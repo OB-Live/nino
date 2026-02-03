@@ -1,6 +1,5 @@
 # NINO
-
-Lino-Pimo Transformation Plan
+NINO stands for Narrow Input Narrow Output, it include a Lino-Pimo Transformation Plan
 
 ![Presentation pic](example.png)
 
@@ -21,12 +20,10 @@ The interactive web interface allows users to explore the data schema, view data
 *   `GET /api/file/{folder}/{filename}`: Retrieves the raw content of a specific file.
 *   `POST /api/file/{folder}/{filename}`: Updates the content of a specific file with the request body.
 
-# Daemon it 
+# Daemon it (-d)
 
-```sh
-# -daemon serve the content on localhost:2442
-# ./ parse the local folder recursively for yaml files 
-go run . -d ./
+```sh 
+nino -d ./
 ```
 
 # Or CLI it 

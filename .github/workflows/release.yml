@@ -26,18 +26,18 @@ jobs:
 
     - name: Build for Linux
       run: |
-        GOOS=linux GOARCH=amd64 go build -o lptp-linux-amd64 ./...
-        zip lptp-linux-amd64.zip lptp-linux-amd64
+        GOOS=linux GOARCH=amd64 go build -o nino-linux-amd64 ./...
+        zip nino-linux-amd64.zip nino-linux-amd64
 
     - name: Build for Windows
       run: |
-        GOOS=windows GOARCH=amd64 go build -o lptp-windows-amd64.exe ./...
-        zip lptp-windows-amd64.zip lptp-windows-amd64.exe
+        GOOS=windows GOARCH=amd64 go build -o nino-windows-amd64.exe ./...
+        zip nino-windows-amd64.zip nino-windows-amd64.exe
 
     - name: Build for macOS
       run: |
-        GOOS=darwin GOARCH=amd64 go build -o lptp-darwin-amd64 ./...
-        zip lptp-darwin-amd64.zip lptp-darwin-amd64
+        GOOS=darwin GOARCH=amd64 go build -o nino-darwin-amd64 ./...
+        zip nino-darwin-amd64.zip nino-darwin-amd64
 
     - name: Create GitHub Release
       id: create_release
@@ -45,7 +45,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
-        tag_name: ${{ github.ref }}
+        tag_name: v${{ github.ref }}
         release_name: Release ${{ steps.get_version.outputs.VERSION }}
         draft: false
         prerelease: false
@@ -56,8 +56,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./lptp-linux-amd64.zip
-        asset_name: lptp-linux-amd64-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_path: ./nino-linux-amd64.zip
+        asset_name: nino-linux-amd64-${{ steps.get_version.outputs.VERSION }}.zip
         asset_content_type: application/zip
 
     - name: Upload Release Asset (Windows)
@@ -66,8 +66,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./lptp-windows-amd64.zip
-        asset_name: lptp-windows-amd64-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_path: ./nino-windows-amd64.zip
+        asset_name: nino-windows-amd64-${{ steps.get_version.outputs.VERSION }}.zip
         asset_content_type: application/zip
 
     - name: Upload Release Asset (macOS)
@@ -76,6 +76,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./lptp-darwin-amd64.zip
-        asset_name: lptp-darwin-amd64-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_path: ./nino-darwin-amd64.zip
+        asset_name: nino-darwin-amd64-${{ steps.get_version.outputs.VERSION }}.zip
         asset_content_type: application/zip
