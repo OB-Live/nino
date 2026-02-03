@@ -1,0 +1,943 @@
+database: source
+tables:
+    - name: owners
+      columns:
+        - name: address
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 6
+            empty: 0
+            nulls: 0
+            min: 106 N. Lake St.
+            max: 638 Cardinal Ave.
+            samples:
+                - 110 W. Liberty St.
+                - 1450 Oak Blvd.
+                - 105 N. Lake St.
+                - 2335 Independence La.
+                - 345 Maple St.
+          stringMetric:
+            minLen: 13
+            maxLen: 21
+            countLen: 8
+            lengths:
+                - length: 17
+                  freq: 0.2
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: 2693 Commerce St.
+                    max: 638 Cardinal Ave.
+                    samples:
+                        - 638 Cardinal Ave.
+                        - 2693 Commerce St.
+                - length: 16
+                  freq: 0.2
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: 2387 S. Fair Way
+                    max: 563 Friendly St.
+                    samples:
+                        - 563 Friendly St.
+                        - 2387 S. Fair Way
+                - length: 18
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: 110 W. Liberty St.
+                    max: 110 W. Liberty St.
+                    samples:
+                        - 110 W. Liberty St.
+                - length: 15
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: 105 N. Lake St.
+                    max: 105 N. Lake St.
+                    samples:
+                        - 105 N. Lake St.
+                - length: 14
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: 1450 Oak Blvd.
+                    max: 1450 Oak Blvd.
+                    samples:
+                        - 1450 Oak Blvd.
+                - length: 13
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: 345 Maple St.
+                    max: 345 Maple St.
+                    samples:
+                        - 345 Maple St.
+                - length: 20
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: 2749 Blackhawk Trail
+                    max: 2749 Blackhawk Trail
+                    samples:
+                        - 2749 Blackhawk Trail
+                - length: 21
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: 2335 Independence La.
+                    max: 2335 Independence La.
+                    samples:
+                        - 2335 Independence La.
+        - name: city
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 10
+            empty: 0
+            nulls: 0
+            min: Nantes
+            max: Windsor
+            samples:
+                - Madison
+                - Sun Prairie
+                - Monona
+                - Madison
+                - Madison
+          stringMetric:
+            minLen: 6
+            maxLen: 11
+            countLen: 5
+            lengths:
+                - length: 7
+                  freq: 0.5
+                  metrics:
+                    count: 5
+                    empty: 0
+                    nulls: 0
+                    min: Madison
+                    max: Windsor
+                    samples:
+                        - Madison
+                        - Windsor
+                        - Madison
+                        - Madison
+                        - Madison
+                - length: 6
+                  freq: 0.2
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Monona
+                    max: Monona
+                    samples:
+                        - Monona
+                        - Monona
+                - length: 8
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: Waunakee
+                    max: Waunakee
+                    samples:
+                        - Waunakee
+                - length: 11
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: Sun Prairie
+                    max: Sun Prairie
+                    samples:
+                        - Sun Prairie
+                - length: 9
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: McFarland
+                    max: McFarland
+                    samples:
+                        - McFarland
+        - name: first_name
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 10
+            empty: 0
+            nulls: 0
+            min: Kevin
+            max: Peter
+            samples:
+                - Carlos
+                - Betty
+                - Maria
+                - Harold
+                - Peter
+          stringMetric:
+            minLen: 4
+            maxLen: 7
+            countLen: 4
+            lengths:
+                - length: 5
+                  freq: 0.4
+                  metrics:
+                    count: 4
+                    empty: 0
+                    nulls: 0
+                    min: Betty
+                    max: Peter
+                    samples:
+                        - Betty
+                        - Peter
+                        - Maria
+                        - David
+                - length: 6
+                  freq: 0.3
+                  metrics:
+                    count: 3
+                    empty: 0
+                    nulls: 0
+                    min: Carlos
+                    max: Harold
+                    samples:
+                        - George
+                        - Harold
+                        - Carlos
+                - length: 4
+                  freq: 0.2
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Jean
+                    max: Jeff
+                    samples:
+                        - Jean
+                        - Jeff
+                - length: 7
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: Eduardo
+                    max: Eduardo
+                    samples:
+                        - Eduardo
+        - name: id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 10
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 10
+            samples:
+                - 1
+                - 8
+                - 6
+                - 10
+                - 5
+          numericMetric:
+            mean: 5.5
+        - name: last_name
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 10
+            empty: 0
+            nulls: 0
+            min: Blackgf
+            max: Schroeder
+            samples:
+                - Coleman
+                - Estaban
+                - Rodriquez
+                - Escobito
+                - McTavish
+          stringMetric:
+            minLen: 5
+            maxLen: 9
+            countLen: 4
+            lengths:
+                - length: 8
+                  freq: 0.3
+                  metrics:
+                    count: 3
+                    empty: 0
+                    nulls: 0
+                    min: Escobito
+                    max: McTavish
+                    samples:
+                        - Franklin
+                        - McTavish
+                        - Escobito
+                - length: 5
+                  freq: 0.3
+                  metrics:
+                    count: 3
+                    empty: 0
+                    nulls: 0
+                    min: Black
+                    max: Davis
+                    samples:
+                        - Davis
+                        - Davis
+                        - Black
+                - length: 9
+                  freq: 0.2
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Rodriquez
+                    max: Schroeder
+                    samples:
+                        - Rodriquez
+                        - Schroeder
+                - length: 7
+                  freq: 0.2
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Coleman
+                    max: Estaban
+                    samples:
+                        - Coleman
+                        - Estaban
+        - name: telephone
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 10
+            empty: 0
+            nulls: 0
+            min: "6085551023"
+            max: "6085559435"
+            samples:
+                - "6085551023"
+                - "6085557683"
+                - "6085558763"
+                - "6085553198"
+                - "6085555387"
+          stringMetric:
+            minLen: 10
+            maxLen: 10
+            countLen: 1
+            lengths:
+                - length: 10
+                  freq: 1
+                  metrics:
+                    count: 10
+                    empty: 0
+                    nulls: 0
+                    min: "6085551023"
+                    max: "6085559435"
+                    samples:
+                        - "6085552654"
+                        - "6085555387"
+                        - "6085558763"
+                        - "6085555487"
+                        - "6085552765"
+    - name: pets
+      columns:
+        - name: id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 13
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 13
+            samples:
+                - 6
+                - 2
+                - 10
+                - 7
+                - 9
+          numericMetric:
+            mean: 7
+        - name: name
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 13
+            empty: 0
+            nulls: 0
+            min: Basil
+            max: Sly
+            samples:
+                - Lucky
+                - Basil
+                - Lucky
+                - Freddy
+                - Iggy
+          stringMetric:
+            minLen: 3
+            maxLen: 8
+            countLen: 5
+            lengths:
+                - length: 5
+                  freq: 0.3076923076923077
+                  metrics:
+                    count: 4
+                    empty: 0
+                    nulls: 0
+                    min: Basil
+                    max: Lucky
+                    samples:
+                        - Basil
+                        - Jewel
+                        - Lucky
+                        - Lucky
+                - length: 3
+                  freq: 0.23076923076923078
+                  metrics:
+                    count: 3
+                    empty: 0
+                    nulls: 0
+                    min: Leo
+                    max: Sly
+                    samples:
+                        - Leo
+                        - Max
+                        - Sly
+                - length: 6
+                  freq: 0.15384615384615385
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Freddy
+                    max: George
+                    samples:
+                        - George
+                        - Freddy
+                - length: 8
+                  freq: 0.15384615384615385
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Mulligan
+                    max: Samantha
+                    samples:
+                        - Samantha
+                        - Mulligan
+                - length: 4
+                  freq: 0.15384615384615385
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Iggy
+                    max: Rosy
+                    samples:
+                        - Rosy
+                        - Iggy
+        - name: owner_id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 13
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 10
+            samples:
+                - 1
+                - 2
+                - 8
+                - 3
+                - 7
+          numericMetric:
+            mean: 5.692307692307692
+        - name: type_id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 13
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 6
+            samples:
+                - 1
+                - 1
+                - 2
+                - 2
+                - 3
+          numericMetric:
+            mean: 2.692307692307692
+    - name: specialties
+      columns:
+        - name: id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 3
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 3
+            samples:
+                - 1
+                - 2
+                - 3
+          numericMetric:
+            mean: 2
+        - name: name
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 3
+            empty: 0
+            nulls: 0
+            min: dentistry
+            max: surgery
+            samples:
+                - radiology
+                - surgery
+                - dentistry
+          stringMetric:
+            minLen: 7
+            maxLen: 9
+            countLen: 2
+            lengths:
+                - length: 9
+                  freq: 0.6666666666666666
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: dentistry
+                    max: radiology
+                    samples:
+                        - radiology
+                        - dentistry
+                - length: 7
+                  freq: 0.3333333333333333
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: surgery
+                    max: surgery
+                    samples:
+                        - surgery
+    - name: types
+      columns:
+        - name: id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 6
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 6
+            samples:
+                - 1
+                - 2
+                - 3
+                - 6
+                - 5
+          numericMetric:
+            mean: 3.5
+        - name: name
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 6
+            empty: 0
+            nulls: 0
+            min: bird
+            max: snake
+            samples:
+                - cat
+                - dog
+                - hamster
+                - snake
+                - bird
+          stringMetric:
+            minLen: 3
+            maxLen: 7
+            countLen: 5
+            lengths:
+                - length: 3
+                  freq: 0.3333333333333333
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: cat
+                    max: dog
+                    samples:
+                        - cat
+                        - dog
+                - length: 6
+                  freq: 0.16666666666666666
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: lizard
+                    max: lizard
+                    samples:
+                        - lizard
+                - length: 5
+                  freq: 0.16666666666666666
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: snake
+                    max: snake
+                    samples:
+                        - snake
+                - length: 4
+                  freq: 0.16666666666666666
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: bird
+                    max: bird
+                    samples:
+                        - bird
+                - length: 7
+                  freq: 0.16666666666666666
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: hamster
+                    max: hamster
+                    samples:
+                        - hamster
+    - name: vets
+      columns:
+        - name: first_name
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 6
+            empty: 0
+            nulls: 0
+            min: Helen
+            max: Sharon
+            samples:
+                - James
+                - Helen
+                - Linda
+                - Rafael
+                - Sharon
+          stringMetric:
+            minLen: 5
+            maxLen: 6
+            countLen: 2
+            lengths:
+                - length: 5
+                  freq: 0.6666666666666666
+                  metrics:
+                    count: 4
+                    empty: 0
+                    nulls: 0
+                    min: Helen
+                    max: Linda
+                    samples:
+                        - James
+                        - Helen
+                        - Linda
+                        - Henry
+                - length: 6
+                  freq: 0.3333333333333333
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Rafael
+                    max: Sharon
+                    samples:
+                        - Rafael
+                        - Sharon
+        - name: id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 6
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 6
+            samples:
+                - 1
+                - 2
+                - 3
+                - 6
+                - 5
+          numericMetric:
+            mean: 3.5
+        - name: last_name
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 6
+            empty: 0
+            nulls: 0
+            min: Carter
+            max: Stevens
+            samples:
+                - Jenkins
+                - Leary
+                - Douglas
+                - Ortega
+                - Stevens
+          stringMetric:
+            minLen: 5
+            maxLen: 7
+            countLen: 3
+            lengths:
+                - length: 7
+                  freq: 0.5
+                  metrics:
+                    count: 3
+                    empty: 0
+                    nulls: 0
+                    min: Douglas
+                    max: Stevens
+                    samples:
+                        - Douglas
+                        - Stevens
+                        - Jenkins
+                - length: 6
+                  freq: 0.3333333333333333
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: Carter
+                    max: Ortega
+                    samples:
+                        - Carter
+                        - Ortega
+                - length: 5
+                  freq: 0.16666666666666666
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: Leary
+                    max: Leary
+                    samples:
+                        - Leary
+    - name: vets_specialties
+      columns:
+        - name: specialties_id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 5
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 3
+            samples:
+                - 1
+                - 2
+                - 3
+                - 2
+                - 1
+          numericMetric:
+            mean: 1.8
+        - name: vet_id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 5
+            empty: 0
+            nulls: 0
+            min: 2
+            max: 5
+            samples:
+                - 2
+                - 3
+                - 3
+                - 4
+                - 5
+          numericMetric:
+            mean: 3.4
+    - name: visits
+      columns:
+        - name: description
+          type: string
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 4
+            empty: 0
+            nulls: 0
+            min: neutered
+            max: spayed
+            samples:
+                - rabies shot
+                - rabies shot
+                - neutered
+                - spayed
+          stringMetric:
+            minLen: 6
+            maxLen: 11
+            countLen: 3
+            lengths:
+                - length: 11
+                  freq: 0.5
+                  metrics:
+                    count: 2
+                    empty: 0
+                    nulls: 0
+                    min: rabies shot
+                    max: rabies shot
+                    samples:
+                        - rabies shot
+                        - rabies shot
+                - length: 8
+                  freq: 0.25
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: neutered
+                    max: neutered
+                    samples:
+                        - neutered
+                - length: 6
+                  freq: 0.25
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: spayed
+                    max: spayed
+                    samples:
+                        - spayed
+        - name: id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 4
+            empty: 0
+            nulls: 0
+            min: 1
+            max: 4
+            samples:
+                - 1
+                - 2
+                - 3
+                - 4
+          numericMetric:
+            mean: 2.5
+        - name: pet_id
+          type: numeric
+          config:
+            concept: ""
+            constraint: []
+            confidential: null
+          mainMetric:
+            count: 4
+            empty: 0
+            nulls: 0
+            min: 7
+            max: 8
+            samples:
+                - 7
+                - 8
+                - 8
+                - 7
+          numericMetric:
+            mean: 7.5

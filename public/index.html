@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>LINO-PIMO Transformation Plan</title>
+  <link rel="stylesheet" href="https://code.jquery.com/ui/1.13.3/themes/base/jquery-ui.css">
+  <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+  <script src="https://code.jquery.com/ui/1.13.3/jquery-ui.min.js"></script>
+  <!-- D3.js and d3-graphviz for rendering the DOT graph -->
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <!-- <script src="https://cdn.jsdelivr.net/npm/@hpcc-js/wasm@2.14.0/dist/index.min.js"></script> -->
+  <script src="https://unpkg.com/d3-graphviz@5.6.0/build/d3-graphviz.js"></script>
+  <style>
+    body, html {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+      overflow: hidden; /* Prevents scrollbars from the main page */
+    }
+    #svg-container {
+      width: 100%;
+      height: 100%;
+    }
+
+
+  </style>
+</head>
+<body> 
+
+  <div id="graph-container"></div>
+
+  <div id="dialog" title="Column's data distribution" style="display:none;">
+    <p>Would you like to <a target="_blank" href="#" id="dialog-create-button">create a mask</a></p>
+    <img id="dialog-image" src="" alt="Image" style="width: 100%;" />
+  </div>
+
+  <div id="execution-dialog" title="Ansible playbook execution" style="display:none;">
+    <div id="execution-graph-container" style="width: 100%; height: 100%;"></div>
+  </div>
+
+  <script>
+    // Function to open the jQuery UI dialog
+    function openTableDialog(tableName, folderName) {
+      const imageUrl = `/api/plot/${folderName}/${tableName}`;
+      $("#dialog-image").attr("src", imageUrl);
+      $("#dialog-create-button").attr("href", `/api/mask/${folderName}/${tableName}`);
+      $("#dialog").dialog("open");
+    }
+
+    // Function to open the execution plan dialog
+    function openExecutionDialog(folderName) {
+      const dotUrl = `/api/playbook/${folderName}`;
+      $("#execution-dialog").dialog("open");
+
+      // Use d3-graphviz to render the dot file inside the dialog
+      const executionGraphviz = d3.select("#execution-graph-container")
+        .graphviz({ useWorker: false });
+
+      d3.text(dotUrl).then(dot => {
+        executionGraphviz.renderDot(dot);
+      });
+    }
+
+    $(document).ready(function() {
+      // Initialize the dialog
+      $("#dialog").dialog({
+        autoOpen: false,
+        modal: true,
+        width: '80%',
+        height: 600,
+        show: {
+          effect: "fade",
+          duration: 400
+        },
+        hide: {
+          effect: "fade",
+          duration: 200
+        }
+      });
+
+      // Initialize the execution dialog
+      $("#execution-dialog").dialog({
+        autoOpen: false,
+        modal: true,
+        width: '80%', // Make it wider for graphs
+        height: 600,
+        show: {
+          effect: "fade",
+          duration: 400
+        },
+        hide: {
+          effect: "fade",
+          duration: 200
+        }
+      });
+      
+      // Use d3-graphviz to render the dot file
+      const graphviz = d3.select("#graph-container")
+        .graphviz({ useWorker: false }); // Use main thread for local files
+
+      // Fetch the schema from the API and render it
+      d3.text("/api/schema.dot").then(dot => {
+        // The API now returns the raw DOT string directly.
+        graphviz.renderDot(dot)
+          .on("end", function() { 
+            // After rendering, listen for zoom/pan events
+            graphviz.graph().on("zoom", () => {
+              const transform = d3.zoomTransform(graphviz.graph().node());
+              // Send the transform to the parent window
+              window.parent.postMessage({ type: 'graph-transform', transform: transform }, '*');
+            });
+          });
+      });
+
+      // Listen for messages from the parent window to set initial transform
+      window.addEventListener('message', event => {
+        if (event.data.type === 'set-graph-transform') {
+          const transform = event.data.transform;
+          if (transform) {
+            const zoomBehavior = d3.zoom().transform;
+            const d3Transform = d3.zoomIdentity.translate(transform.x, transform.y).scale(transform.k);
+            graphviz.graph().call(zoomBehavior, d3Transform);
+          }
+        }
+      });
+    });
+  </script>
+</body>
+</html>

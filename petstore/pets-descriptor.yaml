@@ -1,0 +1,23 @@
+version: "1"
+seed: 42
+masking:
+  - selector:
+      jsonpath: "id"
+    mask:
+      randomChoiceInUri: "pimo://nameFR"
+  - selector:
+      jsonpath: "name"
+    mask:
+      randomChoiceInUri: "pimo://nameFR"
+  - selector:
+      jsonpath: "birth_date"
+    mask:
+      randomChoiceInUri: "pimo://nameFR"
+  - selector:
+      jsonpath: "type_id"
+    mask:
+      #randomChoiceInUri: "pimo://nameFR"
+  - selector:
+      jsonpath: "owner_id"
+    mask:
+      #

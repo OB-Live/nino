@@ -1,0 +1,65 @@
+---
+- name: LINO Petstore Example
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ install_dir }}"
+    ADMIN: admin
+  vars:
+    #  Business variables
+    workspace: "./" 
+    truncate_target: true
+    # fifos_dir: "/tmp/lino"
+    source_db: "postgresql://localhost:5432/jhpetclinic?sslmode=disable -P ADMIN -u jhpetclinic"
+    target_db: "postgresql://localhost:5433/jhpetclinic?sslmode=disable -P ADMIN -u jhpetclinic"
+    id_json: "{{ fifos_dir }}/{{ idName }}.jsonl"
+    id_mask: "{{ fifos_dir }}/{{ idName }}-masked.jsonl"
+    # yaml_mask: "{{ workspace }}/target/{{ idName }}-masking.yml"
+
+  pre_tasks:
+    - name: "Example Docker environnement"
+      # become: true
+      community.docker.docker_compose_v2:
+        project_src: "{{ workspace }}"
+        files:
+          - docker-compose.yml 
+        state: present
+        wait: true                   
+        # build: never                 
+      register: compose_output
+
+    - name: Debug compose status
+      debug:
+        var: compose_output.actions
+    
+    - name: "Cron task"
+      ansible.builtin.cron:
+        name: "check dirs"
+        minute: "0"
+        hour: "0"
+        job: "ansible-playbook -i tests/inventory tests/petstore-test.yml --connection=local -c ansible.cfg > cron.log"
+        # state: present
+        state: absent
+
+
+  
+  #### BUSINESS LOGIC HERE ####
+  roles:
+    - name: OB-Live.nino
+  # tasks:
+  #   - include_tasks: tasks/main.yml  
+      vars:
+        entities:
+          - name: "owners"
+            id_json: "{{ fifos_dir }}/owners.jsonl"
+          - name: "pets"
+            id_json: "{{ fifos_dir }}/pets.jsonl"
+            id_mask: "{{ fifos_dir }}/pets-masking.jsonl"
+            yaml_mask: "{{ workspace }}/target/pets-masking.yml"  # Required
+            # id_json: "{{ fifos_dir }}/{{ idName }}.jsonl"         # Optional
+            # id_mask: "{{ fifos_dir }}/{{ idName }}-masked.jsonl"  # Optional 
+             
+ 
+    

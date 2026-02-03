@@ -1,0 +1,47 @@
+version: v1
+relations:
+  - name: fk_vets_specialties_vets_id
+    parent:
+      name: vets
+      keys:
+        - id
+    child:
+      name: vets_specialties
+      keys:
+        - vet_id
+  - name: fk_vets_specialties_specialties_id
+    parent:
+      name: specialties
+      keys:
+        - id
+    child:
+      name: vets_specialties
+      keys:
+        - specialties_id
+  - name: fk_pets_type_id
+    parent:
+      name: types
+      keys:
+        - id
+    child:
+      name: pets
+      keys:
+        - type_id
+  - name: fk_pets_owner_id
+    parent:
+      name: owners
+      keys:
+        - id
+    child:
+      name: pets
+      keys:
+        - owner_id
+  - name: fk_visits_pet_id
+    parent:
+      name: pets
+      keys:
+        - id
+    child:
+      name: visits
+      keys:
+        - pet_id

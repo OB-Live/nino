@@ -1,0 +1,165 @@
+version: v1
+tables:
+  - name: databasechangeloglock
+    keys:
+      - id
+    columns:
+      - name: id
+        export: numeric
+      - name: locked
+        export: numeric
+      - name: lockgranted
+        export: datetime
+      - name: lockedby
+        export: string
+  - name: jhi_authority
+    keys:
+      - name
+    columns:
+      - name: name
+        export: string
+  - name: jhi_persistent_audit_event
+    keys:
+      - event_id
+    columns:
+      - name: event_id
+        export: string
+      - name: principal
+        export: string
+      - name: event_date
+        export: datetime
+      - name: event_type
+        export: string
+  - name: jhi_persistent_audit_evt_data
+    keys:
+      - event_id
+      - name
+    columns:
+      - name: event_id
+        export: string
+      - name: name
+        export: string
+      - name: value
+        export: string
+  - name: jhi_user
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: login
+        export: string
+      - name: password_hash
+        export: string
+      - name: first_name
+        export: string
+      - name: last_name
+        export: string
+      - name: email
+        export: string
+      - name: image_url
+        export: string
+      - name: activated
+        export: numeric
+      - name: lang_key
+        export: string
+      - name: activation_key
+        export: string
+      - name: reset_key
+        export: string
+      - name: created_by
+        export: string
+      - name: created_date
+        export: datetime
+      - name: reset_date
+        export: datetime
+      - name: last_modified_by
+        export: string
+      - name: last_modified_date
+        export: datetime
+  - name: jhi_user_authority
+    keys:
+      - user_id
+      - authority_name
+    columns:
+      - name: user_id
+        export: string
+      - name: authority_name
+        export: string
+  - name: owners
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: first_name
+        export: string
+      - name: last_name
+        export: string
+      - name: address
+        export: string
+      - name: city
+        export: string
+      - name: telephone
+        export: string
+  - name: pets
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: name
+        export: string
+      - name: birth_date
+        export: datetime
+      - name: type_id
+        export: string
+      - name: owner_id
+        export: string
+  - name: specialties
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: name
+        export: string
+  - name: types
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: name
+        export: string
+  - name: vets
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: first_name
+        export: string
+      - name: last_name
+        export: string
+  - name: vets_specialties
+    keys:
+      - specialties_id
+      - vet_id
+    columns:
+      - name: specialties_id
+        export: string
+      - name: vet_id
+        export: string
+  - name: visits
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: visit_date
+        export: datetime
+      - name: description
+        export: string
+      - name: pet_id
+        export: string

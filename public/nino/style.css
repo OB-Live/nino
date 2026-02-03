@@ -1,0 +1,365 @@
+:root {
+  --background: 80 10% 12%;
+  --foreground: 80 10% 95%;
+  --card: 80 10% 15%;
+  --primary: 80 35% 45%;
+  --primary-foreground: 80 20% 98%;
+  --muted: 80 10% 22%;
+  --muted-foreground: 80 10% 65%;
+  --accent: 75 40% 55%;
+  --border: 80 15% 25%;
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 0px;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: 0;
+  background-color: hsl(var(--background));
+  color: hsl(var(--foreground));
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-header {
+  background-color: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 12px 16px;
+  border-bottom: 1px solid hsl(var(--border));
+  text-align: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+.sidebar {
+  width: var(--sidebar-width);
+  background-color: hsl(var(--card));
+  border-right: 1px solid hsl(var(--border));
+  display: flex;
+  flex-direction: column;
+  transition: width 0.2s ease-in-out;
+  /* overflow: hidden; */
+}
+
+.sidebar.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px;
+  position: relative;
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.sidebar-trigger {
+  position: fixed;
+  left: 8px;
+  top: 8px;
+  /* transform: translateY(-50%); */
+  background: none;
+  border: none;
+  color: hsl(var(--foreground));
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.logo {
+  width: 80px;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.sidebar.collapsed .logo {
+  opacity: 0;
+}
+
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: hsl(var(--muted)) transparent;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+.sidebar-content::-webkit-scrollbar-thumb {
+  background-color: hsl(var(--muted));
+  border-radius: 20px;
+}
+
+.scroll-area {
+  padding: 8px;
+}
+
+.accordion-item {
+  border-bottom: 1px solid hsl(var(--border));
+}
+
+.accordion-trigger {
+  width: 100%;
+  background: none;
+  border: none;
+  color: hsl(var(--foreground));
+  padding: 10px;
+  text-align: left;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.accordion-content {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: hsl(var(--background));
+  padding: 0 10px;
+}
+
+.example-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: hsl(var(--foreground));
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.example-btn:hover {
+  background-color: hsl(var(--muted));
+}
+
+.example-name {
+  font-weight: 500;
+}
+
+.example-desc {
+  font-size: 0.75rem;
+  color: hsl(var(--muted-foreground));
+}
+
+/* Main Content & Panels */
+.main-content {
+  display: flex;
+  flex: 1;
+}
+
+.panel,
+.sub-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* .panel {
+   flex: 1; 
+} */
+
+.sub-panel {
+  height: 50%;
+}
+
+.resize-handle-h {
+  width: 5px;
+  cursor: col-resize;
+  background-color: hsl(var(--border));
+}
+
+.resize-handle-v {
+  height: 5px;
+  cursor: row-resize;
+  background-color: hsl(var(--border));
+}
+
+/* Editors and Tabs */
+.tab-header {
+  display: flex;
+  border-bottom: 1px solid hsl(var(--border));
+  padding: 0 8px;
+}
+
+.tab-button {
+  padding: 4px 6px;
+  border: none;
+  background: none;
+  color: hsl(var(--muted-foreground));
+  cursor: pointer;
+}
+
+.tab-button.active {
+  color: hsl(var(--foreground));
+  border-bottom: 2px solid hsl(var(--accent));
+}
+
+.download-btn {
+  background: none;
+  border: none;
+  color: hsl(var(--foreground));
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 6px;
+  line-height: 1;
+  display: inline-flex;
+}
+
+.play-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 0 6px 10px; /* Slightly smaller triangle for tabs */
+  border-color: transparent transparent transparent hsl(var(--accent));
+  cursor: pointer;
+}
+
+.play-icon:hover {
+  opacity: 0.8;
+}
+
+.tab-button {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.close-tab {
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.close-tab:hover {
+  background-color: hsl(var(--muted));
+}
+
+.tab-content {
+  display: none;
+  flex: 1;
+}
+
+.tab-content.active {
+  display: flex; /* Use flex to allow content to fill space */
+}
+
+.editor-header {
+  padding: 8px 12px;
+  background-color: hsl(var(--card));
+  border-bottom: 1px solid hsl(var(--border));
+  display: flex;
+  /* justify-content: space-between; */
+  align-items: center;
+}
+
+.execute-btn {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 7px 0 7px 12px; /* Creates the triangle shape */
+  border-color: transparent transparent transparent hsl(var(--accent)); /* Left border is green */
+  background: none;
+  padding: 0;
+  margin-right: 8px; /* Add some space between icon and text */
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.execute-btn:hover {
+  opacity: 0.8;
+}
+
+.execute-btn:disabled {
+  border-color: transparent transparent transparent hsl(var(--muted));
+  cursor: not-allowed;
+}
+
+.editor-wrapper,
+#yaml-editor-container,
+#local-storage-editor,
+#graph-view-container  {
+  width: 100%;
+  height: 100%;
+}
+
+iframe {
+  border: none;
+}
+
+.fixed-header {
+  position: fixed;
+  top: 2px;
+  right: 2px;
+  z-index: 1000;
+  /* High z-index to be on top */
+  background-color: rgba(1, 1, 1, 0.8);
+  /* Semi-transparent background */
+  padding: 3px ;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-family: Helvetica, Arial, sans-serif;
+  color: rgb(255, 253, 253);
+}
+#sidebar-toggle{
+display: flex;
+}
+
+.header-img {
+  height: 33px;
+  /* Adjust height as needed */
+  margin: 0 8px;
+}
+
+.header-img2 {
+  height: 24px;
+  /* Adjust height as needed */
+  margin: 0 8px;
+}
+
+
+#main-content {
+  display: flex;
+}
+
+#left-panel {
+  display: flex;
+  flex-direction: column;
+}

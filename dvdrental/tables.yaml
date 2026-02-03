@@ -1,0 +1,79 @@
+version: v1
+tables:
+  - name: owners
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: first_name
+        export: string
+      - name: last_name
+        export: string
+      - name: address
+        export: string
+      - name: city
+        export: string
+      - name: telephone
+        export: string
+  - name: pets
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: name
+        export: string
+      - name: birth_date
+        export: datetime
+      - name: type_id
+        export: string
+      - name: owner_id
+        export: string
+  - name: specialties
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: name
+        export: string
+  - name: types
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: name
+        export: string
+  - name: vets
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: first_name
+        export: string
+      - name: last_name
+        export: string
+  - name: vets_specialties
+    keys:
+      - specialties_id
+      - vet_id
+    columns:
+      - name: specialties_id
+        export: string
+      - name: vet_id
+        export: string
+  - name: visits
+    keys:
+      - id
+    columns:
+      - name: id
+        export: string
+      - name: visit_date
+        export: datetime
+      - name: description
+        export: string
+      - name: pet_id
+        export: string

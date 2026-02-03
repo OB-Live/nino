@@ -1,0 +1,11 @@
+version: "1"
+seed: 42
+masking:
+  - selector:
+      jsonpath: "id"
+    mask:
+      # regex: ""
+  - selector:
+      jsonpath: "name"
+    mask:
+      # regex: ""
