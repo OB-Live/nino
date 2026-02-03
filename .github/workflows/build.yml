@@ -1,0 +1,31 @@
+name: Build and Package Go Application
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Set up Go
+      uses: actions/setup-go@v5
+      with:
+        go-version: '1.21'
+
+    - name: Build Go binary
+      run: go build -v -o nino .
+
+    - name: Package artifact
+      run: tar -czvf nino-package.tar.gz nino public/
+
+    - name: Upload artifact
+      uses: actions/upload-artifact@v4
+      with:
+        name: nino-package
+        path: nino-package.tar.gz

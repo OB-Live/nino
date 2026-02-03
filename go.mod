@@ -1,4 +1,4 @@
-module lptp
+module nino
 
 go 1.24.2
 
