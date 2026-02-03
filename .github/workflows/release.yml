@@ -26,18 +26,21 @@ jobs:
 
     - name: Build for Linux
       run: |
-        GOOS=linux GOARCH=amd64 go build -o nino-linux-amd64 ./...
-        zip nino-linux-amd64.zip nino-linux-amd64
+        GOOS=linux GOARCH=amd64 go build -o nino ./...
+        tar -czf NINO_${{ steps.get_version.outputs.VERSION }}_linux_amd64.tar.gz nino
 
     - name: Build for Windows
       run: |
-        GOOS=windows GOARCH=amd64 go build -o nino-windows-amd64.exe ./...
-        zip nino-windows-amd64.zip nino-windows-amd64.exe
+        GOOS=windows GOARCH=amd64 go build -o nino.exe ./...
+        tar -czf NINO_${{ steps.get_version.outputs.VERSION }}_windows_amd64.tar.gz nino.exe
 
     - name: Build for macOS
       run: |
-        GOOS=darwin GOARCH=amd64 go build -o nino-darwin-amd64 ./...
-        zip nino-darwin-amd64.zip nino-darwin-amd64
+        GOOS=darwin GOARCH=amd64 go build -o nino ./...
+        tar -czf NINO_${{ steps.get_version.outputs.VERSION }}_darwin_amd64.tar.gz nino
+
+    - name: Package example workspace
+      run: zip -r workspace.zip petstore dvdrental
 
     - name: Create GitHub Release
       id: create_release
