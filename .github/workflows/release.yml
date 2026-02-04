@@ -40,7 +40,7 @@ jobs:
         tar -czf NINO_${{ steps.get_version.outputs.VERSION }}_darwin_amd64.tar.gz nino
 
     - name: Package example workspace
-      run: zip -r workspace.zip petstore dvdrental
+      run: zip -r NINO_${{ steps.get_version.outputs.VERSION }}_workspace.zip petstore dvdrental
 
     - name: Create GitHub Release
       id: create_release
@@ -61,6 +61,16 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./NINO_${{ steps.get_version.outputs.VERSION }}_linux_amd64.tar.gz
         asset_name:  NINO_${{ steps.get_version.outputs.VERSION }}_linux_amd64.tar.gz
+        asset_content_type: application/tar+gzip
+
+    - name: Upload Workspace release
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: ./NINO_${{ steps.get_version.outputs.VERSION }}_workspace.zip
+        asset_name:  NINO_${{ steps.get_version.outputs.VERSION }}_workspace.zip
         asset_content_type: application/zip
 
     - name: Upload Release Asset (Windows)
@@ -71,7 +81,7 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./NINO_${{ steps.get_version.outputs.VERSION }}_windows_amd64.tar.gz
         asset_name:  NINO_${{ steps.get_version.outputs.VERSION }}_windows_amd64.tar.gz
-        asset_content_type: application/zip
+        asset_content_type: application/tar+gzip
 
     - name: Upload Release Asset (macOS)
       uses: actions/upload-release-asset@v1
@@ -81,4 +91,4 @@ jobs:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
         asset_path: ./NINO_${{ steps.get_version.outputs.VERSION }}_darwin_amd64.tar.gz
         asset_name:  NINO_${{ steps.get_version.outputs.VERSION }}_darwin_amd64.tar.gz
-        asset_content_type: application/zip
+        asset_content_type: application/tar+gzip
