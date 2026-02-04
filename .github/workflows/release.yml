@@ -59,8 +59,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./nino-linux-amd64.zip
-        asset_name: nino-linux-amd64-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_path: ./NINO_${{ steps.get_version.outputs.VERSION }}_linux_amd64.tar.gz
+        asset_name:  NINO_${{ steps.get_version.outputs.VERSION }}_linux_amd64.tar.gz
         asset_content_type: application/zip
 
     - name: Upload Release Asset (Windows)
@@ -69,8 +69,8 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./nino-windows-amd64.zip
-        asset_name: nino-windows-amd64-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_path: ./NINO_${{ steps.get_version.outputs.VERSION }}_windows_amd64.tar.gz
+        asset_name:  NINO_${{ steps.get_version.outputs.VERSION }}_windows_amd64.tar.gz
         asset_content_type: application/zip
 
     - name: Upload Release Asset (macOS)
@@ -79,6 +79,6 @@ jobs:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       with:
         upload_url: ${{ steps.create_release.outputs.upload_url }}
-        asset_path: ./nino-darwin-amd64.zip
-        asset_name: nino-darwin-amd64-${{ steps.get_version.outputs.VERSION }}.zip
+        asset_path: ./NINO_${{ steps.get_version.outputs.VERSION }}_darwin_amd64.tar.gz
+        asset_name:  NINO_${{ steps.get_version.outputs.VERSION }}_darwin_amd64.tar.gz
         asset_content_type: application/zip
