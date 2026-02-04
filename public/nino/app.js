@@ -60,27 +60,29 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   // --- Data Loading ---
-  async function loadInitialData() {
+  async function loadStaticExamples() {
     const staticExamples = await getStaticExamples();
-    const workspaceExamples = await fetchWorkspaceFiles();
-
-    const finalCategories = staticExamples.map((category) => {
-      if (category.name === "Workspace") {
-        return { ...category, examples: workspaceExamples };
-      }
-      return category;
-    });
-
-    examples = finalCategories;
+    examples = staticExamples.filter(c => c.name !== "Workspace");
     renderExamples(examples);
-    restoreUiState(); // Restore UI after examples are loaded
 
     // Load default example
     if (examples.length > 0 && examples[0].examples.length > 0) {
       const defaultExample = examples[0].examples[0];
       yamlEditor.setValue(defaultExample.yaml);
       inputEditor.setValue(defaultExample.input);
+      // Also update the file type for the main editor
+      editorInstances["yaml"]._currentFileType = 'masking';
     }
+  }
+
+  async function loadWorkspace() {
+    const workspaceJstreeData = await fetchWorkspaceFiles();
+    renderFileTree(workspaceJstreeData);
+  }
+
+  async function loadInitialData() {
+    await Promise.all([loadStaticExamples(), loadWorkspace()]);
+    restoreUiState(); // Restore UI after all data is loaded
   }
 
   async function fetchWorkspaceFiles() {
@@ -88,28 +90,95 @@ document.addEventListener("DOMContentLoaded", () => {
       const response = await fetch("/api/files");
       if (!response.ok) return [];
       const files = await response.json();
-      workspaceFiles = files; // Cache the files
-      const workspaceExamples = [];
+      workspaceFiles = files; // Cache the files 
+
+      const jstreeData = [];
+      let idCounter = 1;
+
+      // Create a root node for "Workspace" 
+      jstreeData.push({
+        id: `ws_root`,
+        parent: '#',
+        text: 'Workspace',
+        state: { opened: true },
+        type: 'folder'
+      });
+
       for (const folder in files) {
+        const folderId = `ws_folder_${idCounter++}`;
+        jstreeData.push({
+          id: folderId,
+          parent: `ws_root`,
+          text: folder,
+          state: { opened: true },
+          type: 'folder'
+        });
+
         files[folder].forEach((file) => {
           if (file.endsWith(".yaml") || file.endsWith(".yml")) {
-            const path = `${folder}/${file}`;
-            workspaceExamples.push({
-              id: `workspace-${path}`,
-              name: `${file}`,
-              description: `${folder}`,
-              url: `/api/file/${folder}/${file}`,
-              input: `{}`,
-              yaml: "",
+            const filePath = `${folder}/${file}`;
+            jstreeData.push({
+              id: `ws_file_${idCounter++}`,
+              parent: folderId,
+              text: file,
+              icon: 'jstree-file',
+              li_attr: {
+                'data-url': `/api/file/${folder}/${file}`,
+                'data-input': '{}', // Default input for workspace files 
+                'data-file-name': file,
+                'data-folder-name': folder,
+                'data-example-id': `workspace-${filePath}` // To identify it later 
+              },
+              type: 'file'
             });
           }
         });
       }
-      return workspaceExamples;
+      return jstreeData;
     } catch (error) {
       console.error("Failed to fetch workspace files:", error);
       return [];
     }
+  }
+
+  function renderFileTree(jstreeData) {
+    const jstreeDiv = document.getElementById("jstree-workspace2");
+    console.log(jstreeDiv)
+    $(jstreeDiv).jstree({
+      'core': {
+        'data': jstreeData, // jstree-compatible data
+        'check_callback': true
+      },
+      'plugins': ["wholerow"] // Optional plugins
+    }).on('select_node.jstree', function (e, data) {
+      const node = data.instance.get_node(data.selected[0]);
+      if (node.type === 'file') {
+        const example = {
+          id: node.li_attr['data-example-id'],
+          name: node.li_attr['data-file-name'],
+          description: node.li_attr['data-folder-name'],
+          url: node.li_attr['data-url'],
+          input: node.li_attr['data-input'],
+          yaml: "" // Will be fetched
+        };
+        handleSelectExample(example);
+      }
+    });
+
+    $(jstreeDiv).on('dblclick.jstree', function (e) {
+      const instance = $.jstree.reference(e.target);
+      const selectedNode = instance.get_node(e.target);
+       console.log("node", instance , selectedNode)
+      if (selectedNode.original.type === 'file') {
+        const example = {
+          id: selectedNode.li_attr['data-example-id'],
+          name: selectedNode.li_attr['data-file-name'],
+          description: selectedNode.li_attr['data-folder-name'],
+          url: selectedNode.li_attr['data-url'],
+        };
+        openWorkspaceFileInNewTab(example);
+      }
+    });
   }
 
   // --- UI Rendering ---
@@ -126,6 +195,7 @@ document.addEventListener("DOMContentLoaded", () => {
       const content = document.createElement("div");
       content.className = "accordion-content";
 
+
       category.examples.forEach((example) => {
         const btn = document.createElement("button");
         btn.className = "example-btn";
@@ -141,8 +211,7 @@ document.addEventListener("DOMContentLoaded", () => {
         } else {
           content.style.maxHeight = content.scrollHeight + "px";
         }
-      };
-
+      }
       item.appendChild(trigger);
       item.appendChild(content);
       examplesContainer.appendChild(item);
@@ -272,6 +341,8 @@ document.addEventListener("DOMContentLoaded", () => {
       })
       .catch(error => {
         console.error("Failed to load schema.dot:", error);
+        console.error("workspaceFiles:", workspaceFiles);
+        console.error("graphviz:", graphviz);
         // Optionally, display an error to the user in the graph container
       })
       ;
@@ -327,11 +398,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   async function handleSelectExample(example) {
-    // TODO: fix this later 
-    if (example.id.startsWith("workspace-")) {
-      openWorkspaceFileInNewTab(example);
-      // return;
-    }
+    // This function is now called directly from jstree's select_node event for workspace files
 
     // Switch to the main YAML tab for static examples
     const yamlTabButton = document.querySelector('.tab-button[data-tab="yaml"]');

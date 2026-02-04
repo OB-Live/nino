@@ -136,17 +136,35 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 		folderName := chi.URLParam(r, "folder")
 
 		var dotString string
+		// Add a recover block to catch panics from generateCombinedDotGraph
+		defer func() {
+			if r := recover(); r != nil {
+				log.Printf("Panic in generateCombinedDotGraph: %v", r)
+				http.Error(w, "Internal server error during graph generation", http.StatusInternalServerError)
+			}
+		}()
+
 		if folderName != "" {
 			dotString = generateCombinedDotGraph(*projectData, folderName)
 		} else {
 			dotString = generateCombinedDotGraph(*projectData)
 		}
 
+		if dotString == "" {
+			log.Println("Error: generateCombinedDotGraph returned an empty string. Returning 500.")
+			http.Error(w, "Failed to generate graph: empty DOT string", http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("Generated DOT string for format '%s', folder '%s':\n", format, folderName)
+
 		switch format {
 		case "dot":
-			w.Header().Set("Content-Type", "text/vnd.graphviz")
+			// w.Header().Set("Content-Type", "text/vnd.graphviz")
 			// w.Header().Set("Content-Disposition", `attachment; filename="schema.dot"`)
 			w.Write([]byte(dotString))
+			// return // Explicitly return here
+
 		case "svg", "png":
 			cmd := exec.Command("dot", "-T"+format)
 			cmd.Stderr = io.Discard // Silence warnings by redirecting stderr
@@ -281,6 +299,10 @@ func listFilesHandler(inputPaths []string) http.HandlerFunc {
 			err = filepath.WalkDir(basePath, func(p string, d os.DirEntry, err error) error {
 				if err != nil {
 					return err
+				}
+				// Skip directories starting with '.'
+				if d.IsDir() && len(d.Name()) > 0 && d.Name()[0] == '.' && p != basePath {
+					return filepath.SkipDir
 				}
 				if !d.IsDir() {
 					rel, _ := filepath.Rel(basePath, p)

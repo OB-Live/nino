@@ -306,6 +306,10 @@ func findYAMLFiles(paths []string) (map[string]string, error) {
 			if err != nil {
 				return err
 			}
+			// Skip directories starting with '.'
+			if d.IsDir() && len(d.Name()) > 0 && d.Name()[0] == '.' && p != basePath {
+				return filepath.SkipDir
+			}
 			if !d.IsDir() && (strings.HasSuffix(p, ".yaml") || strings.HasSuffix(p, ".yml")) {
 				fileMap[p] = basePath
 			}

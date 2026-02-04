@@ -17,7 +17,10 @@
   <script src="/lib/d3.v7.min.js"></script>
   <script src="https://unpkg.com/d3-graphviz@5.6.0/build/d3-graphviz.js"></script>
 
-    <script src="https://cdn.jsdelivr.net/npm/@hpcc-js/wasm@2.14.0/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@hpcc-js/wasm@2.14.0/dist/index.min.js"></script>
+
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 
 
   <!-- Text Editor  -->
@@ -53,9 +56,8 @@
         <span>Data masks</span>
       </div>
       <div id="sidebar-content" class="sidebar-content">
-        <div id="examples-container" class="scroll-area">
-          <!-- Examples will be loaded here by JS -->
-        </div>
+        <div id="examples-container" class="scroll-area"></div>
+        <div id="jstree-workspace2" class="jstree"></div>
       </div>
     </aside>
 
@@ -71,6 +73,8 @@
         </div>
         <div id="graph-view-container" class="tab-content">
           <!-- Graph will be rendered here by d3-graphviz -->
+
+
         </div>
       </div>
 

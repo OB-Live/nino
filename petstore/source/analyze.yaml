@@ -212,26 +212,6 @@ tables:
             maxLen: 13
             countLen: 4
             lengths:
-                - length: 6
-                  freq: 0.25
-                  metrics:
-                    count: 1
-                    empty: 0
-                    nulls: 0
-                    min: System
-                    max: System
-                    samples:
-                        - System
-                - length: 9
-                  freq: 0.25
-                  metrics:
-                    count: 1
-                    empty: 0
-                    nulls: 0
-                    min: Anonymous
-                    max: Anonymous
-                    samples:
-                        - Anonymous
                 - length: 13
                   freq: 0.25
                   metrics:
@@ -252,6 +232,26 @@ tables:
                     max: User
                     samples:
                         - User
+                - length: 6
+                  freq: 0.25
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: System
+                    max: System
+                    samples:
+                        - System
+                - length: 9
+                  freq: 0.25
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: Anonymous
+                    max: Anonymous
+                    samples:
+                        - Anonymous
         - name: id
           type: numeric
           config:
@@ -409,16 +409,6 @@ tables:
                     samples:
                         - User
                         - User
-                - length: 13
-                  freq: 0.25
-                  metrics:
-                    count: 1
-                    empty: 0
-                    nulls: 0
-                    min: Administrator
-                    max: Administrator
-                    samples:
-                        - Administrator
                 - length: 6
                   freq: 0.25
                   metrics:
@@ -429,6 +419,16 @@ tables:
                     max: System
                     samples:
                         - System
+                - length: 13
+                  freq: 0.25
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: Administrator
+                    max: Administrator
+                    samples:
+                        - Administrator
         - name: login
           type: string
           config:
@@ -609,10 +609,10 @@ tables:
             min: 105 N. Lake St.
             max: 638 Cardinal Ave.
             samples:
-                - 110 W. Liberty St.
-                - 638 Cardinal Ave.
                 - 2335 Independence La.
-                - 105 N. Lake St.
+                - 1450 Oak Blvd.
+                - 2749 Blackhawk Trail
+                - 345 Maple St.
                 - 2387 S. Fair Way
           stringMetric:
             minLen: 13
@@ -641,26 +641,6 @@ tables:
                     samples:
                         - 563 Friendly St.
                         - 2387 S. Fair Way
-                - length: 21
-                  freq: 0.1
-                  metrics:
-                    count: 1
-                    empty: 0
-                    nulls: 0
-                    min: 2335 Independence La.
-                    max: 2335 Independence La.
-                    samples:
-                        - 2335 Independence La.
-                - length: 18
-                  freq: 0.1
-                  metrics:
-                    count: 1
-                    empty: 0
-                    nulls: 0
-                    min: 110 W. Liberty St.
-                    max: 110 W. Liberty St.
-                    samples:
-                        - 110 W. Liberty St.
                 - length: 15
                   freq: 0.1
                   metrics:
@@ -701,6 +681,26 @@ tables:
                     max: 2749 Blackhawk Trail
                     samples:
                         - 2749 Blackhawk Trail
+                - length: 21
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: 2335 Independence La.
+                    max: 2335 Independence La.
+                    samples:
+                        - 2335 Independence La.
+                - length: 18
+                  freq: 0.1
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: 110 W. Liberty St.
+                    max: 110 W. Liberty St.
+                    samples:
+                        - 110 W. Liberty St.
         - name: city
           type: string
           config:
@@ -714,10 +714,10 @@ tables:
             min: Madison
             max: Windsor
             samples:
-                - Waunakee
-                - Sun Prairie
-                - McFarland
                 - Monona
+                - Madison
+                - Monona
+                - Windsor
                 - Madison
           stringMetric:
             minLen: 6
@@ -793,10 +793,10 @@ tables:
             max: Peter
             samples:
                 - George
-                - Jean
                 - Carlos
+                - Maria
                 - Harold
-                - Peter
+                - Jean
           stringMetric:
             minLen: 4
             maxLen: 7
@@ -862,9 +862,9 @@ tables:
             max: 10
             samples:
                 - 1
-                - 10
-                - 3
-                - 8
+                - 2
+                - 7
+                - 4
                 - 5
           numericMetric:
             mean: 5.5
@@ -881,11 +881,11 @@ tables:
             min: Black
             max: Schroeder
             samples:
-                - Franklin
+                - Estaban
                 - Davis
                 - Rodriquez
-                - Black
-                - Estaban
+                - Davis
+                - Coleman
           stringMetric:
             minLen: 5
             maxLen: 9
@@ -950,11 +950,11 @@ tables:
             min: "6085551023"
             max: "6085559435"
             samples:
-                - "6085551023"
-                - "6085555487"
-                - "6085552654"
-                - "6085557683"
                 - "6085555387"
+                - "6085559435"
+                - "6085552654"
+                - "6085553198"
+                - "6085552765"
           stringMetric:
             minLen: 10
             maxLen: 10
@@ -969,11 +969,11 @@ tables:
                     min: "6085551023"
                     max: "6085559435"
                     samples:
-                        - "6085552654"
-                        - "6085555487"
-                        - "6085558763"
-                        - "6085553198"
                         - "6085555387"
+                        - "6085557683"
+                        - "6085559435"
+                        - "6085552654"
+                        - "6085552765"
     - name: pets
       columns:
         - name: id
@@ -989,11 +989,11 @@ tables:
             min: 1
             max: 13
             samples:
-                - 10
+                - 13
                 - 2
-                - 3
+                - 7
                 - 4
-                - 5
+                - 8
           numericMetric:
             mean: 7
         - name: name
@@ -1009,10 +1009,10 @@ tables:
             min: Basil
             max: Sly
             samples:
-                - Leo
-                - Sly
-                - Mulligan
+                - George
+                - Lucky
                 - Max
+                - Jewel
                 - Iggy
           stringMetric:
             minLen: 3
@@ -1090,11 +1090,11 @@ tables:
             min: 1
             max: 10
             samples:
-                - 9
-                - 5
+                - 1
+                - 2
                 - 6
-                - 3
-                - 10
+                - 7
+                - 6
           numericMetric:
             mean: 5.692307692307692
         - name: type_id
@@ -1112,9 +1112,9 @@ tables:
             samples:
                 - 1
                 - 6
+                - 5
                 - 2
-                - 2
-                - 3
+                - 1
           numericMetric:
             mean: 2.692307692307692
     - name: specialties
@@ -1196,8 +1196,8 @@ tables:
             samples:
                 - 1
                 - 2
+                - 3
                 - 6
-                - 4
                 - 5
           numericMetric:
             mean: 3.5
@@ -1214,7 +1214,7 @@ tables:
             min: bird
             max: snake
             samples:
-                - hamster
+                - cat
                 - dog
                 - lizard
                 - snake
@@ -1235,16 +1235,6 @@ tables:
                     samples:
                         - cat
                         - dog
-                - length: 7
-                  freq: 0.16666666666666666
-                  metrics:
-                    count: 1
-                    empty: 0
-                    nulls: 0
-                    min: hamster
-                    max: hamster
-                    samples:
-                        - hamster
                 - length: 6
                   freq: 0.16666666666666666
                   metrics:
@@ -1275,6 +1265,16 @@ tables:
                     max: bird
                     samples:
                         - bird
+                - length: 7
+                  freq: 0.16666666666666666
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: hamster
+                    max: hamster
+                    samples:
+                        - hamster
     - name: vets
       columns:
         - name: first_name
@@ -1341,7 +1341,7 @@ tables:
                 - 2
                 - 3
                 - 4
-                - 6
+                - 5
           numericMetric:
             mean: 3.5
         - name: last_name
@@ -1359,7 +1359,7 @@ tables:
             samples:
                 - Carter
                 - Leary
-                - Jenkins
+                - Douglas
                 - Ortega
                 - Stevens
           stringMetric:
@@ -1477,16 +1477,6 @@ tables:
                     samples:
                         - rabies shot
                         - rabies shot
-                - length: 8
-                  freq: 0.25
-                  metrics:
-                    count: 1
-                    empty: 0
-                    nulls: 0
-                    min: neutered
-                    max: neutered
-                    samples:
-                        - neutered
                 - length: 6
                   freq: 0.25
                   metrics:
@@ -1497,6 +1487,16 @@ tables:
                     max: spayed
                     samples:
                         - spayed
+                - length: 8
+                  freq: 0.25
+                  metrics:
+                    count: 1
+                    empty: 0
+                    nulls: 0
+                    min: neutered
+                    max: neutered
+                    samples:
+                        - neutered
         - name: id
           type: numeric
           config:
