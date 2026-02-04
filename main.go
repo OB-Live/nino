@@ -1,8 +1,10 @@
 package main
 
 import (
+	"embed"
 	"flag"
 	"fmt"
+	"io/fs"
 	"log"
 	"os"
 
@@ -18,7 +20,20 @@ var (
 	plotColumn string
 )
 
+//go:embed public
+var embeddedFiles embed.FS
+
 func main() {
+
+	// Create a sub-filesystem from the embedded "public" directory.
+	// This is important if your HTML directly references assets like /css/style.css
+	// and you want the root of your HTTP server to align with the root of embedded files.
+	// Otherwise, paths like /public/css/style.css would be required.
+	publicFS, err := fs.Sub(embeddedFiles, "public")
+	if err != nil {
+		log.Fatal(err)
+	}
+
 	// flag.BoolVar(&daemonMode, "daemon", false, "Run in daemon mode (web server).")
 	flag.BoolVar(&daemonMode, "d", false, "Run in daemon mode (web server).")
 	// flag.StringVar(&port, "port", "2442", "Port for the web server.")
@@ -59,14 +74,14 @@ func main() {
 	// spew.Dump(schemas)
 
 	// Check if we are in plotting mode. Pass fileMap for daemon mode.
-	handleExecutionMode(schemas, fileMap, inputPaths, baseTable, plotColumn, daemonMode, port)
+	handleExecutionMode(schemas, fileMap, inputPaths, baseTable, plotColumn, daemonMode, port, publicFS)
 }
 
 // handleExecutionMode decides whether to generate plots or the main graph.
-func handleExecutionMode(projectData ProjectData, fileMap map[string]string, inputPaths []string, plotTable, plotColumn string, daemonMode bool, port string) {
+func handleExecutionMode(projectData ProjectData, fileMap map[string]string, inputPaths []string, plotTable, plotColumn string, daemonMode bool, port string, publicFS fs.FS) {
 	if daemonMode {
 		log.Println("Starting in daemon mode...")
-		startDaemon(projectData, fileMap, inputPaths, port)
+		startDaemon(projectData, fileMap, inputPaths, port, publicFS)
 		return
 	}
 	if plotTable != "" {

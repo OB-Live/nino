@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"io"
+	"io/fs"
 	"log"
 	"net/http"
 	"os"
@@ -16,7 +17,10 @@ import (
 )
 
 // startDaemon initializes and starts the web server.
-func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths []string, port string) {
+func startDaemon(projectData ProjectData, fileMap map[string]string,
+	inputPaths []string,
+	port string,
+	publicFS fs.FS) {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
@@ -43,9 +47,9 @@ func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths 
 	r.Post("/api/exec/pull/{folder}/{filename}", execCommandHandler())
 
 	// Serve files from the 'public' directory
-	workDir, _ := os.Getwd()
-	publicDir := http.Dir(filepath.Join(workDir, "public"))
-	r.Handle("/*", http.FileServer(publicDir))
+	// workDir, _ := os.Getwd()
+	// publicDir := http.Dir(filepath.Join(workDir, "public"))
+	r.Handle("/*", http.FileServer(http.FS(publicFS)))
 
 	log.Printf("Starting web server on http://localhost:%s", port)
 	err := http.ListenAndServe(":"+port, r)
