@@ -175,10 +175,10 @@ func (sg *subgraphModel) generate() string {
 			targetMetricsHeader = fmt.Sprintf(`<FONT POINT-SIZE="10">Count </FONT><B><FONT POINT-SIZE="12">%d</FONT></B>`, targetAnalyzedTable.Columns[0].MainMetric.Count)
 		}
 
-		var descriptorPtr *IngressDescriptorSchema
-		if folderDescriptors := sg.projectData[sg.folderName].Descriptors; folderDescriptors != nil {
-			if descriptor, ok := folderDescriptors[table.Name]; ok {
-				descriptorPtr = &descriptor
+		var maskingPtr *MaskingSchema
+		if folderMaskings := sg.projectData[sg.folderName].Maskings; folderMaskings != nil {
+			if masking, ok := folderMaskings[table.Name]; ok {
+				maskingPtr = &masking
 			}
 		}
 
@@ -187,7 +187,7 @@ func (sg *subgraphModel) generate() string {
 			uniqueNodeID,
 			table,
 			sg.folderName,
-			descriptorPtr,
+			maskingPtr,
 			sg.analysisMetrics[table.Name],
 			sg.targetColumnsMap[table.Name],
 			sourceMetricsHeader,
@@ -228,18 +228,18 @@ func generateTableNode(
 	uniqueNodeID string,
 	table Table,
 	folderName string,
-	descriptor *IngressDescriptorSchema,
+	masking *MaskingSchema,
 	analysis map[string]AnalyzeColumn,
 	targetColumns map[string]Column,
 	sourceMetricsHeader string,
 	targetMetricsHeader string,
 	targetAnalysis map[string]AnalyzeColumn) string {
 	maskingRules := make(map[string]maskInfo)
-	hasDescriptor := descriptor != nil
+	hasMasking := masking != nil
 	hasAnalysis := len(analysis) > 0
 
-	header := generateNodeHeader(table.Name, hasDescriptor, hasAnalysis, sourceMetricsHeader, targetMetricsHeader)
-	populateMaskingRules(descriptor, maskingRules)
+	header := generateNodeHeader(table.Name, hasMasking, hasAnalysis, sourceMetricsHeader, targetMetricsHeader)
+	populateMaskingRules(masking, maskingRules)
 
 	var rows strings.Builder
 	keyMap := make(map[string]bool)
@@ -270,7 +270,7 @@ func generateTableNode(
 		row := fmt.Sprintf(`
 		<TR><TD ALIGN="LEFT"><B>%s%s</B></TD>%s`, keySymbol, col.Name, exportCell)
 
-		if hasDescriptor {
+		if hasMasking {
 			if mask, ok := maskingRules[col.Name]; ok {
 				maskDisplay := mask.maskType
 				if strings.Contains(mask.maskType, "random") {
@@ -286,7 +286,7 @@ func generateTableNode(
 				row += "<TD></TD><TD></TD>"
 			}
 		}
-		if hasAnalysis && hasDescriptor {
+		if hasAnalysis && hasMasking {
 			if metric, ok := analysis[col.Name]; ok {
 				sourceBG, targetBG := "", ""
 				targetMetric, targetExists := targetAnalysis[col.Name]
@@ -330,12 +330,12 @@ func generateTableNode(
 `, uniqueNodeID, table.Name, folderName, header, rows.String())
 }
 
-// populateMaskingRules extracts masking rule information from a descriptor.
-func populateMaskingRules(descriptor *IngressDescriptorSchema, maskingRules map[string]maskInfo) {
-	if descriptor == nil {
+// populateMaskingRules extracts masking rule information from a masking.
+func populateMaskingRules(masking *MaskingSchema, maskingRules map[string]maskInfo) {
+	if masking == nil {
 		return
 	}
-	for _, rule := range descriptor.Masking {
+	for _, rule := range masking.Masking {
 		var mType, mValue string
 		if rule.Mask.Regex != "" {
 			mType, mValue = "regex", rule.Mask.Regex
@@ -344,7 +344,7 @@ func populateMaskingRules(descriptor *IngressDescriptorSchema, maskingRules map[
 		} else if rule.Mask.Incremental.Increment != 0 {
 			mType, mValue = "incremental", fmt.Sprintf("start=%d, step=%d", rule.Mask.Incremental.Start, rule.Mask.Incremental.Increment)
 		} else if len(rule.Masks) > 0 {
-			mType, mValue = "multiple", "see descriptor"
+			mType, mValue = "multiple", "see masking"
 		}
 		// Only add the rule if a mask type was actually found.
 		if mType != "" {
@@ -354,17 +354,17 @@ func populateMaskingRules(descriptor *IngressDescriptorSchema, maskingRules map[
 }
 
 // generateNodeHeader creates the HTML-like string for a table node's header row.
-func generateNodeHeader(tableName string, hasDescriptor, hasAnalysis bool, sourceMetrics, targetMetrics string) string {
+func generateNodeHeader(tableName string, hasMasking, hasAnalysis bool, sourceMetrics, targetMetrics string) string {
 	var sb strings.Builder
 	sb.WriteString(fmt.Sprintf(`
 		<TR>
 			<TD BGCOLOR="olive" COLSPAN="2" CELLPADDING="4" ><FONT COLOR="white" POINT-SIZE="20"><B>%s</B></FONT></TD>`, tableName))
 
-	if hasDescriptor {
+	if hasMasking {
 		sb.WriteString(`
 			<TD BGCOLOR="#E0E0E0" COLSPAN="2"><FONT POINT-SIZE="12">Mask</FONT></TD>`)
 	}
-	if hasAnalysis && hasDescriptor {
+	if hasAnalysis && hasMasking {
 		if sourceMetrics == targetMetrics {
 			sb.WriteString(fmt.Sprintf(`
 			<TD BGCOLOR="%s">%s</TD>

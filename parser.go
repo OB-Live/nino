@@ -78,8 +78,8 @@ type MaskingRule struct {
 	} `yaml:"masks"`
 }
 
-// IngressDescriptorSchema holds the data from an ingress-descriptor.yaml file (now masking rules).
-type IngressDescriptorSchema struct {
+// MaskingSchema holds the data from an masking.yaml file (now masking rules).
+type MaskingSchema struct {
 	Version string        `yaml:"version"`
 	Seed    int           `yaml:"seed"`
 	Masking []MaskingRule `yaml:"masking"`
@@ -133,7 +133,7 @@ type FolderData struct {
 	DataConnectors DataConnectorSchema
 	Analysis       AnalyzeSchema
 	Tables         []Table
-	Descriptors    map[string]IngressDescriptorSchema
+	Maskings       map[string]MaskingSchema
 	TargetTables   []Table
 	TargetAnalysis AnalyzeSchema
 	Playbook       AnsiblePlaybook // Added this line
@@ -172,7 +172,7 @@ type AnsibleEntity struct {
 // ProjectData is the top-level structure, mapping folder names to their data.
 type ProjectData map[string]*FolderData
 
-// inferAllSchemas parses all primary, descriptor, and analysis YAML files.
+// inferAllSchemas parses all primary, masking, and analysis YAML files.
 func inferAllSchemas(fileMap map[string]string) (ProjectData, error) {
 	projectData := make(ProjectData)
 
@@ -195,7 +195,7 @@ func inferAllSchemas(fileMap map[string]string) (ProjectData, error) {
 		// Ensure a FolderData struct exists for the current path.
 		if _, ok := projectData[relPath]; !ok {
 			projectData[relPath] = &FolderData{
-				Descriptors: make(map[string]IngressDescriptorSchema),
+				Maskings: make(map[string]MaskingSchema),
 			}
 		}
 		folder := projectData[relPath]
@@ -208,8 +208,8 @@ func inferAllSchemas(fileMap map[string]string) (ProjectData, error) {
 			parseDataConnector(file, folder)
 		case baseName == "analyze.yaml":
 			parseAnalyze(file, folder)
-		case strings.HasSuffix(baseName, "-descriptor.yaml"):
-			parseDescriptor(file, folder)
+		case strings.HasSuffix(baseName, "-masking.yaml"):
+			parseMasking(file, folder)
 		case baseName == "target-tables.yaml":
 			parseTargetTables(file, folder)
 		case baseName == "target-analyze.yaml":
@@ -248,11 +248,11 @@ func parseAnalyze(file string, folder *FolderData) {
 	}
 }
 
-func parseDescriptor(file string, folder *FolderData) {
-	var desc IngressDescriptorSchema
+func parseMasking(file string, folder *FolderData) {
+	var desc MaskingSchema
 	if err := parseYAMLFile(file, &desc); err == nil {
-		tableName := strings.TrimSuffix(filepath.Base(file), "-descriptor.yaml")
-		folder.Descriptors[tableName] = desc
+		tableName := strings.TrimSuffix(filepath.Base(file), "-masking.yaml")
+		folder.Maskings[tableName] = desc
 	}
 }
 

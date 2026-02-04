@@ -1,12 +1,12 @@
 version: v1
 IngressDescriptor:
-  startTable: pets
-  select: []
+  startTable: owners
   relations:
     - name: fk_pets_type_id
       parent:
         name: types
-        lookup: false
+        # à modifier
+        lookup: true
       child:
         name: pets
         lookup: false
@@ -16,11 +16,11 @@ IngressDescriptor:
         lookup: false
       child:
         name: pets
-        lookup: false
+        lookup: true
     - name: fk_visits_pet_id
       parent:
         name: pets
         lookup: false
       child:
         name: visits
-        lookup: true
+        lookup: false

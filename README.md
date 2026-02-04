@@ -15,7 +15,7 @@ The interactive web interface allows users to explore the data schema, view data
 *   `GET /api/schema/{folder}`: Returns the DOT graph for a specific folder.
 *   `GET /api/plot/{folder}/{tableName}`: Returns a PNG image plotting the data distribution for a table's columns.
 *   `GET /api/playbook/{folder}`: Returns the DOT graph for an Ansible playbook execution plan.
-*   `GET /api/mask/{folderName}/{tableName}`: Creates a new boilerplate masking descriptor file for a table.
+*   `GET /api/mask/{folderName}/{tableName}`: Creates a new boilerplate masking masking file for a table.
 *   `GET /api/files`: Returns a JSON object listing all files within the project directories.
 *   `GET /api/file/{folder}/{filename}`: Retrieves the raw content of a specific file.
 *   `POST /api/file/{folder}/{filename}`: Updates the content of a specific file with the request body.
@@ -37,13 +37,13 @@ go run . ./petstore
 - Bback end (server + graph rendering) en go 
 - Front end (html, css, js) light weight Single Page App
 - Web Browser execution 
-  - pimo (examples, *.descriptor.yaml)
+  - pimo (examples, *.masking.yaml)
   - lino (tables, relation, analyse)
   - ansible playbooks 
 - lino & pimo editor with autocompletion
   - dataconnectors.yaml
-  - ingress-descriptor.yaml
-  - masking-descriptor.yaml 
+  - masking.yaml
+  - ingress-descriptor.yaml 
   - tables.yaml 
   - relations.yaml 
 - Transformation plan (graphviz)

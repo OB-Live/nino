@@ -1,0 +1,82 @@
+version: "3.3"
+
+services:
+  app:
+    image: ag04/jhpetclinic:latest
+    environment:
+      _JAVA_OPTIONS: '-Xmx512m -Xms256m'
+      SPRING_PROFILES_ACTIVE: 'prod,swagger'
+      MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: 'true'
+      SERVER_SERVLET_CONTEXT_PATH: '/'
+      JHIPSTER_SLEEP: '5'
+      DATASOURCE_URL: 'jdbc:postgresql://bdd:5432/jhpetclinic'
+      JPA_DATABASE_PLATFORM: 'io.github.jhipster.domain.util.FixedPostgreSQL10Dialect'
+      JPA_DATABASE: 'POSTGRESQL'
+      DB_USER: 'jhpetclinic'
+      DB_PWD: 'jhpetclinic'
+      DB_NAME: 'jhpetclinic'
+      DB_SCHEMA: 'public'
+      MAIL_HOST: 'localhost'
+      MAIL_PORT: 25
+      MAIL_USERNAME: ''
+      MAIL_PWD: ''
+      MAIL_APP_BASE_URL: 'localhost:8080/'
+    ports:
+      - 7080:8080
+    depends_on:
+      - bdd
+    networks:
+      - app_net
+
+  bdd:
+    image: postgres:12.3
+    environment:
+      - POSTGRES_USER=jhpetclinic
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5432:5432"
+    networks:
+      - app_net
+
+  bddql:
+    image: postgres:12.3
+    environment:
+      - POSTGRES_USER=jhpetclinic
+      - POSTGRES_HOST_AUTH_METHOD=trust
+    ports:
+      - "5433:5432"
+    networks:
+      - app_net
+
+  app-ql:
+    image: ag04/jhpetclinic:latest
+    environment:
+      _JAVA_OPTIONS: '-Xmx512m -Xms256m'
+      SPRING_PROFILES_ACTIVE: 'prod,swagger'
+      MANAGEMENT_METRICS_EXPORT_PROMETHEUS_ENABLED: 'true'
+      SERVER_SERVLET_CONTEXT_PATH: '/'
+      JHIPSTER_SLEEP: '5' # gives time for other services to boot before the application
+      DATASOURCE_URL: 'jdbc:postgresql://bddql:5432/jhpetclinic'
+      JPA_DATABASE_PLATFORM: 'io.github.jhipster.domain.util.FixedPostgreSQL10Dialect'
+      JPA_DATABASE: 'POSTGRESQL'
+      DB_USER: 'jhpetclinic'
+      DB_PWD: 'jhpetclinic'
+      DB_NAME: 'jhpetclinic'
+      DB_SCHEMA: 'public'
+      MAIL_HOST: 'localhost'
+      MAIL_PORT: 25
+      MAIL_USERNAME: ''
+      MAIL_PWD: ''
+      MAIL_APP_BASE_URL: 'localhost:8001/'
+    ports:
+      - 8001:8080
+    depends_on:
+      - bddql
+    networks:
+      - app_net
+
+
+# networks section
+networks:
+  app_net:
+    driver: bridge

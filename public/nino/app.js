@@ -229,6 +229,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
     d3.text("/api/schema.dot")
       .then(dot => {
+        if (!dot) {
+          console.error("Received empty dot source");
+          return;
+        }
         graphviz.renderDot(dot).on("end", function () {
           const savedTransform = localStorage.getItem('nino-graph-transform');
           if (savedTransform) {
@@ -253,19 +257,24 @@ document.addEventListener("DOMContentLoaded", () => {
           });
         });
 
-        // Find the first descriptor and open its table stats and execution graph
+        // Find the first masking and open its table stats and execution graph
         if (workspaceFiles) {
           for (const folderName in workspaceFiles) {
-            const descriptorFile = workspaceFiles[folderName].find(f => f.endsWith('-descriptor.yaml'));
-            if (descriptorFile) {
-              const tableName = descriptorFile.replace('-descriptor.yaml', '');
+            const maskingFile = workspaceFiles[folderName].find(f => f.endsWith('-masking.yaml'));
+            if (maskingFile) {
+              const tableName = maskingFile.replace('-masking.yaml', '');
               openTableStat(tableName, folderName);
               openExecutionGraph(folderName);
               return; // Stop after finding the first one
             }
           }
         }
-      });
+      })
+      .catch(error => {
+        console.error("Failed to load schema.dot:", error);
+        // Optionally, display an error to the user in the graph container
+      })
+      ;
   }
 
   downloadGraphBtn.addEventListener("click", (e) => {

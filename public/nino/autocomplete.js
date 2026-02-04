@@ -544,8 +544,8 @@ function setupYamlValidationAndCompletion(monaco, jsyaml, editorInstances) {
                 validateRelationsFile(doc, markers, model);
             } else if (fileType && fileType.includes('analyze.yaml')) {
                 validateAnalyzeFile(doc, markers, model);
-            } else if (fileType && (fileType.includes('-descriptor.yaml') || fileType === 'masking')) {
-                // Default to masking file validation for descriptors or the main editor's default
+            } else if (fileType && (fileType.includes('-masking.yaml') || fileType === 'masking')) {
+                // Default to masking file validation for masking or the main editor's default
                 validateMaskingFile(doc, markers, model);
             } else {
                 // For any other file type like playbook.yaml, do nothing.

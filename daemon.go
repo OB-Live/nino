@@ -58,7 +58,7 @@ func startDaemon(projectData ProjectData, fileMap map[string]string,
 	}
 }
 
-// createMaskFile handles the creation of a boilerplate descriptor file.
+// createMaskFile handles the creation of a boilerplate masking file.
 func createMaskFile(projectData *ProjectData, inputPaths []string, fileMap map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		folderName := chi.URLParam(r, "folderName")
@@ -83,7 +83,7 @@ func createMaskFile(projectData *ProjectData, inputPaths []string, fileMap map[s
 			basePath = filepath.Join(basePath, tableFolder)
 		}
 
-		filePath := filepath.Join(basePath, fmt.Sprintf("%s-descriptor.yaml", tableName))
+		filePath := filepath.Join(basePath, fmt.Sprintf("%s-masking.yaml", tableName))
 
 		var sb strings.Builder
 		sb.WriteString("version: \"1\"\n")
@@ -94,7 +94,7 @@ func createMaskFile(projectData *ProjectData, inputPaths []string, fileMap map[s
 		}
 
 		if err := os.WriteFile(filePath, []byte(sb.String()), 0644); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to create descriptor file: %v", err), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("Failed to create masking file: %v", err), http.StatusInternalServerError)
 			return
 		}
 
@@ -145,7 +145,7 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 		switch format {
 		case "dot":
 			w.Header().Set("Content-Type", "text/vnd.graphviz")
-			w.Header().Set("Content-Disposition", `attachment; filename="schema.dot"`)
+			// w.Header().Set("Content-Disposition", `attachment; filename="schema.dot"`)
 			w.Write([]byte(dotString))
 		case "svg", "png":
 			cmd := exec.Command("dot", "-T"+format)
@@ -162,6 +162,15 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 				}
 				// If there's an error but we still got some output, log it as a warning and proceed.
 				log.Printf("Warning: dot command for format %s exited with an error but still produced output. Error: %v", format, err)
+				// If there's an error AND no output, it's a fatal error.
+				log.Printf("Error executing dot command for format %s: %v. Output: %s", format, err, string(output))
+				http.Error(w, "Failed to generate graph image", http.StatusInternalServerError)
+				return
+			}
+
+			if len(output) == 0 {
+				http.Error(w, "Generated graph image is empty", http.StatusInternalServerError)
+				return
 			}
 
 			if format == "svg" {
@@ -211,6 +220,17 @@ func servePlot(projectData ProjectData) http.HandlerFunc {
 			w.Header().Set("Content-Type", "text/vnd.graphviz")
 			dotPlaceholder := fmt.Sprintf(`digraph G { label="No plot data available for %s"; node [shape=box]; "No Data"; }`, tableName)
 			w.Write([]byte(dotPlaceholder))
+			// Return a placeholder image instead of a dot graph
+			w.Header().Set("Content-Type", "image/png")
+			// Create a 1x1 transparent PNG
+			w.Write([]byte{
+				0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
+				0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+				0x08, 0x06, 0x00, 0x00, 0x00, 0x1f, 0x15, 0xc4, 0x89, 0x00, 0x00, 0x00,
+				0x0a, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9c, 0x63, 0x00, 0x01, 0x00, 0x00,
+				0x05, 0x00, 0x01, 0x0d, 0x0a, 0x2d, 0xb4, 0x00, 0x00, 0x00, 0x00, 0x49,
+				0x45, 0x4e, 0x44, 0xae, 0x42, 0x60, 0x82,
+			})
 			return
 		}
 
