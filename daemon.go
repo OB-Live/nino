@@ -212,7 +212,7 @@ func servePlaybook(projectData *ProjectData) http.HandlerFunc {
 		if folderData, ok := (*projectData)[folderName]; ok {
 			if folderData.Playbook != nil {
 				dotString := generateAnsiblePlaybookGraph(folderData.Playbook)
-				w.Header().Set("Content-Type", "text/vnd.graphviz")
+				// w.Header().Set("Content-Type", "text/vnd.graphviz")
 				w.Write([]byte(dotString))
 				return
 			}
