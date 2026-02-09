@@ -1,0 +1,495 @@
+:root {
+  --background: #2f2b0e;
+  /* hsl(80, 10%, 12%) */
+  --foreground: #f0f2f0;
+  /* hsl(80, 10%, 95%) */
+  --card: #2e452e;
+  /* hsl(80, 10%, 15%) */
+  --primary: #858c5e;
+  /* hsl(80, 35%, 45%) */
+  --primary-foreground: #f8faf8;
+  /* hsl(80, 20%, 98%) */
+  --muted: #233b23;
+  /* hsl(80, 10%, 22%) */
+  --muted-foreground: #a2a8a2;
+  /* hsl(80, 10%, 65%) */
+  --accent: #a1a677;
+  /* hsl(75, 40%, 55%) */
+  --border: #3b4239;
+  /* hsl(80, 15%, 25%) */
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 0px;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-header {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  padding: 12px 16px;
+  border-bottom: 1px solid hsl(var(--border));
+  text-align: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+
+nino-workspace.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+nino-workspace {
+  display: flex;
+  flex-direction: column; 
+
+  width: var(--sidebar-width);
+}
+
+.sidebar-header {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.sidebar-trigger {
+  position: fixed;
+  left: 8px;
+  top: 8px;
+  /* transform: translateY(-50%); */
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.logo {
+  width: 80px;
+  transition: opacity 0.2s ease-in-out;
+}
+ 
+.sidebar-content {
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background-color: var(--muted);
+  border-radius: 20px;
+}
+
+.scroll-area {
+  padding: 8px;
+}
+
+.accordion-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.accordion-trigger {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  padding: 10px;
+  text-align: left;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.accordion-content {
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: var(--background);
+  padding: 0 10px;
+}
+
+.example-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.example-btn:hover {
+  background-color: var(--muted);
+}
+
+.example-name {
+  font-weight: 500;
+}
+
+.example-desc {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.panel,
+.sub-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+
+.resize-handle-h {
+  width: 8px;
+  /* Ensures the handle is always 8px wide */
+  flex-shrink: 0;
+  /* Prevents the handle from shrinking in a flex container */
+  cursor: col-resize;
+  background-color: var(--border);
+}
+
+.resize-handle-h:hover,
+.resize-handle-h.active {
+  background-color: var(--accent);
+  /* The width is now consistently 8px, so no need to set it conditionally here */
+}
+
+.resize-handle-v {
+  height: 8px;
+  /* Ensures the handle is always 8px high */
+  flex-shrink: 0;
+  /* Prevents the handle from shrinking in a flex container */
+  cursor: row-resize;
+  background-color: var(--border);
+}
+
+.resize-handle-v:hover,
+.resize-handle-v.active {
+  background-color: var(--accent);
+  /* Corrected typo: removed incorrect 'width' property.
+     The height is consistently 8px, so no need to set it conditionally here. */
+}
+
+.play-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 0 6px 10px;
+  /* Slightly smaller triangle for tabs */
+  border-color: transparent transparent transparent var(--accent);
+  cursor: pointer;
+}
+
+.play-icon:hover {
+  opacity: 0.8;
+}
+
+.close-tab {
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.close-tab:hover {
+  background-color: var(--muted);
+}
+
+.tab-content {
+  display: none;
+  flex: 1;
+}
+
+.tab-content.active {
+  display: flex;
+  /* Use flex to allow content to fill space */
+}
+
+.execute-btn {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 7px 0 7px 12px;
+  /* Creates the triangle shape */
+  border-color: transparent transparent transparent var(--accent);
+  /* Left border is green */
+  background: none;
+  padding: 0;
+  margin-right: 8px;
+  /* Add some space between icon and text */
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.execute-btn:hover {
+  opacity: 0.8;
+}
+
+.execute-btn:disabled {
+  border-color: transparent transparent transparent var(--muted);
+  cursor: not-allowed;
+}
+
+
+.panel,
+.sub-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+iframe {
+  border: none;
+}
+
+.fixed-header {
+  position: fixed;
+  top: 2px;
+  right: 2px;
+  z-index: 1000;
+  /* High z-index to be on top */
+  background-color: rgba(1, 1, 1, 0.8);
+  /* Semi-transparent background */
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-family: Helvetica, Arial, sans-serif;
+  color: rgb(255, 253, 253);
+}
+
+#sidebar-toggle {
+  display: flex;
+}
+
+.header-img {
+  height: 33px;
+  /* Adjust height as needed */
+  margin: 0 8px;
+}
+
+.header-img2 {
+  height: 24px;
+  /* Adjust height as needed */
+  margin: 0 8px;
+}
+
+
+.jstree {
+  max-height: fit-content;
+}
+
+
+nino-editor {
+  flex: 60 1 0%;
+}
+
+nino-execution {
+  flex: 40 1 0%;
+}
+
+#execution-panel {
+  height: -webkit-fill-available;
+}
+
+
+.tab-header {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  padding: 0 8px;
+}
+
+.tab-button {
+  background-color: 1px solid var(--primary);
+  padding: 4px 6px;
+  background: none;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.tab-button.active {
+  color: var(--foreground);
+  border-bottom: 2px solid var(--accent);
+  background-color: var(--primary);
+}
+
+.editor-wrapper {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  /* Ensure editor wrapper takes full height */
+  position: relative;
+}
+
+.download-btn {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 6px;
+  line-height: 1;
+  display: inline-flex;
+}
+
+.close-tab {
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.close-tab:hover {
+  background-color: var(--muted);
+}
+
+
+#input-panel {
+  flex: 60 1 0%;
+}
+
+#output-panel {
+  flex: 40 1 0%;
+}
+
+.editor-header {
+  padding: 8px 12px;
+  background-color: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.editor-wrapper {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background-color: var(--background);
+}
+
+.monaco-editor {
+  width: 100%;
+}
+
+/* SIDEBAR  */
+
+.accordion-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.accordion-trigger {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  padding: 10px;
+  text-align: left;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.accordion-content {
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: var(--background);
+  padding: 0 10px;
+}
+
+.example-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.example-btn:hover {
+  background-color: var(--muted);
+}
+
+#jstree-workspace {
+  background-color: var(--background);
+  flex: 1;
+  /* Ensure it takes up available space */
+}
+
+
+#stats-container {
+  flex: 1;
+  overflow: auto;
+  padding: 1em;
+}
+
+#editor-panel {
+  flex: 60 1 0%;
+  height: 100%;
+}
