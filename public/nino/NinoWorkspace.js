@@ -34,7 +34,9 @@ class NinoWorkspace extends HTMLElement {
         this.renderExamplesMenu();
         this.loadWorkspace();
     }
-
+    /**
+     * TODO: comment and document 
+     */
     renderExamplesMenu() {
         const examplesContainer = this.shadowRoot.querySelector("#examples-container");
         staticExamples.forEach(category => {
@@ -79,15 +81,88 @@ class NinoWorkspace extends HTMLElement {
         try {
             const response = await fetch('/api/files');
             if (!response.ok) return [];
-            var res =  await response.json();
-            console.log(res);
-            return res ; 
+            const files = await response.json();
+            console.log(files);
+ 
+            const jstreeData = [];
+            let idCounter = 1;
+ 
+            // Create a root node for "Workspace" 
+            const workspaceRootNode = {
+                id: `ws_root`,
+                parent: '#',
+                text: 'Workspace',
+                state: { opened: true },
+                type: 'folder'
+            };
+ 
+            jstreeData.push(workspaceRootNode);
+            /**
+             * Recursively processes a node (folder or file) from the input data
+             * and adds it to the jstreeData array.
+             * @param {Array<string|object>} items - An array of file names (strings) or folder objects.
+             * @param {string} parentId - The ID of the parent node in the jstree.
+             * @param {string} currentPath - The current path in the file tree (e.g., "Workspace/folderA").
+             */
+            const processNode = (items, parentId, currentTreePath, currentUrlPath) => {
+                const children = [];
+                for (const item of items) {
+                    if (typeof item === 'string') {
+                        // It's a file
+                        if (item.endsWith(".yaml") || item.endsWith(".yml")) {
+                            const fileName = item;
+                            const nodeTreePath = `${currentTreePath}/${fileName}`;
+                            const nodeUrlPath = currentUrlPath ? `${currentUrlPath}/${fileName}` : fileName;
+                            jstreeData.push({
+                                id: `ws_file_${idCounter++}`,
+                                parent: parentId,
+                                text: fileName,
+                                icon: 'jstree-file',
+                                li_attr: {
+                                    'data-url': `/api/file/${nodeUrlPath}`,
+                                    'data-input': '{}', // Default input for workspace files 
+                                    'data-file-name': fileName,
+                                    'data-folder-name': currentUrlPath.split('/').pop() || '', // Get the immediate parent folder name for the URL path
+                                    'data-example-id': `workspace-${nodeTreePath}` // To identify it later 
+                                },
+                                type: 'file'
+                            });
+                        }
+                    } else if (typeof item === 'object' && item !== null) {
+                        // It's a folder
+                        const folderName = Object.keys(item)[0]; // Get the folder name (the only key in the object)
+                        const folderContent = item[folderName]; // Get the array of its children
+                        const newFolderId = `ws_folder_${idCounter++}`; // This is the jstree node ID
+                        const newCurrentTreePath = `${currentTreePath}/${folderName}`; // This is the full path for jstree hierarchy
+                        const newCurrentUrlPath = currentUrlPath ? `${currentUrlPath}/${folderName}` : folderName; // This is the path for the URL
+                        jstreeData.push({
+                            id: newFolderId,
+                            parent: parentId,
+                            text: folderName,
+                            icon: 'jstree-folder', // Added icon for folder
+                            state: { opened: true },
+                            type: 'folder',
+                            children: processNode(folderContent, newFolderId, newCurrentTreePath, newCurrentUrlPath) // Recursively call for children
+                        });
+                    }
+                }
+            };
+ 
+            // Assuming the top-level 'files' object contains a 'Workspace' key with an array of items
+            if (files.Workspace && Array.isArray(files.Workspace)) {
+                workspaceRootNode.children = processNode(files.Workspace, 'ws_root', 'Workspace', '');
+            }
+
+            return jstreeData;
         } catch (error) {
             console.error('Failed to fetch workspace files:', error);
             return [];
         }
     }
 
+    /**
+     * TODO: comment and document 
+     */
     renderFileTree(jstreeData) {
         const jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
         $(jstreeDiv)

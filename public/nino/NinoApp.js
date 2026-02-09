@@ -87,11 +87,8 @@ async function initializeApp() {
  * @param {string} folderName - The name of the folder where the table definition resides.
  */
 function openTableStat(tableName, folderName) {
-    $ninoExecution.setOutputEditorValue(''); // Clear output container via NinoExecution
-    const tableStats = document.createElement('table-stats');
-    tableStats.setAttribute('table-name', tableName);
-    tableStats.setAttribute('folder-name', folderName);
-    $ninoExecution.shadowRoot.getElementById('output-viewer-container').append(tableStats);
+    // Switch to the stats tab in NinoEditor and pass the table and folder names
+    $ninoEditor.activateTab('stats', false, { tableName: tableName, folderName: folderName });
 }
 
 /**
@@ -100,11 +97,9 @@ function openTableStat(tableName, folderName) {
  * Displays a graph of the current YAML in the output panel.
  * @param {string} folderName - The name of the folder where the YAML definition resides.
  */
-function openExecutionGraph(folderName) {
-    $ninoExecution.setOutputEditorValue(''); // Clear output container via NinoExecution
-    const playbookPlan = document.createElement('playbook-plan');
-    playbookPlan.setAttribute('folder-name', folderName);
-    $ninoExecution.shadowRoot.getElementById('output-viewer-container').append(playbookPlan);
+function openExecutionGraph(folderName) { 
+    // Switch to the graph tab in NinoEditor and pass the folder name
+    $ninoEditor.activateTab('graph', false, { folderName: folderName });
 }
 
 /**

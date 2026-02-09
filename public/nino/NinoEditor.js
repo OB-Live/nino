@@ -74,8 +74,8 @@ class NinoEditor extends HTMLElement {
 
     const commonOptions = {
       theme: "nino-dark",
-      lineNumbers: 'on',
-      minimap: { enabled: false },
+      lineNumbers: x=>x,
+      minimap: { enabled: true },
       automaticLayout: true, // Ensure editors layout automatically
     };
 
@@ -154,7 +154,7 @@ class NinoEditor extends HTMLElement {
     // Handle specific tab content rendering
     switch (tabId) {
         case 'graph':
-            this.renderGraphTab();
+            this.renderGraphTab(data);
             break;
         case 'transformation':
             this.renderTransformationTab(data.folderName);
@@ -171,13 +171,21 @@ class NinoEditor extends HTMLElement {
     this.layoutEditors();
   }
 
-  renderGraphTab() {
+  renderGraphTab(data) {
     // Clear previous graph content
     this.$graphViewContainer.innerHTML = '';
 
-    // Create and append the transformation-plan web component
-    const transformationPlan = document.createElement('transformation-plan');
-    this.$graphViewContainer.appendChild(transformationPlan);
+    const folderName = data.folderName;
+    if (folderName) {
+        // If folderName is provided, render a playbook-plan
+        const playbookPlan = document.createElement('playbook-plan');
+        playbookPlan.setAttribute('folder-name', folderName);
+        this.$graphViewContainer.appendChild(playbookPlan);
+    } else {
+        // Otherwise, render a general transformation-plan
+        const transformationPlan = document.createElement('transformation-plan');
+        this.$graphViewContainer.appendChild(transformationPlan);
+    }
   }
 
   renderTransformationTab(folderName) {
@@ -274,8 +282,8 @@ class NinoEditor extends HTMLElement {
       // Create Monaco editor for the new file
       const commonOptions = {
         theme: "nino-dark",
-        lineNumbers: 'on',
-        minimap: { enabled: false },
+        lineNumbers: x=>x,
+        minimap: { enabled: true },
         automaticLayout: true,
       };
       const language = example.id.endsWith('.json') ? 'json' : 'yaml';

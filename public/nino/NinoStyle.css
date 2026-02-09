@@ -85,6 +85,7 @@ nino-workspace {
 }
 
 .sidebar-header {
+  background-color: var(--card);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -114,6 +115,7 @@ nino-workspace {
 }
  
 .sidebar-content {
+  background-color: var(--card);
   flex: 1;
   overflow-y: auto;
   scrollbar-width: thin;
@@ -492,4 +494,9 @@ nino-execution {
 #editor-panel {
   flex: 60 1 0%;
   height: 100%;
+}
+
+/* temporary fix : monaco editor is creating an extra text area for some reason and it is visible and it is not possible to hide it with the monaco editor options */
+.ime-text-area{
+  display: none
 }

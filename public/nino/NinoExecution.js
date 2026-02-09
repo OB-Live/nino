@@ -44,7 +44,9 @@ class NinoExecution extends HTMLElement {
             }));
         });
     }
-
+    /**
+     * TODO: comment and document 
+     */
     connectedCallback() {
         // Monaco Editor Initialization - embedded within the component
         require.config({ paths: { vs: "/lib/monaco-editor-0.55.1/package/min/vs" } });
@@ -55,13 +57,18 @@ class NinoExecution extends HTMLElement {
             this.dispatchEvent(new CustomEvent('monaco-ready', { bubbles: true, composed: true }));
         });
     }
-
+    /**
+     * TODO: comment and document 
+     */
     _setMonacoInstance(monaco) {
         this.monaco = monaco;
         this.createEditors();
         this.makeVerticalResizable(this.shadowRoot.getElementById("resize-handle-v"), this.shadowRoot.getElementById("input-panel"), this.shadowRoot.getElementById("output-panel"));
     }
 
+    /**
+     * TODO: comment and document 
+     */
     createEditors() {
         this.monaco.editor.defineTheme('nino-dark', {
             base: 'vs-dark',
@@ -87,8 +94,8 @@ class NinoExecution extends HTMLElement {
 
         const commonOptions = {
             theme: "nino-dark",
-            minimap: { enabled: false },
-            lineNumbers: 'on',
+            minimap: { enabled: true },
+            lineNumbers: x=>x,
             automaticLayout: true, // Ensure editors resize automatically
         };
         this.editorInstances["input"] = this.monaco.editor.create(this.$inputEditorContainer, { 

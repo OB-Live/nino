@@ -43,7 +43,7 @@ This directory contains all client-side assets that are served directly by the w
     *   **`NinoExecution.js`**: Web Component for the input/output execution panel, also using Monaco Editors.
     *   **`NinoGraph.js`**: Web Components for rendering various graph visualizations (e.g., `transformation-plan`, `playbook-plan`, `table-stats`).
     *   **`NinoStats.js`**: Web Component for displaying table statistics.
-    *   **`NinoStyle.css`**: Global CSS styles for the application, including theming variables.
+    *   **`NinoStyle.css`**: Global CSS styles for the application, including theming variables. all styling for the application is here nothing  in the web components
     *   **`NinoTransformation.js`**: Web Component for displaying transformation-related plans.
     *   **`NinoWorkspace.js`**: Web Component for the collapsible sidebar, managing static examples and the file tree.
     *   **`index.html`**: The main HTML file, serving as the entry point for the single-page application.
