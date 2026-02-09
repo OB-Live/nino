@@ -17,14 +17,12 @@ import (
 )
 
 // startDaemon initializes and starts the web server.
-func startDaemon(projectData ProjectData, fileMap map[string]string,
-	inputPaths []string,
-	port string,
-	publicFS fs.FS) {
+func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths []string, port string, publicFS fs.FS) {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Compress(5)) // Add gzip compression middleware
 
 	// API routes
 	// r.Get("/api/page", serveIndexPage())            // Serve the html using api
@@ -48,14 +46,24 @@ func startDaemon(projectData ProjectData, fileMap map[string]string,
 
 	// Serve files from the 'public' directory
 	// workDir, _ := os.Getwd()
-	// publicDir := http.Dir(filepath.Join(workDir, "public"))
-	r.Handle("/*", http.FileServer(http.FS(publicFS)))
+	r.Handle("/*", customFileServer(publicFS))
 
 	log.Printf("Starting web server on http://localhost:%s", port)
 	err := http.ListenAndServe(":"+port, r)
 	if err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// customFileServer wraps http.FileServer to set correct MIME types for CSS.
+func customFileServer(fs fs.FS) http.Handler {
+	fsh := http.FileServer(http.FS(fs))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".css") {
+			w.Header().Set("Content-Type", "text/css; charset=utf-8")
+		}
+		fsh.ServeHTTP(w, r)
+	})
 }
 
 // createMaskFile handles the creation of a boilerplate masking file.
