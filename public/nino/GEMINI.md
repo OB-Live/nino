@@ -17,7 +17,7 @@ nino/
 │   │   ├── NinoDialog.js
 │   │   ├── NinoEditor.js
 │   │   ├── NinoExecution.js
-│   │   ├── NinoGraph.js
+│   │   ├── NinoGraphviz.js
 │   │   ├── NinoStats.js
 │   │   ├── NinoStyle.css
 │   │   ├── NinoTransformation.js
@@ -41,7 +41,7 @@ This directory contains all client-side assets that are served directly by the w
     *   **`NinoDialog.js`**: Web Component for generic popup/dialog functionality.
     *   **`NinoEditor.js`**: Web Component for the main code editor area, managing Monaco Editor instances and tabs.
     *   **`NinoExecution.js`**: Web Component for the input/output execution panel, also using Monaco Editors.
-    *   **`NinoGraph.js`**: Web Components for rendering various graph visualizations (e.g., `transformation-plan`, `playbook-plan`, `table-stats`).
+    *   **`NinoGraphviz.js`**: Web Components for rendering various graph visualizations (e.g., `transformation-plan`, `playbook-plan`, `table-stats`).
     *   **`NinoStats.js`**: Web Component for displaying table statistics.
     *   **`NinoStyle.css`**: Global CSS styles for the application, including theming variables. all styling for the application is here nothing  in the web components
     *   **`NinoTransformation.js`**: Web Component for displaying transformation-related plans.

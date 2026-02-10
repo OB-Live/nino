@@ -65,7 +65,7 @@ This Web Component implements the collapsible sidebar, providing navigation and 
 -   **File Actions**: Dispatches events to `NinoApp.js` to open selected files in the `<nino-editor>`.
 -   **Collapse/Expand**: Manages its own collapsed state, which is persisted across sessions.
 
-### 6. `NinoGraph.js`
+### 6. `NinoGraphviz.js`
 
 This script defines several Web Components responsible for rendering various visualizations:
 

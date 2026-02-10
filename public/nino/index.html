@@ -14,23 +14,17 @@
   <script src="/lib/jquery-ui.min.js"></script>
 
   <!-- D3.js and d3-graphviz for rendering the DOT graph -->
-  <script src="/lib/d3.v7.min.js"></script>
-  <script src="https://unpkg.com/d3-graphviz@5.6.0/build/d3-graphviz.js"></script>
-
   <!-- Workspace tree view library -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 
-
   <!-- Monaco text Editor  -->
-  <link rel="stylesheet" data-name="vs/editor/editor.main" href="/lib/monaco-editor-0.55.1/package/min/vs/editor/editor.main.css" />
-  <script src="/lib/js-yaml.min.js"></script>
-  <script src="/lib/monaco-editor-0.55.1/package/min/vs/loader.js"></script>
-
+  <!-- Monaco Editor is now loaded by NinoMonacoEditor.js -->
 
   <!-- NINO's libraries -->
   <script type="module" src="NinoConstants.js"></script> 
-  <script type="module" src="NinoGraph.js"></script>
+  <script type="module" src="NinoGraphviz.js"></script>
+  <script type="module" src="NinoMonacoEditor.js"></script>
   <script type="module" src="NinoExecution.js"></script>
   <script type="module" src="NinoDialog.js"></script> 
 

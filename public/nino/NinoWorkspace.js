@@ -34,6 +34,10 @@ class NinoWorkspace extends HTMLElement {
         this.renderExamplesMenu();
         this.loadWorkspace();
     }
+
+    getWorkspaceData() {
+        return this._workspaceData;
+    }
     /**
      * TODO: comment and document 
      */

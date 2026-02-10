@@ -2,7 +2,7 @@ import { HELPER_LOAD_METADATA, staticExamples, MASK_KEYWORDS } from './NinoConst
 import './NinoEditor.js';
 import './NinoWorkspace.js';
 import './NinoExecution.js';
-import './NinoGraph.js';
+import './NinoGraphviz.js';
 
 const $sidebar = $("nino-workspace");
 const $sidebarToggle = $("#sidebar-toggle");
@@ -60,17 +60,16 @@ export function makeHorizontalResizable(handle, prevComponent, nextComponent) {
 async function initializeApp() {
     // Monaco initialization is now handled within NinoEditor.js and NinoExecution.js
     // Wait for both components to signal that Monaco is ready and editors are created.
-    await Promise.all([
-        new Promise(resolve => $ninoEditor.addEventListener('monaco-ready', resolve, { once: true })),
-        new Promise(resolve => $ninoExecution.addEventListener('monaco-ready', resolve, { once: true }))
-    ]);
+    // NinoEditor now waits for its child components to be ready.
+    await new Promise(resolve => $ninoEditor.addEventListener('monaco-ready', resolve, { once: true }));
+    await new Promise(resolve => $ninoExecution.addEventListener('monaco-ready', resolve, { once: true }));
 
-    $ninoEditor.setJsyaml(jsyaml); // jsyaml is still assumed to be global and needed by NinoEditor
     await restoreUiState();
 
     makeHorizontalResizable($("#resize-handle-h"), $ninoEditor, $ninoExecution);
     window.openExecutionGraph = openExecutionGraph;
     // The makeResizable call for the vertical split within NinoExecution is handled internally by NinoExecution.js
+    document.body.addEventListener('nino-graph-click', handleGraphClick);
 
     window.openTableStat = openTableStat;
      
@@ -86,10 +85,7 @@ async function initializeApp() {
  * @param {string} tableName - The name of the table to display statistics for.
  * @param {string} folderName - The name of the folder where the table definition resides.
  */
-function openTableStat(tableName, folderName) {
-    // Switch to the stats tab in NinoEditor and pass the table and folder names
-    $ninoEditor.activateTab('stats', false, { tableName: tableName, folderName: folderName });
-}
+function openTableStat(tableName, folderName) {    $ninoEditor.activateTab('stats', false, { tableName: tableName, folderName: folderName });}
 
 /**
  * openExecutionGraph
@@ -97,9 +93,28 @@ function openTableStat(tableName, folderName) {
  * Displays a graph of the current YAML in the output panel.
  * @param {string} folderName - The name of the folder where the YAML definition resides.
  */
-function openExecutionGraph(folderName) { 
-    // Switch to the graph tab in NinoEditor and pass the folder name
+function openExecutionGraph(folderName) {
+    // Find the first folder with a playbook.yaml if folderName is not provided
+    if (!folderName) {
+        const workspaceData = $ninoWorkspace.getWorkspaceData();
+        const firstPlaybookFolder = findFirstPlaybookFolder(workspaceData);
+        if (firstPlaybookFolder) {
+            folderName = firstPlaybookFolder;
+        }
+    }
+
     $ninoEditor.activateTab('graph', false, { folderName: folderName });
+}
+
+function handleGraphClick(event) {
+    const { functionName, args } = event.detail;
+    if (functionName === 'openTableStat') {
+        const [tableName, folderName] = args;
+        openTableStat(tableName, folderName);
+    } else if (functionName === 'openExecutionGraph') {
+        const [folderName] = args;
+        openExecutionGraph(folderName);
+    }
 }
 
 /**
@@ -123,12 +138,7 @@ function toggleSidebar() {
     }
     $ninoEditor.layoutEditors();
 }
-
-/**
- * Handles the click event for the download graph button.
- * It opens a small dialog with options to download the schema graph in different formats (DOT, SVG, PNG).
- * @param {Event} e - The click event object.
- */
+ 
 
 /**
  * Handles the click event for the execute button.
@@ -167,29 +177,7 @@ async function handleExecute(yamlValue, jsonValue) {
         executeBtn.disabled = false;
     }
 }
-
-// --- UI State Persistence ---
-/**
- * Saves the state of open file tabs (excluding the main YAML, input, and output tabs)
- * and the currently active tab to localStorage.
- */
-function saveTabsState() {
-    const openTabs = [];
-    $ninoEditor.shadowRoot.querySelectorAll(".tab-button").forEach(function (tab) {
-        const tabId = tab.dataset.tab;
-        if (tabId.startsWith("file-tab-")) {
-            openTabs.push({
-                id: tab.dataset.exampleId,
-                name: tab.dataset.fileName,
-                description: tab.dataset.folderName,
-                url: tab.dataset.url,
-            });
-        }
-    });
-    const activeTab = $ninoEditor.shadowRoot.querySelector(".tab-button.active")?.dataset.tab;
-    localStorage.setItem("nino-open-tabs", JSON.stringify(openTabs));
-    localStorage.setItem("nino-active-tab", activeTab);
-}
+ 
 
 async function handlePlay(example) {
     $ninoExecution.setOutputEditorValue("Executing...");
@@ -293,7 +281,7 @@ export async function restoreUiState() {
  */
 async function openWorkspaceFileInNewTab(example) {
     await $ninoEditor.openFile(example);
-    saveTabsState();
+ 
 }
 
 /**
@@ -328,7 +316,7 @@ $ninoExecution.addEventListener('execute-nino', async (event) => {
 
 $ninoEditor.addEventListener('tab-activated', (event) => {
     const { tabId, fromClick, fileName, folderName } = event.detail;
-    saveTabsState();
+ 
 
     if (tabId === 'graph') {
         $ninoExecution.setOutputEditorValue('');
@@ -352,8 +340,25 @@ $ninoEditor.addEventListener('tab-activated', (event) => {
     }
 });
 
-$ninoEditor.addEventListener('file-action', handleFileAction);
-$ninoEditor.addEventListener('tab-closed', saveTabsState);
+/**
+ * Recursively searches for the first folder containing a 'playbook.yaml' file.
+ * @param {Array<Object>} items - The workspace items (files and folders).
+ * @returns {string|null} The name of the first folder found with a playbook.yaml, or null.
+ */
+function findFirstPlaybookFolder(items) {
+    for (const item of items) {
+        if (typeof item === 'object' && !Array.isArray(item)) {
+            const folderName = Object.keys(item)[0];
+            const folderContent = item[folderName];
+            if (folderContent.some(file => typeof file === 'string' && file.includes('playbook.yaml'))) {
+                return folderName;
+            }
+        }
+    }
+    return null;
+}
+
+$ninoEditor.addEventListener('file-action', handleFileAction); 
 
 $ninoWorkspace.addEventListener('select-example', (e) => handleSelectExample(e.detail));
 $ninoWorkspace.addEventListener('select-file', (e) => handleSelectExample(e.detail.node.li_attr));

@@ -285,7 +285,7 @@ export const MASK_KEYWORDS = [
 ];
 
 
-export const HELPER_LOAD_METADATA = (folderName) => `cd ${folderName}/source
+export const HELPER_LOAD_METADATA = (folderName) => `cd ${folderName}/source 
 lino table extract source
 lino relation extract source
 # lino analyse source > analyze.yaml

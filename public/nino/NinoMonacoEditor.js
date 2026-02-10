@@ -1,0 +1,129 @@
+// c:\Users\benjamin.bertrand\ws\nino\public\nino\NinoMonacoEditor.js
+class NinoMonacoEditor extends HTMLElement {
+    static get observedAttributes() {
+        return ['language', 'value', 'id'];
+    }
+
+    constructor() {
+        super();
+        this.attachShadow({ mode: 'open' });
+        this.monaco = null;
+        this.editorInstance = null;
+
+        const template = document.createElement('template');
+        template.innerHTML = `
+            <style>
+                :host {
+                    display: block;
+                    width: 100%;
+                    height: 100%;
+                }
+                #editor-container {
+                    width: 100%;
+                    height: 100%;
+                }
+            </style>
+            <link rel="stylesheet" data-name="vs/editor/editor.main" href="/lib/monaco-editor-0.55.1/package/min/vs/editor/editor.main.css" />
+            <div id="editor-container"></div>
+        `;
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+        this.$editorContainer = this.shadowRoot.getElementById('editor-container');
+    }
+
+    connectedCallback() {
+        this._loadMonacoAndCreateEditor();
+    }
+
+    _loadMonacoAndCreateEditor() {
+        // Ensure require.js is available globally.
+        // If not, load it dynamically.
+        if (!window.require) {
+            const script = document.createElement('script');
+            script.src = '/lib/monaco-editor-0.55.1/package/min/vs/loader.js';
+            script.onload = () => {
+                this._initializeMonaco();
+            };
+            script.onerror = (error) => {
+                console.error("Failed to load Monaco loader:", error);
+            };
+            this.shadowRoot.appendChild(script); // Append to head for global availability
+        } else {
+            this._initializeMonaco();
+        }
+    }
+
+    _initializeMonaco() {
+        if (this.monaco) { // Already initialized
+            this.createEditor();
+            return;
+        }
+        // Configure require.js for Monaco. This ensures the path is set for this component.
+        window.require.config({ paths: { 'vs': '/lib/monaco-editor-0.55.1/package/min/vs' } });
+
+        window.require(['vs/editor/editor.main'], (monaco) => {
+            this.monaco = monaco;
+            this.createEditor();
+        });
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (!this.editorInstance) return;
+
+        if (name === 'language' && oldValue !== newValue) {
+            this.setLanguage(newValue);
+        } else if (name === 'value' && oldValue !== newValue) {
+            this.setValue(newValue);
+        }
+    }
+
+    createEditor() {
+        if (!this.monaco || this.editorInstance) return;
+
+        const language = this.getAttribute('language') || 'plaintext';
+        const value = this.getAttribute('value') || '';
+
+        this.editorInstance = this.monaco.editor.create(this.$editorContainer, {
+            value: value,
+            language: language,
+            lineNumbers: "on",
+            theme: "vs-dark",
+            minimap: { enabled: true },
+            automaticLayout: true,
+            mouseWheelZoom: true,
+            // No theme specified to ignore all theming, as requested.
+        });
+
+        this.dispatchEvent(new CustomEvent('monaco-editor-ready', { bubbles: true, composed: true }));
+    }
+
+    setValue(value) {
+        if (this.editorInstance) {
+            this.editorInstance.setValue(value);
+        }
+    }
+
+    getValue() {
+        return this.editorInstance ? this.editorInstance.getValue() : '';
+    }
+
+    setLanguage(language) {
+        if (this.editorInstance && this.monaco) {
+            this.monaco.editor.setModelLanguage(this.editorInstance.getModel(), language);
+        }
+    }
+
+    layout() {
+        if (this.editorInstance) {
+            this.editorInstance.layout();
+        }
+    }
+
+    disconnectedCallback() {
+        if (this.editorInstance) {
+            this.editorInstance.dispose();
+            this.editorInstance = null;
+        }
+    }
+}
+
+customElements.define('nino-monaco-editor', NinoMonacoEditor);
