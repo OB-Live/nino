@@ -22,7 +22,7 @@ class NinoEditor extends HTMLElement {
             <span id="download-graph-btn" class="download-btn">⤓</span>Transformation Plan 
           </button>
           <button class="tab-button" data-tab="execution">Execution Plan</button>
-          <button class="tab-button" data-tab="stats">Table stats</button>
+          <button class="tab-button" data-tab="statstlTtslestts
           <button class="tab-button active" data-tab="yaml">Examples</button>
        
         </div> 
