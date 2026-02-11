@@ -19,31 +19,7 @@ class NinoGraphviz extends HTMLElement {
 
             <div id="graph-container"></div>
         `;
-
     }
-
-    // attachClickHandlers() {
-    //     const nodes = this.shadowRoot.querySelectorAll('.node[onclick]');
-    //     nodes.forEach(node => {
-    //         const onclickAttr = node.getAttribute('onclick');
-    //         node.removeAttribute('onclick');
-    //         node.style.cursor = 'pointer';
-
-    //         node.addEventListener('click', (event) => {
-    //             event.preventDefault();
-    //             event.stopPropagation();
-
-    //             const match = onclickAttr.match(/(\w+)\((.*)\)/);
-    //             if (match) {
-    //                 const functionName = match[1];
-    //                 const args = match[2].split(',').map(arg => arg.trim().replace(/['"]/g, ''));
-
-    //                 this.dispatchEvent(new CustomEvent('nino-graph-click', { detail: { functionName, args }, bubbles: true, composed: true }));
-    //             }
-    //         });
-    //     });
-    // }
-
 
     connectedCallback() {
         const graphContainer = this.shadowRoot.querySelector('#graph-container');

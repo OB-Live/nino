@@ -43,27 +43,6 @@ func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths 
 	r.Post("/api/exec/playbook/{folder}/{filename}", execCommandHandler())
 	r.Post("/api/exec/pull/{folder}/{filename}", execCommandHandler())
 
-
-	// // API routes
-	// // r.Get("/api/page", serveIndexPage())            // Serve the html using api
-	// r.Get("/api/schema.{format:(dot|svg|png)}", serveSchema(&projectData))
-	// r.Get("/api/schema/{folder}.{format:(dot|svg|png)}", serveSchema(&projectData))
-	// r.Get("/api/plot/{folder}/{tableName}", servePlot(projectData))
-	// r.Get("/api/playbook/{folder}", servePlaybook(&projectData))
-	// r.Get("/api/mask/{folderName}/{tableName}", createMaskFile(&projectData, inputPaths, fileMap))
-
-	// // API routes for external tool integration
-	// r.Get("/api/files", listFilesHandler(inputPaths)) // This route is for listing files, not for serving a specific file
-	// r.Get("/api/file/{filepath}", getFileHandler(inputPaths))
-	// r.Post("/api/file/{filepath:*}", updateFileHandler(inputPaths, &projectData))
-
-	// // API route for pimo execution
-	// r.Post("/api/pimo/exec", pimoExecHandler())
-
-	// // API routes for exec actions
-	// r.Post("/api/exec/playbook/{folder}/{filename}", execCommandHandler())
-	// r.Post("/api/exec/pull/{folder}/{filename}", execCommandHandler())
-
 	log.Printf("Starting web server on http://localhost:%s", port)
 
 	// Serve files from the 'public' directory. This should be the last route.

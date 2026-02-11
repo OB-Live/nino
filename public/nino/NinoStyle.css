@@ -492,7 +492,6 @@ nino-execution {
   /* Ensure it takes up available space */
 }
 
-
 #stats-container {
   flex: 1;
   overflow: auto;

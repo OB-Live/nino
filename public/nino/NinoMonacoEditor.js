@@ -1,4 +1,8 @@
-// c:\Users\benjamin.bertrand\ws\nino\public\nino\NinoMonacoEditor.js
+/**
+ * Reusable component that encapsulates the Monaco Editor. 
+ * It dynamically loads the Monaco Editor library and creates an editor instance within its shadow DOM.
+ * The component supports setting the language and value via attributes, and it dispatches a custom event when the editor is ready.
+ */
 class NinoMonacoEditor extends HTMLElement {
     static get observedAttributes() {
         return ['language', 'value', 'id'];

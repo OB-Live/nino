@@ -6,7 +6,7 @@ class NinoWorkspace extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="NinoStyle.css">
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default-dark/style.min.css" />
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default-dark/style.min.css" /> 
             <div class="sidebar-header">
                 <span>Data masks</span>
             </div>
@@ -34,12 +34,14 @@ class NinoWorkspace extends HTMLElement {
         this.renderExamplesMenu();
         this.loadWorkspace();
     }
-
+ 
     getWorkspaceData() {
         return this._workspaceData;
     }
-    /**
-     * TODO: comment and document 
+
+   /**
+     * Renders the static examples menu in an accordion-style format.
+     * Each category can be expanded/collapsed to show its examples.
      */
     renderExamplesMenu() {
         const examplesContainer = this.shadowRoot.querySelector("#examples-container");
@@ -81,6 +83,9 @@ class NinoWorkspace extends HTMLElement {
         this.renderFileTree(jstreeData);
     }
 
+     /**
+     * Fetches workspace files from the backend API and transforms them into jstree-compatible data.
+     */
     async fetchWorkspaceFiles() {
         try {
             const response = await fetch('/api/files');
@@ -134,8 +139,8 @@ class NinoWorkspace extends HTMLElement {
                         }
                     } else if (typeof item === 'object' && item !== null) {
                         // It's a folder
-                        const folderName = Object.keys(item)[0]; // Get the folder name (the only key in the object)
-                        const folderContent = item[folderName]; // Get the array of its children
+                        const folderName = Object.keys(item)[0];  
+                        const folderContent = item[folderName];  
                         const newFolderId = `ws_folder_${idCounter++}`; // This is the jstree node ID
                         const newCurrentTreePath = `${currentTreePath}/${folderName}`; // This is the full path for jstree hierarchy
                         const newCurrentUrlPath = currentUrlPath ? `${currentUrlPath}/${folderName}` : folderName; // This is the path for the URL
@@ -143,7 +148,7 @@ class NinoWorkspace extends HTMLElement {
                             id: newFolderId,
                             parent: parentId,
                             text: folderName,
-                            icon: 'jstree-folder', // Added icon for folder
+                            icon: 'jstree-folder', 
                             state: { opened: true },
                             type: 'folder',
                             children: processNode(folderContent, newFolderId, newCurrentTreePath, newCurrentUrlPath) // Recursively call for children
@@ -164,8 +169,9 @@ class NinoWorkspace extends HTMLElement {
         }
     }
 
-    /**
-     * TODO: comment and document 
+ /**
+     * Renders the file tree using jstree.
+     * Sets up event listeners for node selection and double-click to open files.
      */
     renderFileTree(jstreeData) {
         const jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");

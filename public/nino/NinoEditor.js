@@ -1,8 +1,8 @@
 // c:\Users\benjamin.bertrand\ws\nino\public\nino\NinoEditor.js
- 
+
 import './NinoStats.js';
-import './NinoMonacoEditor.js'; // Import the new web component
-import { staticExamples, HELPER_LOAD_METADATA } from './NinoConstants.js'; // Import staticExamples and HELPER_LOAD_METADATA
+import './NinoMonacoEditor.js'; // Import the new web component // Import the new web component
+import { staticExamples, HELPER_LOAD_METADATA } from './NinoConstants.js'; // Import staticExamples and HELPER_LOAD_METADATA// Import staticExamples and HELPER_LOAD_METADATA
 class NinoEditor extends HTMLElement {
   constructor() {
     super();
@@ -10,7 +10,7 @@ class NinoEditor extends HTMLElement {
     this.jsyaml = null;
     this.editorInstances = {}; // To hold Monaco editor instances
     this.activeTab = 'yaml';
-    this.yamlEditorFileType = 'yaml'; // Default file type for YAML editor
+    this.yamlEditorFileType = 'yaml'; // Default file type for YAML editor // Default file type for YAML editor
 
     this._ninoExecution = null; // Reference to NinoExecution component
     const template = document.createElement('template');
@@ -22,7 +22,7 @@ class NinoEditor extends HTMLElement {
             <span id="download-graph-btn" class="download-btn">⤓</span>Transformation Plan 
           </button>
           <button class="tab-button" data-tab="execution">Execution Plan</button>
-          <button class="tab-button" data-tab="statstlTtslestts
+          <button class="tab-button" data-tab="stats">Statistics</button>
           <button class="tab-button active" data-tab="yaml">Examples</button>
        
         </div> 
@@ -37,7 +37,7 @@ class NinoEditor extends HTMLElement {
     this.yamlEditorContainer = this.shadowRoot.getElementById('yaml-editor-container');
     this.graphContainer = this.shadowRoot.getElementById('graph-view-container');
     this.transformationContainer = this.shadowRoot.getElementById('transformation-view-container');
-    this.statsViewContainerr = this.shadowRoot.getElementById('stats-view-container');
+    this.statsViewContainer = this.shadowRoot.getElementById('stats-view-container');
     this.downloadGraphBtn = this.shadowRoot.getElementById('download-graph-btn');
     this.tabHeader.addEventListener('click', this.handleTabClick.bind(this));
     this.downloadGraphBtn.addEventListener('click', this.handleDownloadGraph.bind(this));
@@ -97,7 +97,6 @@ class NinoEditor extends HTMLElement {
     if (this.editorInstances['yaml']) {
       this.editorInstances['yaml'].layout(); // Call layout on the web component
     }
-    // No layout needed for graph tab as it's not a Monaco editor
   }
 
   setYamlValue(value) {
@@ -133,7 +132,6 @@ class NinoEditor extends HTMLElement {
     const fileName = newActiveButton ? newActiveButton.dataset.fileName : this.yamlEditorFileType;
     const folderName = newActiveButton ? newActiveButton.dataset.folderName : '';
 
-    // Deactivate current active tab
     const currentActiveButton = this.shadowRoot.querySelector(`.tab-button.active`);
     const currentActiveContent = this.shadowRoot.querySelector(`.tab-content.active`);
     if (currentActiveButton) currentActiveButton.classList.remove('active');
@@ -149,7 +147,7 @@ class NinoEditor extends HTMLElement {
     // Dispatch event for external listeners (NinoApp.js)
     this.dispatchEvent(new CustomEvent('tab-activated', { // Keep for external listeners that might still rely on it
       detail: { tabId, fromClick, fileName, folderName },
-      bubbles: true,
+      bubbles: true, // Keep for external listeners that might still relyon it
       composed: true
     }));
 
@@ -168,7 +166,7 @@ class NinoEditor extends HTMLElement {
         // For the main YAML tab, ensure the editor is visible and potentially update its content
         // This is handled by openFile or initial setup, so no specific action here unless needed.
         break;
-      default: 
+      default:
         console.warn(`Unknown tabId: ${tabId}`);
     }
     this._handleTabActivated(fileName, folderName, tabId, fromClick);
@@ -176,7 +174,7 @@ class NinoEditor extends HTMLElement {
     this.layoutEditors();
   }
 
-  
+
   _handleTabActivated(fileName, folderName, tabId, fromClick) {
     if (!this._ninoExecution) return;
 
@@ -205,7 +203,7 @@ class NinoEditor extends HTMLElement {
   renderGraphTab(data) {
     // Clear previous graph content
     this.graphContainer.innerHTML = "";
-    const url = data 
+    const url = data
     // Render the generic nino-graphviz component
     const ninoGraphviz = document.createElement("nino-graphviz");
     ninoGraphviz.setAttribute("url", url);
@@ -213,12 +211,12 @@ class NinoEditor extends HTMLElement {
   }
 
   renderExecutionPlanTab(folderName) {
-   
+
     if (folderName) {
-        const execPlan = document.createElement('nino-graphviz');
-        // The 'folder-name' attribute is not directly used byoame}`);
-        this.transformationViewContainer.innerHTML = '';
-        this.transformationViewContainer.appendChild(execPlan);
+      const execPlan = document.createElement('nino-graphviz');
+      // The -nametly used byoame}`);
+      this.transformationViewContainer.innerHTML = '';
+      this.transformationViewContainer.appendChild(execPlan);
     }
   }
 
@@ -230,7 +228,6 @@ class NinoEditor extends HTMLElement {
       ninoStats.setAttribute('folder-name', folderName);
       this.statsViewContainerr.appendChild(ninoStats);
     }
-
 
   }
 
@@ -262,7 +259,7 @@ class NinoEditor extends HTMLElement {
     console.log('NinoEditor: openFile called with example:', example);
     const tabId = `file-tab-${example.id}`;
     let tabButton = this.shadowRoot.querySelector(`.tab-button[data-tab="${tabId}"]`);
-    let url =  example["data-url"];
+    let url = example["data-url"];
 
 
     if (!tabButton) {
@@ -273,7 +270,7 @@ class NinoEditor extends HTMLElement {
       tabButton.dataset.exampleId = example.id;
       tabButton.dataset.fileName = example["data-file-name"];
       tabButton.dataset.folderName = example["data-folder-name"];
-      tabButton.dataset.url =url;
+      tabButton.dataset.url = url;
       tabButton.innerHTML = `<span>${example["data-file-name"]}</span><span class="close-tab">&times;</span>`;
 
       const fileName = example["data-file-name"];
@@ -368,4 +365,3 @@ class NinoEditor extends HTMLElement {
 }
 
 customElements.define('nino-editor', NinoEditor);
-  
