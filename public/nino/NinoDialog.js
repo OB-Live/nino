@@ -51,14 +51,4 @@ class PopupInfo extends HTMLElement {
 
 // Define the new element
 customElements.define("popup-info", PopupInfo);
-  
-  
-  // <!-- Dialogs moved to the end of body for better DOM management by jQuery UI -->
-  // <div id="dialog" title="Column's data distribution" style="display:none;">
-  //   <p>Would you like to <a target="_blank" href="#" id="dialog-create-button">create a mask</a></p>
-  //   <img id="dialog-image" src="" alt="Image" style="width: 100%;" />
-  // </div>
-  // <div id="execution-dialog" title="Ansible playbook execution" style="display:none;">
-  //   <div id="execution-graph-container" style="width: 100%; height: 100%;"></div>
-  // </div>
-  
+

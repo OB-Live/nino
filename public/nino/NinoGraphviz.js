@@ -49,5 +49,4 @@ class NinoGraphviz extends HTMLElement {
     }
 }
 
-
 customElements.define('nino-graphviz', NinoGraphviz);

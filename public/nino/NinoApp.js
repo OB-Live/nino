@@ -1,18 +1,17 @@
-import { HELPER_LOAD_METADATA, staticExamples, MASK_KEYWORDS } from './NinoConstants.js';
+import { HELPER_LOAD_METADATA, staticExamples } from './NinoConstants.js';
 import './NinoEditor.js';
 import './NinoWorkspace.js';
 import './NinoExecution.js';
 import './NinoGraphviz.js';
 
-const $sidebar = $("nino-workspace");
-const $sidebarToggle = $("#sidebar-toggle");
-export const $ninoEditor = document.querySelector('nino-editor');
-export const $ninoExecution = document.querySelector('nino-execution');
-export const $ninoWorkspace = document.querySelector('nino-workspace');
+const sidebar = document.querySelector("nino-workspace");
+const sidebarToggle = document.querySelector("#sidebar-toggle");
+export const ninoEditor = document.querySelector('nino-editor');
+export const ninoExecution = document.querySelector('nino-execution');
+export const ninoWorkspace = document.querySelector('nino-workspace');
 
 
-// --- Event Handlers ---
-$sidebarToggle.on("click", toggleSidebar);
+
 
 document.addEventListener("DOMContentLoaded", initializeApp);
 
@@ -26,7 +25,7 @@ document.addEventListener("DOMContentLoaded", initializeApp);
 export function makeHorizontalResizable(handle, prevComponent, nextComponent) {
     let isResizing = false;
     $(handle).on("mousedown", () => (isResizing = true));
-    $(document).on("mouseup", () => {
+    document.on("mouseup", () => {
         if (isResizing) {
             // Access the internal panels via shadow DOM for the top-level split
             const prev = prevComponent.shadowRoot.getElementById('left-panel');
@@ -40,19 +39,19 @@ export function makeHorizontalResizable(handle, prevComponent, nextComponent) {
         }
         isResizing = false;
     });
-    $(document).on("mousemove", (e) => {
+    document.on("mousemove", (e) => {
         if (!isResizing) return;
 
         // Access the internal panels via shadow DOM for the top-level split
         const prev = prevComponent;
         const next = nextComponent;
 
-        const $container = $(handle).parent(); // The container of the panels
-        const rect = $container[0].getBoundingClientRect();
+        const container = $(handle).parent(); // The container of the panels
+        const rect = container[0].getBoundingClientRect();
         const newPrevWidth = e.clientX - rect.left;
         $(prev).width(newPrevWidth);
         $(next).width(rect.width - newPrevWidth - $(handle).width());
-        $ninoEditor.layoutEditors();
+        ninoEditor.layoutEditors();
 
     });
 }
@@ -61,18 +60,21 @@ async function initializeApp() {
     // Monaco initialization is now handled within NinoEditor.js and NinoExecution.js
     // Wait for both components to signal that Monaco is ready and editors are created.
     // NinoEditor now waits for its child components to be ready.
-    await new Promise(resolve => $ninoEditor.addEventListener('monaco-ready', resolve, { once: true }));
-    await new Promise(resolve => $ninoExecution.addEventListener('monaco-ready', resolve, { once: true }));
+    await new Promise(resolve => ninoEditor.addEventListener('monaco-ready', resolve, { once: true }));
+    await new Promise(resolve => ninoExecution.addEventListener('monaco-ready', resolve, { once: true }));
 
     await restoreUiState();
 
-    makeHorizontalResizable($("#resize-handle-h"), $ninoEditor, $ninoExecution);
+    makeHorizontalResizable($("#resize-handle-h"), ninoEditor, ninoExecution);
     window.openExecutionGraph = openExecutionGraph;
     // The makeResizable call for the vertical split within NinoExecution is handled internally by NinoExecution.js
     document.body.addEventListener('nino-graph-click', handleGraphClick);
 
+    // --- Event Handlers ---
+    sidebarToggle.on("click", toggleSidebar);
+
     window.openTableStat = openTableStat;
-     
+
 }
 
 /**
@@ -85,7 +87,7 @@ async function initializeApp() {
  * @param {string} tableName - The name of the table to display statistics for.
  * @param {string} folderName - The name of the folder where the table definition resides.
  */
-function openTableStat(tableName, folderName) {    $ninoEditor.activateTab('stats', false, { tableName: tableName, folderName: folderName });}
+function openTableStat(tableName, folderName) { ninoEditor.activateTab('stats', false, { tableName: tableName, folderName: folderName }); }
 
 /**
  * openExecutionGraph
@@ -96,16 +98,20 @@ function openTableStat(tableName, folderName) {    $ninoEditor.activateTab('stat
 function openExecutionGraph(folderName) {
     // Find the first folder with a playbook.yaml if folderName is not provided
     if (!folderName) {
-        const workspaceData = $ninoWorkspace.getWorkspaceData();
+        const workspaceData = ninoWorkspace.getWorkspaceData();
         const firstPlaybookFolder = findFirstPlaybookFolder(workspaceData);
         if (firstPlaybookFolder) {
             folderName = firstPlaybookFolder;
         }
     }
 
-    $ninoEditor.activateTab('graph', false, { folderName: folderName });
+    ninoEditor.activateTab('graph', false, { folderName: folderName });
 }
 
+/**
+ * handleGraphClick - Handles clicks on the graph output, allowing users to click on nodes to see table stats or execution details.
+ * @param {*} event 
+ */
 function handleGraphClick(event) {
     const { functionName, args } = event.detail;
     if (functionName === 'openTableStat') {
@@ -123,22 +129,22 @@ function handleGraphClick(event) {
  * and adjusts the width of the left panel to compensate for the sidebar's change in width.
  */
 function toggleSidebar() {
-    const isCollapsed = $ninoWorkspace.toggleCollapse();
+    const isCollapsed = ninoWorkspace.toggleCollapse();
     localStorage.setItem("nino-sidebar-collapsed", isCollapsed);
 
     // Adjust left panel width to keep right panel width constant
-    const $leftPanel = $("#left-panel");
-    const sidebarWidth = parseFloat(getComputedStyle($ninoWorkspace).getPropertyValue('--sidebar-width'));
-    const currentLeftWidth = $leftPanel.width();
+    const leftPanel = $("#left-panel");
+    const sidebarWidth = parseFloat(getComputedStyle(ninoWorkspace).getPropertyValue('--sidebar-width'));
+    const currentLeftWidth = leftPanel.width();
 
     if (isCollapsed) {
-        $leftPanel.width(currentLeftWidth + sidebarWidth);
+        leftPanel.width(currentLeftWidth + sidebarWidth);
     } else {
-        $leftPanel.width(currentLeftWidth - sidebarWidth);
+        leftPanel.width(currentLeftWidth - sidebarWidth);
     }
-    $ninoEditor.layoutEditors();
+    ninoEditor.layoutEditors();
 }
- 
+
 
 /**
  * Handles the click event for the execute button.
@@ -146,10 +152,10 @@ function toggleSidebar() {
  * and displays the result in the output editor.
  */
 async function handleExecute(yamlValue, jsonValue) {
-    const executeBtn = $ninoExecution.shadowRoot.getElementById('execute-btn');
+    const executeBtn = ninoExecution.shadowRoot.getElementById('execute-btn');
     executeBtn.textContent = "Executing...";
     executeBtn.disabled = true;
-    $ninoExecution.setOutputEditorValue("");
+    ninoExecution.setOutputEditorValue("");
 
     try {
         const response = await fetch("/api/pimo/exec", {
@@ -163,13 +169,13 @@ async function handleExecute(yamlValue, jsonValue) {
 
         if (!response.ok) {
             const errorText = await response.text();
-            $ninoExecution.setOutputEditorValue(JSON.stringify({ error: `Command execution failed: ${errorText}` }, null, 2));
+            ninoExecution.setOutputEditorValue(JSON.stringify({ error: `Command execution failed: ${errorText}` }, null, 2));
         } else {
             const resultJson = await response.json();
-            $ninoExecution.setOutputEditorValue(JSON.stringify(resultJson, null, 2));
+            ninoExecution.setOutputEditorValue(JSON.stringify(resultJson, null, 2));
         }
     } catch (error) {
-        $ninoExecution.setOutputEditorValue(
+        ninoExecution.setOutputEditorValue(
             JSON.stringify({ error: "API request failed" }, null, 2)
         );
     } finally {
@@ -177,33 +183,15 @@ async function handleExecute(yamlValue, jsonValue) {
         executeBtn.disabled = false;
     }
 }
- 
 
-async function handlePlay(example) {
-    $ninoExecution.setOutputEditorValue("Executing...");
-    $ninoExecution.activateOutputTab(); // Assuming NinoExecution has a method to activate its output tab
 
-    let url = '';
-    if (example.name.includes('playbook')) {
-        url = `/api/exec/playbook/${example.description}/${example.name}`;
-    } else if (example.name.includes('dataconnector')) {
-        url = `/api/exec/pull/${example.description}/${example.name}`;
-    }
-    if (!url) return;
-
-    try {
-        const response = await fetch(url, {
-            method: 'POST',
-            headers: { 'Content-Type': 'text/plain' },
-            body: $ninoExecution.getInputEditorValue()
-        });
-        const text = await response.text();
-        $ninoExecution.setOutputEditorValue(text);
-    } catch (error) {
-        $ninoExecution.setOutputEditorValue(`Error: ${error.message}`);
-    }
-}
-
+/**
+ * handleFileAction - Handles file actions such as "play" for playbooks and dataconnector files.
+ * It constructs the appropriate API endpoint based on the file type and sends a POST request with the input editor content.
+ * The response is then displayed in the output editor.
+ * @param {*} event 
+ * @returns 
+ */
 async function handleFileAction(event) {
     const { action, example } = event.detail;
     if (action === 'play') {
@@ -219,21 +207,24 @@ async function handleFileAction(event) {
             const response = await fetch(url, {
                 method: 'POST',
                 headers: { 'Content-Type': 'text/plain' },
-                body: $ninoExecution.getInputEditorValue()
+                body: ninoExecution.getInputEditorValue()
             });
             const text = await response.text();
-            $ninoExecution.setOutputEditorValue(text);
+            ninoExecution.setOutputEditorValue(text);
         } catch (error) {
-            $ninoExecution.setOutputEditorValue(`Error: ${error.message}`);
+            ninoExecution.setOutputEditorValue(`Error: ${error.message}`);
         }
     }
 }
 
+/**
+ * Restores the UI state from localStorage, including sidebar state, open tabs, active tab, and panel sizes.
+ */
 export async function restoreUiState() {
     // Restore sidebar state
     const isSidebarCollapsed = localStorage.getItem("nino-sidebar-collapsed") === "true";
     if (isSidebarCollapsed) {
-        $sidebar.addClass("collapsed");
+        sidebar.addClass("collapsed");
     }
     const savedTabs = localStorage.getItem("nino-open-tabs");
     if (savedTabs) {
@@ -247,31 +238,31 @@ export async function restoreUiState() {
 
     // Restore the active tab
     const activeTabId = localStorage.getItem("nino-active-tab");
-    let tabToActivate = $ninoEditor.shadowRoot.querySelector(`.tab-button[data-tab="${activeTabId}"]`);
+    let tabToActivate = ninoEditor.shadowRoot.querySelector(`.tab-button[data-tab="${activeTabId}"]`);
     if (!tabToActivate) {
         // Fallback to the default YAML tab if the saved one doesn't exist
-        tabToActivate = $ninoEditor.shadowRoot.querySelector('.tab-button[data-tab="yaml"]');
+        tabToActivate = ninoEditor.shadowRoot.querySelector('.tab-button[data-tab="yaml"]');
     }
-    $ninoEditor.activateTab(tabToActivate);
+    ninoEditor.activateTab(tabToActivate);
 
     // Restore panel sizes
     const hPrevWidth = localStorage.getItem("nino-panel-h-prev");
     const hNextWidth = localStorage.getItem("nino-panel-h-next");
     if (hPrevWidth && hNextWidth) {
         // Access the custom elements directly
-        $($ninoEditor).width(parseFloat(hPrevWidth));
-        $($ninoExecution).width(parseFloat(hNextWidth));
+        $(ninoEditor).width(parseFloat(hPrevWidth));
+        $(ninoExecution).width(parseFloat(hNextWidth));
     } else {
         // Set initial 60/40 split if no saved state
         const mainContainerWidth = $(".main-container").width();
-        const sidebarWidth = parseFloat(getComputedStyle($ninoWorkspace).getPropertyValue('--sidebar-width'));
+        const sidebarWidth = parseFloat(getComputedStyle(ninoWorkspace).getPropertyValue('--sidebar-width'));
         const resizeHandleWidth = $("#resize-handle-h").width();
         const availableWidth = mainContainerWidth - sidebarWidth - resizeHandleWidth;
-        $($ninoEditor).width(availableWidth * 0.6);
-        $($ninoExecution).width(availableWidth * 0.4);
+        $(ninoEditor).width(availableWidth * 0.6);
+        $(ninoExecution).width(availableWidth * 0.4);
     }
 
-    $ninoEditor.layoutEditors();
+    ninoEditor.layoutEditors();
 }
 
 /**
@@ -280,8 +271,7 @@ export async function restoreUiState() {
  * @param {Object} example - The example object containing file information (id, name, description, url).
  */
 async function openWorkspaceFileInNewTab(example) {
-    await $ninoEditor.openFile(example);
- 
+    await ninoEditor.openFile(example);
 }
 
 /**
@@ -290,55 +280,65 @@ async function openWorkspaceFileInNewTab(example) {
  */
 async function handleSelectExample(example) {
     // Switch to the main YAML tab in NinoEditor
-    $ninoEditor.activateTab('yaml');
+    ninoEditor.activateTab('yaml');
 
     // Track the file type being loaded into the main editor
     const fileName = (example.url && example.url.includes('/')) ? example.url.split('/').pop() : 'masking.yaml';
-    $ninoEditor.setYamlEditorFileType(fileName);
+    ninoEditor.setYamlEditorFileType(fileName);
 
     if (example.yaml !== undefined) {
-        $ninoEditor.setYamlValue(example.yaml);
+        ninoEditor.setYamlValue(example.yaml);
     } else if (example.url) {
         await fetch(example.url)
             .then(res => res.text())
-            .then(text => $ninoEditor.setYamlValue(text))
-            .catch(err => $ninoEditor.setYamlValue(`# Failed to load: ${example.url}`));
+            .then(text => ninoEditor.setYamlValue(text))
+            .catch(err => ninoEditor.setYamlValue(`# Failed to load: ${example.url}`));
     }
-    $ninoExecution.setInputEditorValue(example.input);
-    $ninoExecution.setOutputEditorValue("");
+    ninoExecution.setInputEditorValue(example.input);
+    ninoExecution.setOutputEditorValue("");
 }
 
-$ninoExecution.addEventListener('execute-nino', async (event) => {
-    const yamlValue = $ninoEditor.getYamlValue();
-    const jsonValue = $ninoExecution.getInputEditorValue();
+/**
+ * handleExecution - Handles the execution of the current YAML and input content.
+ * @param {*} event 
+ */
+async function handleExecution(event) {
+    const yamlValue = ninoEditor.getYamlValue();
+    const jsonValue = ninoExecution.getInputEditorValue();
     await handleExecute(yamlValue, jsonValue);
-});
+}
 
-$ninoEditor.addEventListener('tab-activated', (event) => {
+/**
+ * handleTabActivation - Handles the activation of different tabs in the editor.
+ * @param {*} event 
+ */
+function handleTabActivation(event) {
     const { tabId, fromClick, fileName, folderName } = event.detail;
- 
+
 
     if (tabId === 'graph') {
-        $ninoExecution.setOutputEditorValue('');
+        ninoExecution.setOutputEditorValue('');
     } else {
-        $ninoExecution.restoreInputOutputEditors();
+        ninoExecution.restoreInputOutputEditors();
     }
 
     if (fileName && fileName.includes('dataconnector.yaml')) {
-        $ninoExecution.setInputEditorLanguage('shell');
-        $ninoExecution.setInputEditorValue(HELPER_LOAD_METADATA(folderName));
+        ninoExecution.setInputEditorLanguage('shell');
+        ninoExecution.setInputEditorValue(HELPER_LOAD_METADATA(folderName));
     } else if (fileName && fileName.includes('playbook.yaml')) {
-        $ninoExecution.setInputEditorLanguage('shell');
-        $ninoExecution.setInputEditorValue(`ansible-playbook ${folderName}/${fileName} --connection=local`);
+        ninoExecution.setInputEditorLanguage('shell');
+        ninoExecution.setInputEditorValue(`ansible-playbook ${folderName}/${fileName} --connection=local`);
     } else if (tabId === 'yaml') {
-        $ninoExecution.setInputEditorLanguage('json');
+        ninoExecution.setInputEditorLanguage('json');
         if (!fromClick) {
             const activeExampleId = localStorage.getItem('nino-active-example-id');
             const example = staticExamples.flatMap(c => c.examples).find(e => e.id === activeExampleId);
-            $ninoExecution.setInputEditorValue(example?.input || '{}');
+            ninoExecution.setInputEditorValue(example?.input || '{}');
         }
     }
-});
+}
+
+
 
 /**
  * Recursively searches for the first folder containing a 'playbook.yaml' file.
@@ -358,8 +358,11 @@ function findFirstPlaybookFolder(items) {
     return null;
 }
 
-$ninoEditor.addEventListener('file-action', handleFileAction); 
+ninoExecution.addEventListener('execute-nino', (e) => handleExecution(e));
 
-$ninoWorkspace.addEventListener('select-example', (e) => handleSelectExample(e.detail));
-$ninoWorkspace.addEventListener('select-file', (e) => handleSelectExample(e.detail.node.li_attr));
-$ninoWorkspace.addEventListener('open-file', (e) => openWorkspaceFileInNewTab(e.detail.node.li_attr));
+ninoEditor.addEventListener('tab-activated', (e) => handleTabActivation(e));
+ninoEditor.addEventListener('file-action', handleFileAction);
+
+ninoWorkspace.addEventListener('select-example', (e) => handleSelectExample(e.detail));
+ninoWorkspace.addEventListener('select-file', (e) => handleSelectExample(e.detail.node.li_attr));
+ninoWorkspace.addEventListener('open-file', (e) => openWorkspaceFileInNewTab(e.detail.node.li_attr));

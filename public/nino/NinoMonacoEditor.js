@@ -31,7 +31,7 @@ class NinoMonacoEditor extends HTMLElement {
             <div id="editor-container"></div>
         `;
         this.shadowRoot.appendChild(template.content.cloneNode(true));
-        this.$editorContainer = this.shadowRoot.getElementById('editor-container');
+        this.editorContainer = this.shadowRoot.getElementById('editor-container');
     }
 
     connectedCallback() {
@@ -86,7 +86,7 @@ class NinoMonacoEditor extends HTMLElement {
         const language = this.getAttribute('language') || 'plaintext';
         const value = this.getAttribute('value') || '';
 
-        this.editorInstance = this.monaco.editor.create(this.$editorContainer, {
+        this.editorInstance = this.monaco.editor.create(this.editorContainer, {
             value: value,
             language: language,
             lineNumbers: "on",

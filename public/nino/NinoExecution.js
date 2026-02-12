@@ -29,11 +29,11 @@ class NinoExecution extends HTMLElement {
 
         this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-        this.$inputEditorContainer = this.shadowRoot.getElementById('input-editor-container');
-        this.$outputEditorContainer = this.shadowRoot.getElementById('output-viewer-container');
-        this.$executeBtn = this.shadowRoot.getElementById('execute-btn');
+        this.inputEditorContainer = this.shadowRoot.getElementById('input-editor-container');
+        this.outputEditorContainer = this.shadowRoot.getElementById('output-viewer-container');
+        this.executeBtn = this.shadowRoot.getElementById('execute-btn');
 
-        this.$executeBtn.addEventListener('click', () => {
+        this.executeBtn.addEventListener('click', () => {
             this.dispatchEvent(new CustomEvent('execute-nino', {
                 detail: {
                     yaml: this.editorInstances.yaml ? this.editorInstances.yaml.getValue() : '', // Assuming yaml editor is external or passed
@@ -72,7 +72,7 @@ class NinoExecution extends HTMLElement {
         inputEditor.setAttribute('language', 'json');
         inputEditor.setAttribute('value', '');
         inputEditor.setAttribute('id', 'input');
-        this.$inputEditorContainer.appendChild(inputEditor);
+        this.inputEditorContainer.appendChild(inputEditor);
         this.editorInstances["input"] = inputEditor;
  
         const outputEditor = document.createElement('nino-monaco-editor');
@@ -80,7 +80,7 @@ class NinoExecution extends HTMLElement {
         outputEditor.setAttribute('value', '');
         inputEditor.setAttribute('id', 'output');
         outputEditor.setAttribute('read-only', 'true'); // Set read-only attribute
-        this.$outputEditorContainer.appendChild(outputEditor);
+        this.outputEditorContainer.appendChild(outputEditor);
         this.editorInstances["output"] = outputEditor;
         outputEditor.addEventListener('monaco-editor-ready', this.handleChildEditorReady.bind(this));
     }
@@ -118,15 +118,15 @@ class NinoExecution extends HTMLElement {
         // If the output editor is hidden by other tabs in NinoEditor, NinoEditor should handle activating the correct tab.
     }
     // The output-viewer-container is now exclusively for the Monaco output editor.
-    clearOutputViewerContainer() { this.$outputEditorContainer.innerHTML = ''; }
+    clearOutputViewerContainer() { this.outputEditorContainer.innerHTML = ''; }
     restoreInputOutputEditors() {
         // With web components, they manage their own DOM.
         // We just need to ensure they are laid out correctly if their container size changes.
         // The web components should already be in the DOM if they were created.
-        if (!this.$inputEditorContainer.querySelector('nino-monaco-editor')) {
+        if (!this.inputEditorContainer.querySelector('nino-monaco-editor')) {
             this.createEditors(); // Recreate if somehow removed
         }
-        if (!this.$outputEditorContainer.querySelector('nino-monaco-editor')) {
+        if (!this.outputEditorContainer.querySelector('nino-monaco-editor')) {
             this.createEditors(); // Recreate if somehow removed
         }
         this.editorInstances.input.layout();

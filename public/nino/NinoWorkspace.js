@@ -1,4 +1,5 @@
 import { staticExamples } from './NinoConstants.js';
+import * as  jstree from 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js';
 
 class NinoWorkspace extends HTMLElement {
     constructor() {
@@ -15,8 +16,8 @@ class NinoWorkspace extends HTMLElement {
                 <div id="jstree-workspace" class="jstree-default-dark"></div>
             </div>
         `;
-    }
-
+        }
+       
     toggleCollapse() {
         this.classList.toggle('collapsed');
         return this.classList.contains('collapsed');
@@ -34,15 +35,15 @@ class NinoWorkspace extends HTMLElement {
         this.renderExamplesMenu();
         this.loadWorkspace();
     }
- 
+
     getWorkspaceData() {
         return this._workspaceData;
     }
 
-   /**
-     * Renders the static examples menu in an accordion-style format.
-     * Each category can be expanded/collapsed to show its examples.
-     */
+    /**
+      * Renders the static examples menu in an accordion-style format.
+      * Each category can be expanded/collapsed to show its examples.
+      */
     renderExamplesMenu() {
         const examplesContainer = this.shadowRoot.querySelector("#examples-container");
         staticExamples.forEach(category => {
@@ -83,19 +84,19 @@ class NinoWorkspace extends HTMLElement {
         this.renderFileTree(jstreeData);
     }
 
-     /**
-     * Fetches workspace files from the backend API and transforms them into jstree-compatible data.
-     */
+    /**
+    * Fetches workspace files from the backend API and transforms them into jstree-compatible data.
+    */
     async fetchWorkspaceFiles() {
         try {
             const response = await fetch('/api/files');
             if (!response.ok) return [];
             const files = await response.json();
             console.log(files);
- 
+
             const jstreeData = [];
             let idCounter = 1;
- 
+
             // Create a root node for "Workspace" 
             const workspaceRootNode = {
                 id: `ws_root`,
@@ -104,7 +105,7 @@ class NinoWorkspace extends HTMLElement {
                 state: { opened: true },
                 type: 'folder'
             };
- 
+
             jstreeData.push(workspaceRootNode);
             /**
              * Recursively processes a node (folder or file) from the input data
@@ -139,8 +140,8 @@ class NinoWorkspace extends HTMLElement {
                         }
                     } else if (typeof item === 'object' && item !== null) {
                         // It's a folder
-                        const folderName = Object.keys(item)[0];  
-                        const folderContent = item[folderName];  
+                        const folderName = Object.keys(item)[0];
+                        const folderContent = item[folderName];
                         const newFolderId = `ws_folder_${idCounter++}`; // This is the jstree node ID
                         const newCurrentTreePath = `${currentTreePath}/${folderName}`; // This is the full path for jstree hierarchy
                         const newCurrentUrlPath = currentUrlPath ? `${currentUrlPath}/${folderName}` : folderName; // This is the path for the URL
@@ -148,7 +149,7 @@ class NinoWorkspace extends HTMLElement {
                             id: newFolderId,
                             parent: parentId,
                             text: folderName,
-                            icon: 'jstree-folder', 
+                            icon: 'jstree-folder',
                             state: { opened: true },
                             type: 'folder',
                             children: processNode(folderContent, newFolderId, newCurrentTreePath, newCurrentUrlPath) // Recursively call for children
@@ -156,7 +157,7 @@ class NinoWorkspace extends HTMLElement {
                     }
                 }
             };
- 
+
             // Assuming the top-level 'files' object contains a 'Workspace' key with an array of items
             if (files.Workspace && Array.isArray(files.Workspace)) {
                 workspaceRootNode.children = processNode(files.Workspace, 'ws_root', 'Workspace', '');
@@ -169,10 +170,10 @@ class NinoWorkspace extends HTMLElement {
         }
     }
 
- /**
-     * Renders the file tree using jstree.
-     * Sets up event listeners for node selection and double-click to open files.
-     */
+    /**
+        * Renders the file tree using jstree.
+        * Sets up event listeners for node selection and double-click to open files.
+        */
     renderFileTree(jstreeData) {
         const jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
         $(jstreeDiv)
