@@ -1,22 +1,64 @@
 :root {
-  --background: #2f2b0e;
-  /* hsl(80, 10%, 12%) */
-  --foreground: #f0f2f0;
-  /* hsl(80, 10%, 95%) */
-  --card: #2e452e;
-  /* hsl(80, 10%, 15%) */
-  --primary: #858c5e;
-  /* hsl(80, 35%, 45%) */
-  --primary-foreground: #f8faf8;
-  /* hsl(80, 20%, 98%) */
-  --muted: #233b23;
-  /* hsl(80, 10%, 22%) */
-  --muted-foreground: #a2a8a2;
-  /* hsl(80, 10%, 65%) */
-  --accent: #a1a677;
-  /* hsl(75, 40%, 55%) */
-  --border: #3b4239;
-  /* hsl(80, 15%, 25%) */
+  /* 🌿 Olive Tree Palette */
+   /* 🌿 Olive Leaves */
+  --pale-silver-leaf: #bac6b0;
+  --sunlit-olive-leaf: #a4b28c;
+  --classic-olive-green: #808c52;
+  --muted-sage-olive: #788660;
+  --deep-leaf-shadow: #485c36;
+  --blue-tinted-olive-shade: #586852;
+
+  /* 🫒 Olives (Fruit) */
+  --fresh-green-olive: #8e9e42;
+  --yellow-green-olive: #a6ac4e;
+  --maturing-olive: #6e603a;
+  --bruised-olive-brown: #5c4830;
+  --deep-purple-olive: #3a2c34;
+  --ripe-black-olive: #22261e;
+
+  /* 🌳 Trunk & Bark */
+  --weathered-bark-light: #948a7a;
+  --olive-bark-midtone: #706656;
+  --dark-bark-crevice: #463e32;
+
+  /* 🌞 Mediterranean Environment */
+  --dry-olive-soil: #b0966c;
+  --sun-baked-earth: #9c7848;
+  --dusty-stone-gray: #848676;
+
+
+  /* --background: var(--ripe-black-olive); 
+  --foreground: var(--pale-silver-leaf); 
+  --card: var(--sun-baked-earth); 
+  --primary: var(--classic-olive-green); 
+  --primary-foreground: var(--sunlit-olive-leaf); 
+  --muted: var(--muted-sage-olive); 
+  --muted-foreground: var(--weathered-bark-light); 
+  --accent: var(--maturing-olive); 
+  --border: var(--dusty-stone-gray );  */
+
+
+ /* Base */
+  --background: #f3f1e6;            /* sun-washed field light */
+  --foreground: #2f3a24;            /* deep olive shadow text */
+
+  /* Surfaces */
+  --card: #e7e3cf;                  /* dry soil + dust mix */
+
+  /* Primary (olive canopy) */
+  --primary: #6e7f3f;               /* classic olive green */
+  --primary-foreground: #f6f7f2;    /* light leaf highlight */
+
+  /* Muted (stone + bark undertones) */
+  --muted: #cfcab4;                 /* dusty stone */
+  --muted-foreground: #6a7158;      /* muted leaf gray-green */
+
+  /* Accent (sunlit olive fruit) */
+  --accent: #a6ac4e;                /* yellow-green olive */
+
+  /* Structural */
+  --border: #b8b39d;      
+
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 0px;
 }
@@ -261,7 +303,22 @@ nino-workspace {
 
 .tab-content.active {
   display: flex;
-  /* Use flex to allow content to fill space */
+  gap: 5px;
+  flex-direction: column;
+}
+
+a{
+  color: var(--accent);
+  text-decoration: none;
+  background-color: var(--card); 
+}
+a:hover{
+  color: var(--primary-foreground);
+}
+
+p { 
+  background-color: var(--card);
+  padding: 3px;
 }
 
 .execute-btn {
@@ -338,13 +395,23 @@ iframe {
   max-height: fit-content;
 }
 
-
-nino-editor {
-  flex: 60 1 0%;
+.jstree-default-dark>.jstree-no-dots .jstree-leaf>.jstree-ocl {
+  background: unset;
 }
 
-nino-execution {
-  flex: 40 1 0%;
+
+
+
+nino-editor, #editor-panel {
+  min-width: 20vw !important; 
+
+  /* width: stretch; */
+}
+
+nino-execution, #execution-panel{
+  /* flex: 1; */
+  min-width: 20vw !important;
+
 }
 
 #execution-panel {
@@ -357,14 +424,16 @@ nino-execution {
   border-bottom: 1px solid var(--border);
   flex-wrap: wrap;
   padding: 2px;
+  gap: 2px;
   background-color: var(--card);
 }
 
 .tab-button {
-  font-size: large;
+  font-size: medium;
   background-color: 1px solid var(--primary);
   padding: 3px 5px;
   color: var(--foreground);
+  border-radius: 2px 12px 2px 2px;
   cursor: pointer;
   display: flex;
   align-items: center;
@@ -379,6 +448,7 @@ nino-execution {
   color: var(--foreground);
   border-bottom: 2px solid var(--accent);
   background-color: var(--primary);
+  font-size: large;
 }
 
 .editor-wrapper {
@@ -488,8 +558,18 @@ nino-execution {
 
   border: 4px solid var(--card);
   flex: 1;
+  scrollbar-width: none;
   overflow: scroll;
   /* Ensure it takes up available space */
+}
+
+#lino-analyse,
+#stats-container img,
+nino-graphviz,
+#graph-container svg {
+  width: 100%;
+  box-sizing: border-box;
+  /* Ensures padding and border are included in the width */
 }
 
 #stats-container {

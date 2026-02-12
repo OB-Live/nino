@@ -10,49 +10,43 @@ export const ninoEditor = document.querySelector('nino-editor');
 export const ninoExecution = document.querySelector('nino-execution');
 export const ninoWorkspace = document.querySelector('nino-workspace');
 
-
-
+window.openTableStat = openTableStat;
+window.openExecutionGraph = openExecutionGraph;
+$(sidebarToggle).on("click", toggleSidebar);
+makeHorizontalResizable();
 
 document.addEventListener("DOMContentLoaded", initializeApp);
 
 /**
- * Makes an element resizable by dragging a handle.
- * @param {HTMLElement} handle - The handle element to drag.
- * @param {HTMLElement} prev - The element to resize before the handle.
- * @param {HTMLElement} next - The element to resize after the handle.
- * @param {'horizontal'|'vertical'} direction - The direction of resizing.
+ * Makes the right panel, execution-panel resizable  
  */
-export function makeHorizontalResizable(handle, prevComponent, nextComponent) {
-    let isResizing = false;
-    $(handle).on("mousedown", () => (isResizing = true));
-    document.on("mouseup", () => {
-        if (isResizing) {
-            // Access the internal panels via shadow DOM for the top-level split
-            const prev = prevComponent.shadowRoot.getElementById('left-panel');
-            const next = nextComponent.shadowRoot.getElementById('right-panel');
-
-
-            // This branch is for internal vertical split, not used here directly for top-level
-            localStorage.setItem("nino-panel-v-prev", $(prev).css('height'));
-            localStorage.setItem("nino-panel-v-next", $(next).css('height'));
-
-        }
-        isResizing = false;
-    });
-    document.on("mousemove", (e) => {
-        if (!isResizing) return;
-
-        // Access the internal panels via shadow DOM for the top-level split
-        const prev = prevComponent;
-        const next = nextComponent;
-
-        const container = $(handle).parent(); // The container of the panels
+function makeHorizontalResizable() {
+    let handle = $("#resize-handle-h")
+    $(handle).on("mousedown", (e) => {
+        console.log("mousedown", e);
+        e.preventDefault();
+        const container = $(handle).parent();
         const rect = container[0].getBoundingClientRect();
-        const newPrevWidth = e.clientX - rect.left;
-        $(prev).width(newPrevWidth);
-        $(next).width(rect.width - newPrevWidth - $(handle).width());
-        ninoEditor.layoutEditors();
+        console.log("mousedown", rect);
+        const onMouseMove = (moveEvent) => {
+            const sidebarWidth = $(ninoWorkspace).outerWidth();
+            const handleWidth = $(handle).outerWidth();
 
+            const newNextWidth = rect.right - moveEvent.clientX;
+            $(ninoExecution).css('flex', `0 0 ${newNextWidth}px`);
+
+            const newPrevWidth = moveEvent.clientX - rect.left - sidebarWidth - handleWidth;
+            $(ninoEditor).css('flex', `1 1 ${newPrevWidth}px`);
+            ninoExecution.layoutEditors();
+        };
+
+        const onMouseUp = () => {
+            $(document).off("mousemove", onMouseMove);
+            $(document).off("mouseup", onMouseUp);
+        };
+
+        $(document).on("mousemove", onMouseMove);
+        $(document).on("mouseup", onMouseUp);
     });
 }
 
@@ -62,20 +56,8 @@ async function initializeApp() {
     // NinoEditor now waits for its child components to be ready.
     await new Promise(resolve => ninoEditor.addEventListener('monaco-ready', resolve, { once: true }));
     await new Promise(resolve => ninoExecution.addEventListener('monaco-ready', resolve, { once: true }));
-
-    await restoreUiState();
-
-    makeHorizontalResizable($("#resize-handle-h"), ninoEditor, ninoExecution);
-    window.openExecutionGraph = openExecutionGraph;
-    // The makeResizable call for the vertical split within NinoExecution is handled internally by NinoExecution.js
-    document.body.addEventListener('nino-graph-click', handleGraphClick);
-
-    // --- Event Handlers ---
-    sidebarToggle.on("click", toggleSidebar);
-
-    window.openTableStat = openTableStat;
-
 }
+
 
 /**
  * openTableStat
@@ -87,7 +69,12 @@ async function initializeApp() {
  * @param {string} tableName - The name of the table to display statistics for.
  * @param {string} folderName - The name of the folder where the table definition resides.
  */
-function openTableStat(tableName, folderName) { ninoEditor.activateTab('stats', false, { tableName: tableName, folderName: folderName }); }
+function openTableStat(tableName, folderName) {
+    ninoEditor.activateTab('stats', false, {
+        tableName: tableName,
+        folderName: folderName
+    });
+}
 
 /**
  * openExecutionGraph
@@ -96,6 +83,8 @@ function openTableStat(tableName, folderName) { ninoEditor.activateTab('stats', 
  * @param {string} folderName - The name of the folder where the YAML definition resides.
  */
 function openExecutionGraph(folderName) {
+    console.log("openExecutionGraph", folderName);
+
     // Find the first folder with a playbook.yaml if folderName is not provided
     if (!folderName) {
         const workspaceData = ninoWorkspace.getWorkspaceData();
@@ -105,23 +94,23 @@ function openExecutionGraph(folderName) {
         }
     }
 
-    ninoEditor.activateTab('graph', false, { folderName: folderName });
+    ninoEditor.activateTab('execution', false, { folderName: folderName });
 }
 
-/**
- * handleGraphClick - Handles clicks on the graph output, allowing users to click on nodes to see table stats or execution details.
- * @param {*} event 
- */
-function handleGraphClick(event) {
-    const { functionName, args } = event.detail;
-    if (functionName === 'openTableStat') {
-        const [tableName, folderName] = args;
-        openTableStat(tableName, folderName);
-    } else if (functionName === 'openExecutionGraph') {
-        const [folderName] = args;
-        openExecutionGraph(folderName);
-    }
-}
+// /**
+//  * handleGraphClick - Handles clicks on the graph output, allowing users to click on nodes to see table stats or execution details.
+//  * @param {*} event 
+//  */
+// function handleGraphClick(event) {
+//     const { functionName, args } = event.detail;
+//     if (functionName === 'openTableStat') {
+//         const [tableName, folderName] = args;
+//         openTableStat(tableName, folderName);
+//     } else if (functionName === 'openExecutionGraph') {
+//         const [folderName] = args;
+//         openExecutionGraph(folderName);
+//     }
+// }
 
 /**
  * Toggles the collapsed state of the sidebar.
@@ -133,14 +122,14 @@ function toggleSidebar() {
     localStorage.setItem("nino-sidebar-collapsed", isCollapsed);
 
     // Adjust left panel width to keep right panel width constant
-    const leftPanel = $("#left-panel");
+    const editorPanel = $(ninoEditor);
     const sidebarWidth = parseFloat(getComputedStyle(ninoWorkspace).getPropertyValue('--sidebar-width'));
-    const currentLeftWidth = leftPanel.width();
+    const currentLeftWidth = editorPanel.width();
 
     if (isCollapsed) {
-        leftPanel.width(currentLeftWidth + sidebarWidth);
+        editorPanel.width(currentLeftWidth + sidebarWidth);
     } else {
-        leftPanel.width(currentLeftWidth - sidebarWidth);
+        editorPanel.width(currentLeftWidth - sidebarWidth);
     }
     ninoEditor.layoutEditors();
 }
@@ -215,54 +204,6 @@ async function handleFileAction(event) {
             ninoExecution.setOutputEditorValue(`Error: ${error.message}`);
         }
     }
-}
-
-/**
- * Restores the UI state from localStorage, including sidebar state, open tabs, active tab, and panel sizes.
- */
-export async function restoreUiState() {
-    // Restore sidebar state
-    const isSidebarCollapsed = localStorage.getItem("nino-sidebar-collapsed") === "true";
-    if (isSidebarCollapsed) {
-        sidebar.addClass("collapsed");
-    }
-    const savedTabs = localStorage.getItem("nino-open-tabs");
-    if (savedTabs) {
-        const openTabs = JSON.parse(savedTabs);
-        for (const example of openTabs) { // This re-uses the existing function to open tabs
-            // The example object might not have all properties needed by openWorkspaceFileInNewTab,
-            // but it should have enough to reconstruct the tab.
-            await openWorkspaceFileInNewTab(example);
-        }
-    }
-
-    // Restore the active tab
-    const activeTabId = localStorage.getItem("nino-active-tab");
-    let tabToActivate = ninoEditor.shadowRoot.querySelector(`.tab-button[data-tab="${activeTabId}"]`);
-    if (!tabToActivate) {
-        // Fallback to the default YAML tab if the saved one doesn't exist
-        tabToActivate = ninoEditor.shadowRoot.querySelector('.tab-button[data-tab="yaml"]');
-    }
-    ninoEditor.activateTab(tabToActivate);
-
-    // Restore panel sizes
-    const hPrevWidth = localStorage.getItem("nino-panel-h-prev");
-    const hNextWidth = localStorage.getItem("nino-panel-h-next");
-    if (hPrevWidth && hNextWidth) {
-        // Access the custom elements directly
-        $(ninoEditor).width(parseFloat(hPrevWidth));
-        $(ninoExecution).width(parseFloat(hNextWidth));
-    } else {
-        // Set initial 60/40 split if no saved state
-        const mainContainerWidth = $(".main-container").width();
-        const sidebarWidth = parseFloat(getComputedStyle(ninoWorkspace).getPropertyValue('--sidebar-width'));
-        const resizeHandleWidth = $("#resize-handle-h").width();
-        const availableWidth = mainContainerWidth - sidebarWidth - resizeHandleWidth;
-        $(ninoEditor).width(availableWidth * 0.6);
-        $(ninoExecution).width(availableWidth * 0.4);
-    }
-
-    ninoEditor.layoutEditors();
 }
 
 /**

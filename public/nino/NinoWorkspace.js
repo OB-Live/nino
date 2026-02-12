@@ -6,8 +6,8 @@ class NinoWorkspace extends HTMLElement {
         super();
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.innerHTML = `
-            <link rel="stylesheet" href="NinoStyle.css">
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default-dark/style.min.css" /> 
+            <link rel="stylesheet" href="NinoStyle.css" />
             <div class="sidebar-header">
                 <span>Data masks</span>
             </div>

@@ -10,6 +10,7 @@ class NinoGraphviz extends HTMLElement {
         this.shadowRoot.innerHTML = `<link rel="stylesheet" href="NinoStyle.css">
             <style>
                  #graph-container { height: 100%; width: 100%; }
+                 #graph-container svg { width: 100%; height: 100%; }
             </style>
             <script src="/lib/d3.v7.min.js"></script>
             <script src="/lib/d3-graphviz.js"></script>
@@ -19,33 +20,45 @@ class NinoGraphviz extends HTMLElement {
 
             <div id="graph-container"></div>
         `;
+        this._graphviz = null;
     }
 
     connectedCallback() {
+        this.render();
+    }
+
+    attributeChangedCallback(name, oldValue, newValue) {
+        if (name === 'url' && oldValue !== newValue) {
+            this.render();
+        }
+    }
+
+    render() {
+        const url = this.getAttribute('url');
+        if (!url) {
+            return;
+        }
+
         const graphContainer = this.shadowRoot.querySelector('#graph-container');
-        let graph = window.d3.select(graphContainer).graphviz({ useWorker: false });
+        if (!this._graphviz) {
+            this._graphviz = window.d3.select(graphContainer).graphviz({ useWorker: false , fit: true});
+        }
 
-        window.d3.text("/api/schema.dot")
-            .then(dot => {
-                if (!dot) {
-                    console.error("Received empty dot source for transformation plan.");
-                    return;
+        fetch(url)
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
                 }
-                graph.renderDot(dot, () => this.attachClickHandlers())
-                    .on("end", function () {
-                        const { width, height } = this.getBBox();
-                        const containerWidth = graphContainer.clientWidth;
-                        const containerHeight = graphContainer.clientHeight;
-                        const scale = 0.5;
-                        const x = (containerWidth - width * scale) / 2;
-                        const y = (containerHeight - height * scale) / 2;
-                        const initialTransform = window.d3.zoomIdentity.translate(x, y).scale(scale);
-                        window.d3.select(this)
-                            .call(window.d3.zoom().transform, initialTransform);
-
-                    });
+                return response.text();
             })
-            .catch(error => console.error("Failed to load schema.dot:", error));
+            .then(dot => {
+                 if (dot) {
+                    this._graphviz.renderDot(dot);
+                } else {
+                    console.error(`Received empty dot source from ${url}`);
+                }
+            })
+            .catch(error => console.error(`Failed to load dot source from ${url}:`, error));
     }
 }
 

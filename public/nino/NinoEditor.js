@@ -1,6 +1,6 @@
 // c:\Users\benjamin.bertrand\ws\nino\public\nino\NinoEditor.js
 
-import './NinoStats.js';
+import './LinoAnalyse.js';
 import './NinoMonacoEditor.js'; // Import the new web component // Import the new web component
 import { staticExamples, HELPER_LOAD_METADATA } from './NinoConstants.js'; // Import staticExamples and HELPER_LOAD_METADATA// Import staticExamples and HELPER_LOAD_METADATA
 class NinoEditor extends HTMLElement {
@@ -22,13 +22,13 @@ class NinoEditor extends HTMLElement {
             <span id="download-graph-btn" class="download-btn">⤓</span>Transformation Plan 
           </button>
           <button class="tab-button" data-tab="execution">Execution Plan</button>
-          <button class="tab-button" data-tab="stats">Statistics</button>
+          <button class="tab-button" data-tab="stats">Analyse</button>
           <button class="tab-button active" data-tab="yaml">Examples</button>
        
         </div> 
         <div id="yaml-editor-container" class="tab-content active editor-wrapper"></div>
         <div id="graph-view-container" class="tab-content editor-wrapper"></div>
-        <div id="transformation-view-container" class="tab-content editor-wrapper"></div>
+        <div id="execution-view-container" class="tab-content editor-wrapper"></div>
         <div id="stats-view-container" class="tab-content editor-wrapper"></div>
       </div>
     `;
@@ -36,8 +36,9 @@ class NinoEditor extends HTMLElement {
     this.tabHeader = this.shadowRoot.querySelector('.tab-header');
     this.yamlEditorContainer = this.shadowRoot.getElementById('yaml-editor-container');
     this.graphContainer = this.shadowRoot.getElementById('graph-view-container');
-    this.transformationContainer = this.shadowRoot.getElementById('transformation-view-container');
+    this.executionContainer = this.shadowRoot.getElementById('execution-view-container');
     this.statsViewContainer = this.shadowRoot.getElementById('stats-view-container');
+    this.linoAnalyseInstance = null; // To store the single instance of LinoAnalyse
     this.downloadGraphBtn = this.shadowRoot.getElementById('download-graph-btn');
     this.tabHeader.addEventListener('click', this.handleTabClick.bind(this));
     this.downloadGraphBtn.addEventListener('click', this.handleDownloadGraph.bind(this));
@@ -203,7 +204,7 @@ class NinoEditor extends HTMLElement {
   renderGraphTab(data) {
     // Clear previous graph content
     this.graphContainer.innerHTML = "";
-    const url = data
+    const url = data.url || '/api/schema.dot'; // Get URL from data passed during tab activation
     // Render the generic nino-graphviz component
     const ninoGraphviz = document.createElement("nino-graphviz");
     ninoGraphviz.setAttribute("url", url);
@@ -214,20 +215,27 @@ class NinoEditor extends HTMLElement {
 
     if (folderName) {
       const execPlan = document.createElement('nino-graphviz');
-      // The -nametly used byoame}`);
-      this.transformationViewContainer.innerHTML = '';
-      this.transformationViewContainer.appendChild(execPlan);
+      execPlan.setAttribute('url', `/api/playbook/${folderName}`); 
+    
+      this.executionContainer.innerHTML = `<p>
+        <a href="#"> 📄 Create</a> an Execution Plan or 
+        <a href="#"> 🏃‍♀️ Run it </a>
+        
+      </p>`;
+      this.executionContainer.appendChild(execPlan);
     }
   }
 
   renderStatsTab(tableName, folderName) {
-    this.statsViewContainerr.innerHTML = '';
     if (tableName) {
-      const ninoStats = document.createElement('nino-stats');
-      ninoStats.setAttribute('table-name', tableName);
-      ninoStats.setAttribute('folder-name', folderName);
-      this.statsViewContainerr.appendChild(ninoStats);
-    }
+      if (!this.linoAnalyseInstance) {
+        this.linoAnalyseInstance = document.createElement('lino-analyse');
+        this.statsViewContainer.appendChild(this.linoAnalyseInstance);
+      }
+      // Update attributes, which will trigger render in LinoAnalyse.js if values changed
+      this.linoAnalyseInstance.setAttribute('table-name', tableName);
+      this.linoAnalyseInstance.setAttribute('folder-name', folderName);
+    } 
 
   }
 
@@ -237,7 +245,7 @@ class NinoEditor extends HTMLElement {
   }
 
   openSvgInNewTab() {
-    const activeGraphTab = this.shadowRoot.querySelector('#graph-view-container transformation-plan, #transformation-view-container nino-transformation > playbook-plan');
+    const activeGraphTab = this.shadowRoot.querySelector('#graph-view-container transformation-plan, #execution-view-container nino-transformation > playbook-plan');
     if (!activeGraphTab) {
       console.warn('No active graph to open.');
       return;
