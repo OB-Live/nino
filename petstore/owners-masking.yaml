@@ -1,0 +1,27 @@
+version: "1"
+seed: 42
+masking:
+  - selector:
+      jsonpath: "address"
+    mask:
+      # regex: ""
+  - selector:
+      jsonpath: "city"
+    mask:
+      # regex: ""
+  - selector:
+      jsonpath: "first_name"
+    mask:
+      # regex: ""
+  - selector:
+      jsonpath: "id"
+    mask:
+      # regex: ""
+  - selector:
+      jsonpath: "last_name"
+    mask:
+      # regex: ""
+  - selector:
+      jsonpath: "telephone"
+    mask:
+      # regex: ""

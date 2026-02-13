@@ -17,17 +17,14 @@ import (
 )
 
 // startDaemon initializes and starts the web server.
-func startDaemon(projectData ProjectData, fileMap map[string]string,
-	inputPaths []string,
-	port string,
-	publicFS fs.FS) {
+func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths []string, port string, publicFS fs.FS) {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
+	r.Use(middleware.Compress(5)) // Add gzip compression middleware
 
 	// API routes
-	// r.Get("/api/page", serveIndexPage())            // Serve the html using api
 	r.Get("/api/schema.{format:(dot|svg|png)}", serveSchema(&projectData))
 	r.Get("/api/schema/{folder}.{format:(dot|svg|png)}", serveSchema(&projectData))
 	r.Get("/api/plot/{folder}/{tableName}", servePlot(projectData))
@@ -36,8 +33,8 @@ func startDaemon(projectData ProjectData, fileMap map[string]string,
 
 	// API routes for external tool integration
 	r.Get("/api/files", listFilesHandler(inputPaths))
-	r.Get("/api/file/{folder}/{filename}", getFileHandler(inputPaths))
-	r.Post("/api/file/{folder}/{filename}", updateFileHandler(inputPaths, &projectData))
+	r.Get("/api/file/*", getFileHandler(inputPaths))
+	r.Post("/api/file/*", updateFileHandler(inputPaths, &projectData))
 
 	// API route for pimo execution
 	r.Post("/api/pimo/exec", pimoExecHandler())
@@ -46,16 +43,26 @@ func startDaemon(projectData ProjectData, fileMap map[string]string,
 	r.Post("/api/exec/playbook/{folder}/{filename}", execCommandHandler())
 	r.Post("/api/exec/pull/{folder}/{filename}", execCommandHandler())
 
-	// Serve files from the 'public' directory
-	// workDir, _ := os.Getwd()
-	// publicDir := http.Dir(filepath.Join(workDir, "public"))
-	r.Handle("/*", http.FileServer(http.FS(publicFS)))
-
 	log.Printf("Starting web server on http://localhost:%s", port)
-	err := http.ListenAndServe(":"+port, r)
-	if err != nil {
+
+	// Serve files from the 'public' directory. This should be the last route.
+	// workDir, _ := os.Getwd()
+	r.Handle("/*", customFileServer(publicFS))
+
+	if err := http.ListenAndServe(":"+port, r); err != nil {
 		log.Fatalf("Failed to start server: %v", err)
 	}
+}
+
+// customFileServer wraps http.FileServer to set correct MIME types for CSS.
+func customFileServer(fs fs.FS) http.Handler {
+	fsh := http.FileServer(http.FS(fs))
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if strings.HasSuffix(r.URL.Path, ".css") {
+			w.Header().Set("Content-Type", "text/css; charset=utf-8")
+		}
+		fsh.ServeHTTP(w, r)
+	})
 }
 
 // createMaskFile handles the creation of a boilerplate masking file.
@@ -212,7 +219,7 @@ func servePlaybook(projectData *ProjectData) http.HandlerFunc {
 		if folderData, ok := (*projectData)[folderName]; ok {
 			if folderData.Playbook != nil {
 				dotString := generateAnsiblePlaybookGraph(folderData.Playbook)
-				w.Header().Set("Content-Type", "text/vnd.graphviz")
+				// w.Header().Set("Content-Type", "text/vnd.graphviz")
 				w.Write([]byte(dotString))
 				return
 			}
@@ -277,44 +284,85 @@ func reloadSchemas(projectData *ProjectData, inputPaths []string) {
 // listFilesHandler serves a JSON structure of all discovered YAML files.
 func listFilesHandler(inputPaths []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		fileTree := make(map[string][]string)
+		// The top-level structure should be a map with "Workspace" as the key,
+		// and its value an array of items (files or folders).
+		workspaceItems := make([]interface{}, 0)
 
-		for _, path := range inputPaths {
-			info, err := os.Stat(path)
+		// Helper function to recursively build the file tree for a given directory
+		// Returns an array of items (files or nested folders)
+		var buildFolderContent func(folderPath string) ([]interface{}, error)
+		buildFolderContent = func(folderPath string) ([]interface{}, error) {
+			content := make([]interface{}, 0)
+			entries, err := os.ReadDir(folderPath)
 			if err != nil {
-				log.Printf("Warning: skipping invalid input path '%s': %v", path, err)
+				return nil, err
+			}
+
+			for _, entry := range entries {
+				name := entry.Name()
+				// Skip hidden files and folders, and the 'public' folder
+				if strings.HasPrefix(name, ".") || name == "public" {
+					continue // Just skip this entry
+				}
+
+				entryPath := filepath.Join(folderPath, name)
+
+				if entry.IsDir() {
+					// Recursively get content for the subfolder
+					subfolderContent, err := buildFolderContent(entryPath)
+					if err != nil {
+						return nil, err // Propagate actual errors
+					}
+					// If the subfolder has content, add it as a nested object
+					if len(subfolderContent) > 0 {
+						nestedFolder := make(map[string][]interface{})
+						nestedFolder[name] = subfolderContent
+						content = append(content, nestedFolder)
+					}
+				} else {
+					// It's a file, append its name to the current folder's content
+					if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") {
+						content = append(content, name)
+					}
+				}
+			}
+			return content, nil
+		}
+
+		for _, basePath := range inputPaths {
+			// Normalize basePath to ensure consistent path separators
+			basePath = filepath.Clean(basePath)
+
+			info, err := os.Stat(basePath)
+			if err != nil {
+				log.Printf("Error stating path %s: %v", basePath, err)
 				continue
 			}
 
-			basePath := path
-			if !info.IsDir() {
-				// If a single file is passed, its folder is its directory
-				dir := filepath.Dir(path)
-				folderName := filepath.Base(dir)
-				fileTree[folderName] = append(fileTree[folderName], filepath.Base(path))
-				continue
-			}
-
-			// It's a directory, walk it to find all files.
-			err = filepath.WalkDir(basePath, func(p string, d os.DirEntry, err error) error {
+			if info.IsDir() {
+				// If basePath is a directory, its name becomes a top-level folder under "Workspace"
+				folderName := filepath.Base(basePath)
+				folderContent, err := buildFolderContent(basePath)
 				if err != nil {
-					return err
+					http.Error(w, fmt.Sprintf("Failed to build file tree for %s: %v", basePath, err), http.StatusInternalServerError)
+					return
 				}
-				// Skip directories starting with '.'
-				if d.IsDir() && len(d.Name()) > 0 && d.Name()[0] == '.' && p != basePath {
-					return filepath.SkipDir
+				if len(folderContent) > 0 {
+					nestedFolder := make(map[string][]interface{})
+					nestedFolder[folderName] = folderContent
+					workspaceItems = append(workspaceItems, nestedFolder)
 				}
-				if !d.IsDir() {
-					rel, _ := filepath.Rel(basePath, p)
-					folder := strings.Split(rel, string(os.PathSeparator))[0]
-					fileTree[folder] = append(fileTree[folder], filepath.Base(p))
+			} else {
+				// If basePath is a file, add it directly to "Workspace"
+				fileName := filepath.Base(basePath)
+				if strings.HasSuffix(fileName, ".yaml") || strings.HasSuffix(fileName, ".yml") {
+					workspaceItems = append(workspaceItems, fileName)
 				}
-				return nil
-			})
-			if err != nil {
-				http.Error(w, fmt.Sprintf("Failed to walk directory %s: %v", path, err), http.StatusInternalServerError)
-				return
 			}
+		}
+
+		fileTree := map[string]interface{}{
+			"Workspace": workspaceItems,
 		}
 
 		w.Header().Set("Content-Type", "application/json")
@@ -327,22 +375,37 @@ func listFilesHandler(inputPaths []string) http.HandlerFunc {
 // getFileHandler serves the content of a specific file.
 func getFileHandler(inputPaths []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		folderName := chi.URLParam(r, "folder")
-		fileName := chi.URLParam(r, "filename")
+		filepathParam := strings.TrimPrefix(chi.URLParam(r, "*"), "/")
+		log.Printf("getFileHandler: Received request for filepath: %s", filepathParam)
 
-		http.ServeFile(w, r, folderName+"/"+fileName)
+		fullPath, err := findSecureFilePath(inputPaths, filepathParam)
+		if err != nil {
+			log.Printf("getFileHandler: Error finding secure file path for %s: %v", filepathParam, err)
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		log.Printf("getFileHandler: Serving file from full path: %s", fullPath)
+		http.ServeFile(w, r, fullPath)
 	}
 }
 
 // updateFileHandler replaces a file with the content from the POST body.
 func updateFileHandler(inputPaths []string, projectData *ProjectData) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		folderName := chi.URLParam(r, "folder")
-		fileName := chi.URLParam(r, "filename")
+		filepathParam := strings.TrimPrefix(chi.URLParam(r, "*"), "/")
+		log.Printf("updateFileHandler: Received request to update filepath: %s", filepathParam)
 
-		filePath := folderName + "/" + fileName
+		fullPath, err := findSecureFilePath(inputPaths, filepathParam)
+		if err != nil {
+			log.Printf("updateFileHandler: Error finding secure file path for %s: %v", filepathParam, err)
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		filePath := fullPath
 
 		body, err := io.ReadAll(r.Body)
+		log.Printf("updateFileHandler: Attempting to write to file: %s", filePath)
 		if err != nil {
 			http.Error(w, "Failed to read request body", http.StatusInternalServerError)
 			return
@@ -358,23 +421,37 @@ func updateFileHandler(inputPaths []string, projectData *ProjectData) http.Handl
 		reloadSchemas(projectData, inputPaths)
 
 		w.WriteHeader(http.StatusOK)
-		fmt.Fprintf(w, "File %s updated successfully", fileName)
+		fmt.Fprintf(w, "File %s updated successfully", filepathParam)
 	}
 }
 
 // findSecureFilePath locates the absolute path for a file within the allowed input directories.
-func findSecureFilePath(inputPaths []string, folderName, fileName string) (string, error) {
-	for _, p := range inputPaths {
-		// Check if the input path `p` is the folder we are looking for.
-		// e.g., inputPaths has "petstore", folderName is "petstore".
-		if filepath.Base(p) == folderName {
-			candidate := filepath.Join(p, fileName)
-			if _, err := os.Stat(candidate); err == nil {
-				return candidate, nil
-			}
+func findSecureFilePath(inputPaths []string, relativeFilePath string) (string, error) {
+    for _, basePath := range inputPaths {
+        // Attempt 1: Join the basePath and the relative path.
+        // This works for paths like `nino -d .` and URL `/api/file/petstore/source/analyze.yaml`
+        candidatePath1 := filepath.Join(basePath, relativeFilePath)
+        if _, err := os.Stat(candidatePath1); err == nil {
+			cleanPath, err := filepath.Abs(candidatePath1)
+			if err != nil { return "", err }
+            log.Printf("findSecureFilePath: File found at %s", cleanPath)
+            return cleanPath, nil
+        }
+
+        // Attempt 2: Check if the relative path is complete from the parent of the basePath.
+        // This works for paths like `nino -d ./petstore` and URL `/api/file/petstore/source/analyze.yaml`
+        // where `basePath` is `./petstore` and `relativeFilePath` is `petstore/source/analyze.yaml`.
+		parentOfBasePath := filepath.Dir(basePath)
+        candidatePath2 := filepath.Join(parentOfBasePath, relativeFilePath)
+        if _, err := os.Stat(candidatePath2); err == nil {
+			cleanPath, err := filepath.Abs(candidatePath2)
+			if err != nil { return "", err }
+			log.Printf("findSecureFilePath: File found at %s", cleanPath)
+			return cleanPath, nil
 		}
-	}
-	return "", fmt.Errorf("file '%s' not found in folder '%s'", fileName, folderName)
+    }
+
+    return "", fmt.Errorf("file '%s' not found in any configured input path", relativeFilePath)
 }
 
 // PimoExecRequest defines the structure for the /pimo/exec request body.

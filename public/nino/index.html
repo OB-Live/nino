@@ -7,27 +7,22 @@
   <link rel="icon" href="/img/favicon.ico" type="image/x-icon">
 
   <title>NINŎ - Anonymisation </title>
-  <link rel="stylesheet" href="style.css" />
 
   <!-- Common libraries  -->
   <script src="/lib/jquery-3.7.1.min.js"></script>
   <script src="/lib/jquery-ui.min.js"></script>
 
-  <!-- D3.js and d3-graphviz for rendering the DOT graph -->
-  <script src="/lib/d3.v7.min.js"></script>
-  <script src="https://unpkg.com/d3-graphviz@5.6.0/build/d3-graphviz.js"></script>
-
-  <script src="https://cdn.jsdelivr.net/npm/@hpcc-js/wasm@2.14.0/dist/index.min.js"></script>
-
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default/style.min.css" />
+  <!-- Workspace tree view library --> 
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js"></script>
 
 
-  <!-- Text Editor  -->
-  <link rel="stylesheet" data-name="vs/editor/editor.main"
-    href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.33.0/min/vs/editor/editor.main.min.css" />
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/js-yaml/4.1.0/js-yaml.min.js"></script>
-  <script src="autocomplete.js"></script>
+  <!-- NINO application libraries -->
+  <script type="module" src="NinoConstants.js"></script> 
+  <script type="module" src="NinoGraphviz.js"></script>
+  <script type="module" src="NinoMonacoEditor.js"></script>
+  <script type="module" src="NinoExecution.js"></script>
+  <script type="module" src="NinoDialog.js"></script>
+  <link rel="stylesheet" href="NinoStyle.css" />
 
 </head>
 
@@ -49,67 +44,25 @@
     <img src="/img/cgi.png" alt="CGI" class="header-img2">
   </div>
 
-  <div class="main-container">
+
+  <main class="main-container">
     <!-- Sidebar -->
-    <aside id="sidebar" class="sidebar">
-      <div class="sidebar-header">
-        <span>Data masks</span>
-      </div>
-      <div id="sidebar-content" class="sidebar-content">
-        <div id="examples-container" class="scroll-area"></div>
-        <div id="jstree-workspace2" class="jstree"></div>
-      </div>
+    <aside id="sidebar">
+      <nino-workspace></nino-workspace>
     </aside>
 
-    <!-- Main Content -->
-    <main id="main-content" class="main-content">
-      <div id="left-panel" class="panel">
-        <div class="tab-header">
-          <button class="tab-button active" data-tab="yaml">YAML</button>
-          <button class="tab-button" data-tab="graph"><span id="download-graph-btn"
-              class="download-btn">⤓</span>Graph</button>
-        </div>
-        <div id="yaml-editor-container" class="tab-content active">
-        </div>
-        <div id="graph-view-container" class="tab-content">
-          <!-- Graph will be rendered here by d3-graphviz -->
+    <!-- Central text editor -->
+    <nino-editor id="main-nino-editor"></nino-editor>
 
+    <!-- Resize handle -->
+    <div id="resize-handle-h" class="resize-handle-h"></div>
 
-        </div>
-      </div>
+    <!-- Execution panel web component -->
+    <nino-execution id="main-nino-execution"></nino-execution>
 
-      <div id="resize-handle-h" class="resize-handle-h"></div>
+  </main>
 
-      <div id="right-panel" class="panel">
-        <div id="top-panel" class="sub-panel">
-          <div class="editor-header">Input</div>
-          <div id="input-editor-container" class="editor-wrapper"></div>
-        </div>
-        <div id="resize-handle-v" class="resize-handle-v"></div>
-        <div id="bottom-panel" class="sub-panel">
-          <div class="editor-header">
-            <button id="execute-btn" class="execute-btn"></button>
-            <span>Output</span>
-          </div>
-          <div id="output-viewer-container" class="editor-wrapper"></div>
-        </div>
-      </div>
-    </main>
-  </div>
-
-  <!-- Dialogs moved to the end of body for better DOM management by jQuery UI -->
-  <div id="dialog" title="Column's data distribution" style="display:none;">
-    <p>Would you like to <a target="_blank" href="#" id="dialog-create-button">create a mask</a></p>
-    <img id="dialog-image" src="" alt="Image" style="width: 100%;" />
-  </div>
-
-  <div id="execution-dialog" title="Ansible playbook execution" style="display:none;">
-    <div id="execution-graph-container" style="width: 100%; height: 100%;"></div>
-  </div>
-
-  <script src="/lib/loader.min.js"></script>
-  <script src="app.js"></script>
-
+  <script src="NinoApp.js" type="module"></script>
 </body>
 
 </html>

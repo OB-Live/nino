@@ -1,0 +1,589 @@
+:root {
+  /* 🌿 Olive Tree Palette */
+   /* 🌿 Olive Leaves */
+  --pale-silver-leaf: #bac6b0;
+  --sunlit-olive-leaf: #a4b28c;
+  --classic-olive-green: #808c52;
+  --muted-sage-olive: #788660;
+  --deep-leaf-shadow: #485c36;
+  --blue-tinted-olive-shade: #586852;
+
+  /* 🫒 Olives (Fruit) */
+  --fresh-green-olive: #8e9e42;
+  --yellow-green-olive: #a6ac4e;
+  --maturing-olive: #6e603a;
+  --bruised-olive-brown: #5c4830;
+  --deep-purple-olive: #3a2c34;
+  --ripe-black-olive: #22261e;
+
+  /* 🌳 Trunk & Bark */
+  --weathered-bark-light: #948a7a;
+  --olive-bark-midtone: #706656;
+  --dark-bark-crevice: #463e32;
+
+  /* 🌞 Mediterranean Environment */
+  --dry-olive-soil: #b0966c;
+  --sun-baked-earth: #9c7848;
+  --dusty-stone-gray: #848676;
+
+
+  /* --background: var(--ripe-black-olive); 
+  --foreground: var(--pale-silver-leaf); 
+  --card: var(--sun-baked-earth); 
+  --primary: var(--classic-olive-green); 
+  --primary-foreground: var(--sunlit-olive-leaf); 
+  --muted: var(--muted-sage-olive); 
+  --muted-foreground: var(--weathered-bark-light); 
+  --accent: var(--maturing-olive); 
+  --border: var(--dusty-stone-gray );  */
+
+
+ /* Base */
+  --background: #f3f1e6;            /* sun-washed field light */
+  --foreground: #2f3a24;            /* deep olive shadow text */
+
+  /* Surfaces */
+  --card: #e7e3cf;                  /* dry soil + dust mix */
+
+  /* Primary (olive canopy) */
+  --primary: #6e7f3f;               /* classic olive green */
+  --primary-foreground: #f6f7f2;    /* light leaf highlight */
+
+  /* Muted (stone + bark undertones) */
+  --muted: #cfcab4;                 /* dusty stone */
+  --muted-foreground: #6a7158;      /* muted leaf gray-green */
+
+  /* Accent (sunlit olive fruit) */
+  --accent: #a6ac4e;                /* yellow-green olive */
+
+  /* Structural */
+  --border: #b8b39d;      
+
+  --sidebar-width: 280px;
+  --sidebar-width-collapsed: 0px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica,
+    Arial, sans-serif;
+  margin: 0;
+  background-color: var(--background);
+  color: var(--foreground);
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.main-header {
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  padding: 12px 16px;
+  border-bottom: 1px solid hsl(var(--border));
+  text-align: center;
+}
+
+.header-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+}
+
+.title {
+  font-size: 1.25rem;
+  font-weight: bold;
+  letter-spacing: -0.025em;
+  margin: 0;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  opacity: 0.7;
+}
+
+.main-container {
+  display: flex;
+  flex: 1;
+  overflow: hidden;
+}
+
+/* Sidebar */
+
+nino-workspace.collapsed {
+  width: var(--sidebar-width-collapsed);
+}
+
+nino-workspace {
+  display: flex;
+  flex-direction: column;
+
+  width: var(--sidebar-width);
+}
+
+.sidebar-header {
+  background-color: var(--card);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding-top: 8px;
+  padding-bottom: 8px;
+  border-bottom: 2px;
+  position: relative;
+  border-bottom: 1px solid var(--border);
+  overflow: hidden;
+}
+
+.sidebar-trigger {
+  position: fixed;
+  left: 8px;
+  top: 8px;
+  /* transform: translateY(-50%); */
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+.logo {
+  width: 80px;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.sidebar-content {
+  background-color: var(--card);
+  flex: 1;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--muted) transparent;
+}
+
+.sidebar-content::-webkit-scrollbar {
+  width: 4px;
+}
+
+.sidebar-content::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.sidebar-content::-webkit-scrollbar-thumb {
+  background-color: var(--muted);
+  border-radius: 20px;
+}
+
+.scroll-area {
+  padding: 8px;
+}
+
+.accordion-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.accordion-trigger {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  padding: 10px;
+  text-align: left;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.accordion-content {
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: var(--background);
+  padding: 0 10px;
+}
+
+.example-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.example-btn:hover {
+  background-color: var(--muted);
+}
+
+.example-name {
+  font-weight: 500;
+}
+
+.example-desc {
+  font-size: 0.75rem;
+  color: var(--muted-foreground);
+}
+
+.panel,
+.sub-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+
+
+.resize-handle-h {
+  width: 8px;
+  /* Ensures the handle is always 8px wide */
+  flex-shrink: 0;
+  /* Prevents the handle from shrinking in a flex container */
+  cursor: col-resize;
+  background-color: var(--border);
+}
+
+.resize-handle-h:hover,
+.resize-handle-h.active {
+  background-color: var(--accent);
+  /* The width is now consistently 8px, so no need to set it conditionally here */
+}
+
+.resize-handle-v {
+  height: 8px;
+  /* Ensures the handle is always 8px high */
+  flex-shrink: 0;
+  /* Prevents the handle from shrinking in a flex container */
+  cursor: row-resize;
+  background-color: var(--border);
+}
+
+.resize-handle-v:hover,
+.resize-handle-v.active {
+  background-color: var(--accent);
+  /* Corrected typo: removed incorrect 'width' property.
+     The height is consistently 8px, so no need to set it conditionally here. */
+}
+
+.play-icon {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 0 6px 10px;
+  /* Slightly smaller triangle for tabs */
+  border-color: transparent transparent transparent var(--accent);
+  cursor: pointer;
+}
+
+.play-icon:hover {
+  opacity: 0.8;
+}
+
+.close-tab {
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.close-tab:hover {
+  background-color: var(--muted);
+}
+
+.tab-content {
+  display: none;
+  flex: 1;
+}
+
+.tab-content.active {
+  display: flex;
+  gap: 5px;
+  flex-direction: column;
+}
+
+a{
+  color: var(--accent);
+  text-decoration: none;
+  background-color: var(--card); 
+}
+a:hover{
+  color: var(--primary-foreground);
+}
+
+p { 
+  background-color: var(--card);
+  padding: 3px;
+}
+
+.execute-btn {
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 7px 0 7px 12px;
+  /* Creates the triangle shape */
+  border-color: transparent transparent transparent var(--accent);
+  /* Left border is green */
+  background: none;
+  padding: 0;
+  margin-right: 8px;
+  /* Add some space between icon and text */
+  cursor: pointer;
+  transition: border-color 0.2s ease;
+}
+
+.execute-btn:hover {
+  opacity: 0.8;
+}
+
+.execute-btn:disabled {
+  border-color: transparent transparent transparent var(--muted);
+  cursor: not-allowed;
+}
+
+
+.panel,
+.sub-panel {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+iframe {
+  border: none;
+}
+
+.fixed-header {
+  position: fixed;
+  top: 2px;
+  right: 2px;
+  z-index: 1000;
+  /* High z-index to be on top */
+  background-color: rgba(1, 1, 1, 0.8);
+  /* Semi-transparent background */
+  padding: 3px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  font-family: Helvetica, Arial, sans-serif;
+  color: rgb(255, 253, 253);
+}
+
+#sidebar-toggle {
+  display: flex;
+}
+
+.header-img {
+  height: 33px;
+  /* Adjust height as needed */
+  margin: 0 8px;
+}
+
+.header-img2 {
+  height: 24px;
+  /* Adjust height as needed */
+  margin: 0 8px;
+}
+
+
+.jstree {
+  max-height: fit-content;
+}
+
+.jstree-default-dark>.jstree-no-dots .jstree-leaf>.jstree-ocl {
+  background: unset;
+}
+
+
+
+
+nino-editor, #editor-panel {
+  min-width: 20vw !important; 
+
+  /* width: stretch; */
+}
+
+nino-execution, #execution-panel{
+  /* flex: 1; */
+  min-width: 20vw !important;
+
+}
+
+#execution-panel {
+  height: -webkit-fill-available;
+}
+
+
+.tab-header {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  flex-wrap: wrap;
+  padding: 2px;
+  gap: 2px;
+  background-color: var(--card);
+}
+
+.tab-button {
+  font-size: medium;
+  background-color: 1px solid var(--primary);
+  padding: 3px 5px;
+  color: var(--foreground);
+  border-radius: 2px 12px 2px 2px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.jstree-leaf>.jstree-ocl {
+  background: opacity(50);
+}
+
+.tab-button.active {
+  color: var(--foreground);
+  border-bottom: 2px solid var(--accent);
+  background-color: var(--primary);
+  font-size: large;
+}
+
+.editor-wrapper {
+  flex: 1;
+  min-height: 0;
+  height: 100%;
+  /* Ensure editor wrapper takes full height */
+  position: relative;
+}
+
+.download-btn {
+  background: none;
+  border: none;
+  color: var(--foreground);
+  font-size: 1.2rem;
+  cursor: pointer;
+  padding: 0;
+  margin-right: 6px;
+  line-height: 1;
+  display: inline-flex;
+}
+
+.close-tab {
+  font-size: 1.2rem;
+  line-height: 1;
+  padding: 0 4px;
+  border-radius: 4px;
+}
+
+.close-tab:hover {
+  background-color: var(--muted);
+}
+
+
+#input-panel {
+  flex: 60 1 0%;
+}
+
+#output-panel {
+  flex: 40 1 0%;
+}
+
+.editor-header {
+  padding: 8px 12px;
+  background-color: var(--card);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  align-items: center;
+}
+
+.editor-wrapper {
+  flex: 1;
+  min-height: 0;
+  position: relative;
+  background-color: var(--background);
+}
+
+.monaco-editor {
+  width: 100%;
+}
+
+/* SIDEBAR  */
+
+.accordion-item {
+  border-bottom: 1px solid var(--border);
+}
+
+.accordion-trigger {
+  width: 100%;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  padding: 10px;
+  text-align: left;
+  font-size: 0.875rem;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+}
+
+.accordion-content {
+  max-height: 0px;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: var(--background);
+  padding: 0 10px;
+}
+
+.example-btn {
+  display: block;
+  width: 100%;
+  text-align: left;
+  background: none;
+  border: none;
+  color: var(--foreground);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 4px;
+}
+
+.example-btn:hover {
+  background-color: var(--muted);
+}
+
+#jstree-workspace {
+  background-color: var(--background);
+
+  border: 4px solid var(--card);
+  flex: 1;
+  scrollbar-width: none;
+  overflow: scroll;
+  /* Ensure it takes up available space */
+}
+
+#lino-analyse,
+#stats-container img,
+nino-graphviz,
+#graph-container svg {
+  width: 100%;
+  box-sizing: border-box;
+  /* Ensures padding and border are included in the width */
+}
+
+#stats-container {
+  flex: 1;
+  overflow: auto;
+  padding: 1em;
+}
+
+#editor-panel {
+  flex: 60 1 0%;
+  height: 100%;
+}
+
+/* temporary fix : monaco editor is creating an extra text area for some reason and it is visible and it is not possible to hide it with the monaco editor options */
+.ime-text-area {
+  display: none
+}
