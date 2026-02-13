@@ -1,0 +1,20 @@
+{
+	"name": "NINŎ Dev Container",
+	"image": "ghcr.io/cgi-fr/lino-dev-container:v2.0.0",
+
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"humao.bruno",
+				"dbaeumer.vscode-eslint"
+			]
+		}
+	},
+
+	"forwardPorts": [3000],
+
+	"postCreateCommand": "npm install",
+
+	"remoteUser": "node"
+}
+ 
