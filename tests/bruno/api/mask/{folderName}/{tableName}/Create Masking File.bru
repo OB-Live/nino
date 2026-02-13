@@ -1,0 +1,45 @@
+meta {
+  name: Create Masking File
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/mask/:folderName/:tableName
+  body: none
+  auth: inherit
+}
+
+params:path {
+  folderName: 
+  tableName: 
+}
+
+example {
+  name: 201 Response
+  description: Masking file created successfully.
+  
+  request: {
+    url: {{baseUrl}}/api/mask/:folderName/:tableName
+    method: GET
+    mode: none
+    params:path: {
+      folderName: 
+      tableName: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 201
+      text: Created
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

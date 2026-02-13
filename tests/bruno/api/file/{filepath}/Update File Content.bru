@@ -1,0 +1,47 @@
+meta {
+  name: Update File Content
+  type: http
+  seq: 2
+}
+
+post {
+  url: {{baseUrl}}/api/file/:filepath
+  body: text
+  auth: inherit
+}
+
+params:path {
+  filepath: 
+}
+
+example {
+  name: 200 Response
+  description: File updated successfully.
+  
+  request: {
+    url: {{baseUrl}}/api/file/:filepath
+    method: POST
+    mode: text
+    params:path: {
+      filepath: 
+    }
+  
+    body:text: {
+      file content here
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

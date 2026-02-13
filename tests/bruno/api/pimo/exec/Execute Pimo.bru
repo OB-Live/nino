@@ -1,0 +1,49 @@
+meta {
+  name: Execute Pimo
+  type: http
+  seq: 1
+}
+
+post {
+  url: {{baseUrl}}/api/pimo/exec
+  body: json
+  auth: inherit
+}
+
+body:json {
+  {
+    "yaml": "",
+    "json": ""
+  }
+}
+
+example {
+  name: 200 Response
+  description: The masked output from the pimo command.
+  
+  request: {
+    url: {{baseUrl}}/api/pimo/exec
+    method: POST
+    mode: json
+    body:json: {
+      {
+        "yaml": "",
+        "json": ""
+      }
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

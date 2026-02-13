@@ -1,0 +1,43 @@
+meta {
+  name: Get File Content
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/file/:filepath
+  body: none
+  auth: inherit
+}
+
+params:path {
+  filepath: 
+}
+
+example {
+  name: 200 Response
+  description: The raw content of the file.
+  
+  request: {
+    url: {{baseUrl}}/api/file/:filepath
+    method: GET
+    mode: none
+    params:path: {
+      filepath: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

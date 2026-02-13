@@ -1,0 +1,40 @@
+meta {
+  name: List Workspace Files
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/files
+  body: none
+  auth: inherit
+}
+
+example {
+  name: 200 Response
+  description: A JSON object representing the file tree.
+  
+  request: {
+    url: {{baseUrl}}/api/files
+    method: GET
+    mode: none
+  }
+  
+  response: {
+    headers: {
+      Content-Type: application/json
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: json
+      content: '''
+        {}
+      '''
+    }
+  }
+}

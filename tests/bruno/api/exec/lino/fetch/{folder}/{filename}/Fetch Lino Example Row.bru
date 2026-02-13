@@ -1,0 +1,49 @@
+meta {
+  name: Fetch Lino Example Row
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/exec/lino/fetch/:folder/:filename
+  body: none
+  auth: inherit
+}
+
+params:path {
+  folder: 
+  filename: 
+}
+
+example {
+  name: 200 Response
+  description: A single row of example data.
+  
+  request: {
+    url: {{baseUrl}}/api/exec/lino/fetch/:folder/:filename
+    method: GET
+    mode: none
+    params:path: {
+      folder: 
+      filename: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: text/plain
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

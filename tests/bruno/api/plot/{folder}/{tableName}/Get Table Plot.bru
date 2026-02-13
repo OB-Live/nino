@@ -1,0 +1,49 @@
+meta {
+  name: Get Table Plot
+  type: http
+  seq: 1
+}
+
+get {
+  url: {{baseUrl}}/api/plot/:folder/:tableName
+  body: none
+  auth: inherit
+}
+
+params:path {
+  folder: 
+  tableName: 
+}
+
+example {
+  name: 200 Response
+  description: PNG image of the plot.
+  
+  request: {
+    url: {{baseUrl}}/api/plot/:folder/:tableName
+    method: GET
+    mode: none
+    params:path: {
+      folder: 
+      tableName: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: image/png
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

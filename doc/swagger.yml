@@ -1,0 +1,241 @@
+openapi: 3.0.0
+info:
+  title: NINO API
+  description: API for the NINO (Narrow Input, Narrow Output) data transformation pipeline visualization tool.
+  version: "1.0.0"
+servers:
+  - url: http://localhost:2442
+    description: Local development server
+
+paths:
+  /api/schema.{format}:
+    get:
+      summary: Get Project Schema
+      description: Returns the DOT graph for the entire project schema in the specified format.
+      parameters:
+        - name: format
+          in: path
+          required: true
+          description: The format of the schema graph.
+          schema:
+            type: string
+            enum: [dot, svg, png]
+      responses:
+        '200':
+          description: Schema graph in the specified format.
+          content:
+            text/vnd.graphviz:
+              schema:
+                type: string
+            image/svg+xml:
+              schema:
+                type: string
+                format: binary
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  /api/schema/{folder}.{format}:
+    get:
+      summary: Get Folder Schema
+      description: Returns the DOT graph for a specific folder's schema in the specified format.
+      parameters:
+        - name: folder
+          in: path
+          required: true
+          description: The name of the folder.
+          schema:
+            type: string
+        - name: format
+          in: path
+          required: true
+          description: The format of the schema graph.
+          schema:
+            type: string
+            enum: [dot, svg, png]
+      responses:
+        '200':
+          description: Schema graph for the specified folder.
+
+  /api/plot/{folder}/{tableName}:
+    get:
+      summary: Get Table Plot
+      description: Returns a PNG image plotting the data distribution for a table's columns.
+      parameters:
+        - name: folder
+          in: path
+          required: true
+          description: The name of the folder containing the table.
+          schema:
+            type: string
+        - name: tableName
+          in: path
+          required: true
+          description: The name of the table.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: PNG image of the plot.
+          content:
+            image/png:
+              schema:
+                type: string
+                format: binary
+
+  /api/playbook/{folder}:
+    get:
+      summary: Get Playbook Graph
+      description: Returns the DOT graph for an Ansible playbook execution plan.
+      parameters:
+        - name: folder
+          in: path
+          required: true
+          description: The name of the folder containing the playbook.
+          schema:
+            type: string
+      responses:
+        '200':
+          description: DOT graph for the playbook.
+          content:
+            text/vnd.graphviz:
+              schema:
+                type: string
+
+  /api/mask/{folderName}/{tableName}:
+    get:
+      summary: Create Masking File
+      description: Creates a new boilerplate masking file for a table.
+      parameters:
+        - name: folderName
+          in: path
+          required: true
+          description: The name of the folder.
+          schema:
+            type: string
+        - name: tableName
+          in: path
+          required: true
+          description: The name of the table to create a masking file for.
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Masking file created successfully.
+
+  /api/files:
+    get:
+      summary: List Workspace Files
+      description: Returns a JSON structure of all discovered YAML files in the workspace.
+      responses:
+        '200':
+          description: A JSON object representing the file tree.
+          content:
+            application/json:
+              schema:
+                type: object
+
+  /api/file/{filepath}:
+    get:
+      summary: Get File Content
+      description: Retrieves the raw content of a specific file. The filepath should be the full path from the workspace root.
+      parameters:
+        - name: filepath
+          in: path
+          required: true
+          description: Full path to the file (e.g., 'folder/subfolder/file.yaml').
+          schema:
+            type: string
+      responses:
+        '200':
+          description: The raw content of the file.
+    post:
+      summary: Update File Content
+      description: Updates the content of a specific file with the request body.
+      parameters:
+        - name: filepath
+          in: path
+          required: true
+          description: Full path to the file (e.g., 'folder/subfolder/file.yaml').
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          text/plain:
+            schema:
+              type: string
+              example: "file content here"
+      responses:
+        '200':
+          description: File updated successfully.
+
+  /api/pimo/exec:
+    post:
+      summary: Execute Pimo
+      description: Executes the `pimo` CLI tool with the provided YAML masking rules and JSON input.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                yaml:
+                  type: string
+                  description: The masking configuration in YAML format.
+                json:
+                  type: string
+                  description: The input data in JSON format.
+      responses:
+        '200':
+          description: The masked output from the pimo command.
+
+  /api/exec/playbook/{folder}/{filename}:
+    post:
+      summary: Execute Playbook
+      description: Executes a command-line script, typically for an Ansible playbook.
+      parameters:
+        - name: folder
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: filename
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          text/plain:
+            schema:
+              type: string
+      responses:
+        '200':
+          description: The combined stdout and stderr from the command execution.
+
+  /api/exec/lino/fetch/{folder}/{filename}:
+    get:
+      summary: Fetch Lino Example Row
+      description: Fetches a single row of data as an example for a masking file using the `lino` CLI.
+      parameters:
+        - name: folder
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: filename
+          in: path
+          required: true
+          description: The masking filename (e.g., 'my_table-masking.yaml').
+          schema:
+            type: string
+      responses:
+        '200':
+          description: A single row of example data.
+          content:
+            text/plain:
+              schema:
+                type: string
