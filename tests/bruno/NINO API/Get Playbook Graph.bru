@@ -1,0 +1,47 @@
+meta {
+  name: Get Playbook Graph
+  type: http
+  seq: 4
+}
+
+get {
+  url: {{baseUrl}}/api/playbook/:folder
+  body: none
+  auth: inherit
+}
+
+params:path {
+  folder: 
+}
+
+example {
+  name: 200 Response
+  description: DOT graph for the playbook.
+  
+  request: {
+    url: {{baseUrl}}/api/playbook/:folder
+    method: GET
+    mode: none
+    params:path: {
+      folder: 
+    }
+  }
+  
+  response: {
+    headers: {
+      Content-Type: text/vnd.graphviz
+    }
+  
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}

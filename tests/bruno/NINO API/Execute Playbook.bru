@@ -1,0 +1,45 @@
+meta {
+  name: Execute Playbook
+  type: http
+  seq: 10
+}
+
+post {
+  url: {{baseUrl}}/api/exec/playbook/:folder/:filename
+  body: text
+  auth: inherit
+}
+
+params:path {
+  folder: 
+  filename: 
+}
+
+example {
+  name: 200 Response
+  description: The combined stdout and stderr from the command execution.
+  
+  request: {
+    url: {{baseUrl}}/api/exec/playbook/:folder/:filename
+    method: POST
+    mode: text
+    params:path: {
+      folder: 
+      filename: 
+    }
+  }
+  
+  response: {
+    status: {
+      code: 200
+      text: OK
+    }
+  
+    body: {
+      type: text
+      content: '''
+  
+      '''
+    }
+  }
+}
