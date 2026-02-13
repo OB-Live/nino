@@ -5,15 +5,40 @@ class NinoExecution extends HTMLElement {
         super();
         this.editorInstances = {};
         this.monaco = null;
+        this._activeFile = { fileName: null, folderName: null };
 
         this.attachShadow({ mode: 'open' });
 
         const template = document.createElement('template');
         template.innerHTML = `
             <link rel="stylesheet" href="NinoStyle.css">
+            <style>
+                .refresh-icon {
+                    font-size: 1.2rem;
+                    line-height: 1;
+                    padding: 0;
+                    margin-right: 6px;
+                    display: inline-flex;
+                    cursor: pointer;
+                    }
+
+                    .refresh-icon:hover {
+                    opacity: 0.8;
+                    }
+
+                    .tab-button:disabled .refresh-icon {
+                    cursor: not-allowed;
+                    opacity: 0.5;
+                }
+            </style>
             <div id="execution-panel" class="panel">
                 <div id="input-panel" class="sub-panel">
-                    <div class="editor-header">Input</div>
+                    <div class="editor-header">
+                        <span>Input</span>
+                        <button id="fetch-row-btn" class="tab-button" style="display: none;">
+                            <span class="refresh-icon">↻</span> fetch 1 row 
+                        </button>
+                    </div>
                     <div id="input-editor-container" class="editor-wrapper"></div>
                 </div>
                 <div id="resize-handle-v" class="resize-handle-v"></div>
@@ -32,6 +57,7 @@ class NinoExecution extends HTMLElement {
         this.inputEditorContainer = this.shadowRoot.getElementById('input-editor-container');
         this.outputEditorContainer = this.shadowRoot.getElementById('output-viewer-container');
         this.executeBtn = this.shadowRoot.getElementById('execute-btn');
+        this.fetchRowBtn = this.shadowRoot.getElementById('fetch-row-btn');
 
         this.executeBtn.addEventListener('click', () => {
             this.dispatchEvent(new CustomEvent('execute-nino', {
@@ -45,7 +71,32 @@ class NinoExecution extends HTMLElement {
         });
 
         this.readyEditorCount = 0;
+
+        this.fetchRowBtn.addEventListener('click', this.handleFetchRow.bind(this));
     }
+
+    /**
+     * Sets the active file information and updates the UI accordingly.
+     * @param {{fileName: string, folderName: string}} fileInfo - The active file information.
+     */
+    set activeFile(fileInfo) {
+        this._activeFile = fileInfo;
+        this.updateFetchRowButton();
+    }
+
+    /**
+     * Shows or hides the 'fetch 1 row' button based on the active file type.
+     */
+    updateFetchRowButton() {
+        const { fileName } = this._activeFile;
+        if (fileName && fileName.includes('masking.yaml')) {
+            this.fetchRowBtn.style.display = 'inline-flex';
+        } else {
+            this.fetchRowBtn.style.display = 'none';
+        }
+    }
+
+
     /**
      * TODO: comment and document 
      */
@@ -160,6 +211,40 @@ class NinoExecution extends HTMLElement {
             $(bottomPanel).height(rect.height - newTopHeight - $(handle).height());
             this.layoutEditors();
         });
+    }
+
+    /**
+     * Handles the click event for the 'fetch 1 row' button.
+     * This function is only active for masking files. It calls the backend
+     * to get a single row of example data and populates the input editor with it.
+     */
+    async handleFetchRow() {
+        const { fileName, folderName } = this._activeFile;
+
+        if (!fileName || !folderName) {
+            console.error("Missing file name or folder name for fetching row.");
+            return;
+        }
+
+        this.fetchRowBtn.disabled = true;
+        this.fetchRowBtn.querySelector('.refresh-icon').textContent = '...';
+
+        try {
+            const response = await fetch(`/api/exec/lino/fetch/${folderName}/${fileName}`);
+
+            if (!response.ok) {
+                const errorText = await response.text();
+                this.setOutputEditorValue(`Error fetching example row: ${errorText}`);
+            } else {
+                const result = await response.text();
+                this.setInputEditorValue(result);
+            }
+        } catch (error) {
+            this.setOutputEditorValue(`API request failed during fetch: ${error.message}`);
+        } finally {
+            this.fetchRowBtn.disabled = false;
+            this.fetchRowBtn.querySelector('.refresh-icon').textContent = '↻';
+        }
     }
 }
 customElements.define('nino-execution', NinoExecution);

@@ -1,3 +1,4 @@
 *.log
 petstore/analyze.yaml
 petstore/ingress-descriptor.dot
+./nino

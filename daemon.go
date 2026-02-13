@@ -39,8 +39,9 @@ func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths 
 	// API route for pimo execution
 	r.Post("/api/pimo/exec", pimoExecHandler())
 
-	// API routes for exec actions
+	// API routes that executes Command lines actions
 	r.Post("/api/exec/playbook/{folder}/{filename}", execCommandHandler())
+	r.Get("/api/exec/lino/fetch/{folder}/{filename}", fetchLinoExampleHandler(inputPaths, fileMap))
 	r.Post("/api/exec/pull/{folder}/{filename}", execCommandHandler())
 
 	log.Printf("Starting web server on http://localhost:%s", port)
@@ -427,31 +428,35 @@ func updateFileHandler(inputPaths []string, projectData *ProjectData) http.Handl
 
 // findSecureFilePath locates the absolute path for a file within the allowed input directories.
 func findSecureFilePath(inputPaths []string, relativeFilePath string) (string, error) {
-    for _, basePath := range inputPaths {
-        // Attempt 1: Join the basePath and the relative path.
-        // This works for paths like `nino -d .` and URL `/api/file/petstore/source/analyze.yaml`
-        candidatePath1 := filepath.Join(basePath, relativeFilePath)
-        if _, err := os.Stat(candidatePath1); err == nil {
+	for _, basePath := range inputPaths {
+		// Attempt 1: Join the basePath and the relative path.
+		// This works for paths like `nino -d .` and URL `/api/file/petstore/source/analyze.yaml`
+		candidatePath1 := filepath.Join(basePath, relativeFilePath)
+		if _, err := os.Stat(candidatePath1); err == nil {
 			cleanPath, err := filepath.Abs(candidatePath1)
-			if err != nil { return "", err }
-            log.Printf("findSecureFilePath: File found at %s", cleanPath)
-            return cleanPath, nil
-        }
-
-        // Attempt 2: Check if the relative path is complete from the parent of the basePath.
-        // This works for paths like `nino -d ./petstore` and URL `/api/file/petstore/source/analyze.yaml`
-        // where `basePath` is `./petstore` and `relativeFilePath` is `petstore/source/analyze.yaml`.
-		parentOfBasePath := filepath.Dir(basePath)
-        candidatePath2 := filepath.Join(parentOfBasePath, relativeFilePath)
-        if _, err := os.Stat(candidatePath2); err == nil {
-			cleanPath, err := filepath.Abs(candidatePath2)
-			if err != nil { return "", err }
+			if err != nil {
+				return "", err
+			}
 			log.Printf("findSecureFilePath: File found at %s", cleanPath)
 			return cleanPath, nil
 		}
-    }
 
-    return "", fmt.Errorf("file '%s' not found in any configured input path", relativeFilePath)
+		// Attempt 2: Check if the relative path is complete from the parent of the basePath.
+		// This works for paths like `nino -d ./petstore` and URL `/api/file/petstore/source/analyze.yaml`
+		// where `basePath` is `./petstore` and `relativeFilePath` is `petstore/source/analyze.yaml`.
+		parentOfBasePath := filepath.Dir(basePath)
+		candidatePath2 := filepath.Join(parentOfBasePath, relativeFilePath)
+		if _, err := os.Stat(candidatePath2); err == nil {
+			cleanPath, err := filepath.Abs(candidatePath2)
+			if err != nil {
+				return "", err
+			}
+			log.Printf("findSecureFilePath: File found at %s", cleanPath)
+			return cleanPath, nil
+		}
+	}
+
+	return "", fmt.Errorf("file '%s' not found in any configured input path", relativeFilePath)
 }
 
 // PimoExecRequest defines the structure for the /pimo/exec request body.
@@ -525,5 +530,52 @@ func execCommandHandler() http.HandlerFunc {
 
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write([]byte(responseOutput))
+	}
+}
+
+// fetchLinoExampleHandler fetches the first line of a table as an example for masking files.
+func fetchLinoExampleHandler(inputPaths []string, fileMap map[string]string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		folderName := chi.URLParam(r, "folder")
+		fileName := chi.URLParam(r, "filename")
+
+		if !strings.HasSuffix(fileName, "-masking.yaml") {
+			http.Error(w, "File is not a masking file", http.StatusBadRequest)
+			return
+		}
+
+		tableName := strings.TrimSuffix(fileName, "-masking.yaml")
+
+		// Find the base path for the folder to execute the lino command from.
+		basePath, ok := findBasePathForFolder(inputPaths, folderName, fileMap)
+		if !ok {
+			http.Error(w, fmt.Sprintf("Could not determine base path for folder '%s'", folderName), http.StatusInternalServerError)
+			return
+		}
+
+		// Change to the correct directory before executing the command
+		originalDir, err := os.Getwd()
+		if err != nil {
+			http.Error(w, fmt.Sprintf("Failed to get current working directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+		defer os.Chdir(originalDir) // Restore original directory
+
+		targetDir := filepath.Join(basePath, folderName)
+		if err := os.Chdir(targetDir); err != nil {
+			http.Error(w, fmt.Sprintf("Failed to change directory to '%s': %v", targetDir, err), http.StatusInternalServerError)
+			return
+		}
+
+		cmd := exec.Command("lino", "pull", "--table", tableName, "source", "-l", "1")
+		output, err := cmd.CombinedOutput()
+		if err != nil {
+			log.Printf("Error executing lino pull command: %v\nOutput:\n%s", err, string(output))
+			http.Error(w, fmt.Sprintf("Failed to fetch example data: %v\n%s", err, string(output)), http.StatusInternalServerError)
+			return
+		}
+
+		w.Header().Set("Content-Type", "text/plain")
+		w.Write(output)
 	}
 }

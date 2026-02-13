@@ -262,6 +262,8 @@ function handleTabActivation(event) {
             ninoExecution.setInputEditorValue(example?.input || '{}');
         }
     }
+
+    ninoExecution.activeFile = { fileName, folderName };
 }
 
 /**

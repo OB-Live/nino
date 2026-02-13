@@ -1,11 +1,11 @@
 # NINO
-NINO stands for Narrow Input Narrow Output, it include a Lino-Pimo Transformation Plan
+NINO (Narrow Input, Narrow Output) is a data transformation pipeline visualization tool. It includes a Lino-Pimo Transformation Plan viewer, an interactive web UI, and a backend service to analyze and display data schemas and execution plans.
 
 ![Presentation pic](example.png)
 
 # Description 
 
-NINO parses YAML configuration files and describes them as Graphviz dot files, which it serves over at (http://localhost:2442 by default). This tool is designed to provide a clear and interactive visualization of data transformation pipelines. By parsing various YAML files defining tables, relations, data connectors, and masking rules, it generates a comprehensive graph that helps developers and data engineers understand the structure and flow of their data.
+NINO parses YAML configuration files from specified project directories and generates interactive visualizations. When run in daemon mode (`-d`), it starts a web server (http://localhost:2442 by default) that provides a comprehensive view of your data transformation pipelines.
 
 The interactive web interface allows users to explore the data schema, view data distribution plots for specific table columns, and visualize the execution plan of associated Ansible playbooks. Furthermore, it exposes a set of API endpoints for programmatic access, enabling integration with external tools for file management and automation. This makes it a powerful utility for both documenting and managing complex data transformation processes.
 
@@ -18,12 +18,13 @@ The interactive web interface allows users to explore the data schema, view data
 *   `GET /api/mask/{folderName}/{tableName}`: Creates a new boilerplate masking masking file for a table.
 *   `GET /api/files`: Returns a JSON object listing all files within the project directories.
 *   `GET /api/file/{folder}/{filename}`: Retrieves the raw content of a specific file.
+*   `GET /api/exec/lino/fetch/{folder}/{filename}`: Fetches a single row of data as an example for a masking file.
 *   `POST /api/file/{folder}/{filename}`: Updates the content of a specific file with the request body.
 
 # Daemon it (-d)
-
+To start the interactive web server, run:
 ```sh 
-nino -d ./
+go run . -d ./petstore
 ```
 
 # Or CLI it 
