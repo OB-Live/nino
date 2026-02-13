@@ -1,6 +1,4 @@
 # feature ideas 
-
-
 - improve yaml autocompletion an validation for 
     - dataconnector
     - masking (!important)
