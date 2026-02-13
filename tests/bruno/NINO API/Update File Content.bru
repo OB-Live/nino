@@ -14,6 +14,12 @@ params:path {
   filepath: 
 }
 
+tests {
+  test("Status code is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
+}
+
 example {
   name: 200 Response
   description: File updated successfully.

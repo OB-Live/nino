@@ -11,8 +11,14 @@ get {
 }
 
 params:path {
-  folder: 
-  tableName: 
+  folder: petstore
+  tableName: pets
+}
+
+tests {
+  test("Status code is 200", function() {
+    expect(res.getStatus()).to.equal(200);
+  });
 }
 
 example {
