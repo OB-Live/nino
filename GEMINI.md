@@ -58,14 +58,13 @@ This directory contains all client-side assets that are served directly by the w
 
 *   **`README.md`**: Provides a high-level overview of the project, its features, and how to set it up.
 
-## Default Context
-
 ## Testing
 
 ### Backend Testing with Bruno (Folder Structure)
 
 The `./tests/bruno/` folder contains a Bruno API collection with automated tests for each backend endpoint, organized into subfolders. This structured collection can be imported into the Bruno client to ensure API functionality and regression detection.
 
+## Default Context Items
 
 The following files should be loaded by default as context items for Gemini Code Assist:
 
