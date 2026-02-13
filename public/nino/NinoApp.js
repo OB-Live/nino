@@ -97,21 +97,6 @@ function openExecutionGraph(folderName) {
     ninoEditor.activateTab('execution', false, { folderName: folderName });
 }
 
-// /**
-//  * handleGraphClick - Handles clicks on the graph output, allowing users to click on nodes to see table stats or execution details.
-//  * @param {*} event 
-//  */
-// function handleGraphClick(event) {
-//     const { functionName, args } = event.detail;
-//     if (functionName === 'openTableStat') {
-//         const [tableName, folderName] = args;
-//         openTableStat(tableName, folderName);
-//     } else if (functionName === 'openExecutionGraph') {
-//         const [folderName] = args;
-//         openExecutionGraph(folderName);
-//     }
-// }
-
 /**
  * Toggles the collapsed state of the sidebar.
  * It adds or removes the 'collapsed' class, saves the state to localStorage,
@@ -278,8 +263,6 @@ function handleTabActivation(event) {
         }
     }
 }
-
-
 
 /**
  * Recursively searches for the first folder containing a 'playbook.yaml' file.
