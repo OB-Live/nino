@@ -2,16 +2,6 @@
 
 This document outlines the recommended best practices and project structure for the Gemini project. Adhering to these guidelines ensures consistency, maintainability, and scalability of the codebase.
 
-## Guiding Principles
-
-The primary principle is **KISS (Keep It Simple, Stupid)**. We aim for:
-- **Minimal Code**: Write only what is necessary.
-- **Uniform Code**: Maintain a consistent style across the project.
-- **Minimal Number of Files**: Avoid creating new files unless absolutely necessary.
-- **Minimal Number of Lines**: Keep functions and files concise.
-
-During the current feature development phase, priorities such as testing, security, and performance optimization are secondary to rapid feature implementation.
-
 ## Project Structure
 
 The project follows a modular and layered architecture.
@@ -35,7 +25,6 @@ nino/
 │   │   └── index.html
 │   └── ...
 ├── daemon.go
-├── main.go
 ├── parser.go
 ├── renderer.go
 └── README.md
@@ -71,6 +60,13 @@ This directory contains all client-side assets that are served directly by the w
 
 ## Default Context
 
+## Testing
+
+### Backend Testing with Bruno (Folder Structure)
+
+The `./tests/bruno/` folder contains a Bruno API collection with automated tests for each backend endpoint, organized into subfolders. This structured collection can be imported into the Bruno client to ensure API functionality and regression detection.
+
+
 The following files should be loaded by default as context items for Gemini Code Assist:
 
 *   `public/nino/NinoApp.js`
@@ -101,6 +97,7 @@ The following files should be loaded by default as context items for Gemini Code
     *   Components should communicate primarily through custom events (`dispatchEvent` and `addEventListener`) rather than direct DOM manipulation of other components.
 
 2.  **State Management**:
+    *   Persist user preferences and UI state (e.g., sidebar collapse, active tabs, panel sizes) using `localStorage` to enhance user experience across sessions.
     *   Avoid global variables where possible; pass data explicitly between components or use a centralized state management pattern if the application complexity grows.
 
 3.  **Performance**:
