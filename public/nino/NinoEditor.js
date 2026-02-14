@@ -217,11 +217,11 @@ class NinoEditor extends HTMLElement {
       const execPlan = document.createElement('nino-graphviz');
       execPlan.setAttribute('url', `/api/playbook/${folderName}`); 
     
-      this.executionContainer.innerHTML = `<p>
-        <a href="#"> 📄 Create</a> an Execution Plan or 
-        <a href="#"> 🏃‍♀️ Run it </a>
-        
-      </p>`;
+      this.executionContainer.innerHTML = `<p><span> 
+        <button class="btn"><i class="iPlaybook mediumIcon"></i> Create Playbook</button> 
+        <button class="btn"><i class="iScript mediumIcon"></i> Create Script</button> 
+        <button class="btn"><i class="iPlaybook mediumIcon"></i> Run it</button> 
+      </span></p>`;
       this.executionContainer.appendChild(execPlan);
     }
   }

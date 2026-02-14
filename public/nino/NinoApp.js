@@ -220,7 +220,7 @@ async function handleSelectExample(example) {
             .then(text => ninoEditor.setYamlValue(text))
             .catch(err => ninoEditor.setYamlValue(`# Failed to load: ${example.url}`));
     }
-    ninoExecution.setInputEditorValue(example.input);
+    ninoExecution.setInputEditorValue(example.input ?? example['data-input'] ?? '');
     ninoExecution.setOutputEditorValue("");
 }
 

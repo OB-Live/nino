@@ -1,6 +1,6 @@
 :root {
   /* 🌿 Olive Tree Palette */
-   /* 🌿 Olive Leaves */
+  /* 🌿 Olive Leaves */
   --pale-silver-leaf: #bac6b0;
   --sunlit-olive-leaf: #a4b28c;
   --classic-olive-green: #808c52;
@@ -38,26 +38,34 @@
   --border: var(--dusty-stone-gray );  */
 
 
- /* Base */
-  --background: #f3f1e6;            /* sun-washed field light */
-  --foreground: #2f3a24;            /* deep olive shadow text */
+  /* Base */
+  --background: #f3f1e6;
+  /* sun-washed field light */
+  --foreground: #2f3a24;
+  /* deep olive shadow text */
 
   /* Surfaces */
-  --card: #e7e3cf;                  /* dry soil + dust mix */
+  --card: #e7e3cf;
+  /* dry soil + dust mix */
 
   /* Primary (olive canopy) */
-  --primary: #6e7f3f;               /* classic olive green */
-  --primary-foreground: #f6f7f2;    /* light leaf highlight */
+  --primary: #6e7f3f;
+  /* classic olive green */
+  --primary-foreground: #f6f7f2;
+  /* light leaf highlight */
 
   /* Muted (stone + bark undertones) */
-  --muted: #cfcab4;                 /* dusty stone */
-  --muted-foreground: #6a7158;      /* muted leaf gray-green */
+  --muted: #cfcab4;
+  /* dusty stone */
+  --muted-foreground: #6a7158;
+  /* muted leaf gray-green */
 
   /* Accent (sunlit olive fruit) */
-  --accent: #a6ac4e;                /* yellow-green olive */
+  --accent: #a6ac4e;
+  /* yellow-green olive */
 
   /* Structural */
-  --border: #b8b39d;      
+  --border: #b8b39d;
 
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 0px;
@@ -307,18 +315,21 @@ nino-workspace {
   flex-direction: column;
 }
 
-a{
-  color: var(--accent);
+a {
+  color: var(--pale-silver-leaf);
   text-decoration: none;
-  background-color: var(--card); 
-}
-a:hover{
-  color: var(--primary-foreground);
+  background-color: var(--deep-purple-olive);
+  border-radius: 6px;
+  padding-right: 6px;
 }
 
-p { 
-  background-color: var(--card);
-  padding: 3px;
+a:hover {
+  color: var(--dry-olive-soil);
+}
+
+p {
+  background-color: var(--fresh-green-olive);
+  padding: 6px;
 }
 
 .execute-btn {
@@ -402,13 +413,15 @@ iframe {
 
 
 
-nino-editor, #editor-panel {
-  min-width: 20vw !important; 
+nino-editor,
+#editor-panel {
+  min-width: 20vw !important;
 
   /* width: stretch; */
 }
 
-nino-execution, #execution-panel{
+nino-execution,
+#execution-panel {
   /* flex: 1; */
   min-width: 20vw !important;
 
@@ -550,13 +563,16 @@ nino-execution, #execution-panel{
 }
 
 .example-btn:hover {
-  background-color: var(--muted);
+  background-color: var(--maturing-olive);
+}
+
+.example-name {
+  font-weight: 500;
 }
 
 #jstree-workspace {
-  background-color: var(--background);
-
-  border: 4px solid var(--card);
+  background-color: var(--muted-sage-olive);
+  border: 4px solid var(--maturing-olive);
   flex: 1;
   scrollbar-width: none;
   overflow: scroll;
@@ -586,4 +602,56 @@ nino-graphviz,
 /* temporary fix : monaco editor is creating an extra text area for some reason and it is visible and it is not possible to hide it with the monaco editor options */
 .ime-text-area {
   display: none
+}
+
+.vakata-context .iDataconnector {
+  background-image: url("/img/db_icon.png");
+  background-size: contain;
+
+}
+
+.vakata-context .iMask,
+.iMask {
+  background-image: url("/img/masks.png");
+  background-size: contain;
+}
+
+.vakata-context .iPlaybook {
+  background-image: url("/img/green-play-button.png");
+  background-size: contain;
+}
+
+.iPlaybook:hover {
+  opacity: 0.8;
+  content: '⬇️';
+}
+
+.btn {
+  background-color: var(--pale-silver-leaf);
+  border: 1px solid var(--deep-purple-olive);
+  padding: 4px 4px;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.btn:hover {
+  background-color: var(--maturing-olive);
+}
+
+span {
+  display: flex;
+  gap: 10px;
+  flex-direction: row;
+  align-items: center;
+}
+
+.mediumIcon {
+  width: 24px;
+  height: 24px;
+  background-color: rgb(155 208 246 / 30%);
+  /* padding: 5px; */
+  background-size: contain;
 }

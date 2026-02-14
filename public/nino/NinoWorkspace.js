@@ -173,6 +173,7 @@ class NinoWorkspace extends HTMLElement {
     /**
         * Renders the file tree using jstree.
         * Sets up event listeners for node selection and double-click to open files.
+        * documentation there : https://github.com/vakata/jstree/blob/master/src/jstree.contextmenu.js
         */
     renderFileTree(jstreeData) {
         const jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
@@ -180,13 +181,55 @@ class NinoWorkspace extends HTMLElement {
             .jstree({
                 core: {
                     data: jstreeData,
+                    dots : true,
                     check_callback: true,
                 },
-                plugins: ['wholerow', 'types'],
+                plugins: [ "state", "types", "sort", "search", "contextmenu"],
+                
                 types: {
                     default: { icon: 'jstree-file' },
                     folder: { icon: 'jstree-folder' },
-                    file: { icon: 'jstree-file' },
+                    file: { icon: 'iMask' },
+                    dataconnector: { icon: 'iDataconnector' },
+                    masking: { icon: 'iMask' },
+                    playbook: { icon: '▶️' },
+                    table: { icon: '📊' },
+                    analyse: { icon: '🔍' },
+                },
+                "contextmenu":{
+                    "items": function($node) {
+                        return {
+                            createDB : {
+                                "separator_before"	: false,
+					            "separator_after"	: true,
+                                "icon": 'iDataconnector',
+                                "label" : "Create DataConnector",
+                                "action" : function(obj) { this.create(obj); alert(obj.text())},
+                                "_class" : "class"
+                            },
+                            createMasking : {
+                                "separator_before"	: false,
+					            "separator_after"	: true,
+                                "icon": 'iMask',
+                                "label" : "Create Masking File",
+                                "action" : function(obj) { this.rename(obj);}
+                            },
+                            createPlaybook : {
+                                "separator_before"	: false,
+					            "separator_after"	: false,
+                                "icon": 'iPlaybook',
+                                "label" : "Create Playbook",
+                                "action" : function(obj) { this.remove(obj); }
+                            },
+                            createScript : {
+                                "separator_before"	: false,
+					            "separator_after"	: false,
+                                "icon": 'iPlaybook',
+                                "label" : "Create bash script",
+                                "action" : function(obj) { this.remove(obj); }
+                            }
+                        };
+                    }
                 },
             })
             .on('select_node.jstree', (e, data) => {

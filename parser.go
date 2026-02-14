@@ -286,6 +286,15 @@ func parseTables(file string, folder *FolderData) {
 
 // findYAMLFiles recursively searches input paths for .yaml and .yml files.
 func findYAMLFiles(paths []string) (map[string]string, error) {
+	skippedFolders := map[string]bool{
+		".devcontainer": true,
+		".github":       true,
+		"doc":           true,
+		"node_modules":  true,
+		"public":        true,
+		"tests":         true,
+	}
+
 	fileMap := make(map[string]string)
 	for _, path := range paths {
 		info, err := os.Stat(path)
@@ -306,8 +315,8 @@ func findYAMLFiles(paths []string) (map[string]string, error) {
 			if err != nil {
 				return err
 			}
-			// Skip directories starting with '.'
-			if d.IsDir() && len(d.Name()) > 0 && d.Name()[0] == '.' && p != basePath {
+			// Skip specified directories
+			if d.IsDir() && skippedFolders[d.Name()] {
 				return filepath.SkipDir
 			}
 			if !d.IsDir() && (strings.HasSuffix(p, ".yaml") || strings.HasSuffix(p, ".yml")) {

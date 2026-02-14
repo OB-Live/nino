@@ -342,16 +342,21 @@ func listFilesHandler(inputPaths []string) http.HandlerFunc {
 
 			if info.IsDir() {
 				// If basePath is a directory, its name becomes a top-level folder under "Workspace"
-				folderName := filepath.Base(basePath)
 				folderContent, err := buildFolderContent(basePath)
 				if err != nil {
 					http.Error(w, fmt.Sprintf("Failed to build file tree for %s: %v", basePath, err), http.StatusInternalServerError)
 					return
 				}
 				if len(folderContent) > 0 {
-					nestedFolder := make(map[string][]interface{})
-					nestedFolder[folderName] = folderContent
-					workspaceItems = append(workspaceItems, nestedFolder)
+					folderName := filepath.Base(basePath)
+					if folderName == "." {
+						// If the folder is '.', flatten its content into the workspace
+						workspaceItems = append(workspaceItems, folderContent...)
+					} else {
+						nestedFolder := make(map[string][]interface{})
+						nestedFolder[folderName] = folderContent
+						workspaceItems = append(workspaceItems, nestedFolder)
+					}
 				}
 			} else {
 				// If basePath is a file, add it directly to "Workspace"

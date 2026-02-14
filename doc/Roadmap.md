@@ -1,4 +1,7 @@
-# feature ideas 
+# Add features 
+
+## 
+
 - improve yaml autocompletion an validation for 
     - dataconnector
     - masking (!important)
@@ -6,11 +9,23 @@
     - tables 
     - relations 
     - analyze
-- better template
+- in NinoWorspace.js : 
+    - add icons for each file type 
+        - dataconnector.yaml
+        - masking.yaml
+        - ingress-descriptor.yaml 
+        - tables.yaml 
+        - relations.yaml 
+        - analyze.yaml
 
-# quality & deployement 
+- create 
+
+# Quality  
 - stabilize static examples 
+- better css
 - test 
+
+# Deployement
 - conteneurisation
 - product release
 - product demo 

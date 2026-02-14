@@ -4,9 +4,15 @@ class LinoAnalyse extends HTMLElement {
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="NinoStyle.css">
+            <style>
+                
+
+            </style>
             <p>
                 <span> 
-                <a href="#"> 📈 (Re)Start Analysis</a> 
+                <button class="btn"> 📈 (Re)Start Analysis</button> 
+                 or 
+                <button class="btn"><i class="iMask mediumIcon"></i> Create a mask</button> 
                 </span> 
             </p>
             <div id="stats-container"></div>

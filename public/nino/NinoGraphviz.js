@@ -11,6 +11,7 @@ class NinoGraphviz extends HTMLElement {
             <style>
                  #graph-container { height: 100%; width: 100%; }
                  #graph-container svg { width: 100%; height: 100%; }
+                 polygon[fill="white"] {fill-opacity: 0;}
             </style>
             <script src="/lib/d3.v7.min.js"></script>
             <script src="/lib/d3-graphviz.js"></script>
