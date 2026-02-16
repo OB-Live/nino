@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Nino Monaco Editor</title>
+    <link rel="stylesheet" href="NinoStyle.css" />
+    <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+        /* Give the component a specific size */
+        nino-monaco-editor {
+            width: 80vw;
+            height: 80vh;
+            border: 2px solid red;
+        }
+    </style>
+    
+</head>
+<body>
+    <h1>Testing nino-monaco-editor</h1>
+
+    <nino-monaco-editor
+        id="my-editor"
+        language="javascript"
+        value="console.log('Hello, isolated world!');">
+    </nino-monaco-editor>
+
+    <script type="module" src="./NinoMonacoEditor.js"></script>
+</body>
+</html>
