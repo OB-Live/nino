@@ -10,28 +10,39 @@ class NinoMonacoEditor extends HTMLElement {
 
     constructor() {
         super();
-        this.attachShadow({ mode: 'open' });
+        this.shadow = this.attachShadow({ mode: 'closed' });
         this.monaco = null;
         this.editorInstance = null;
 
         const template = document.createElement('template');
-        template.innerHTML = `
-            <style>
-                :host {
-                    display: block;
-                    width: 100%;
-                    height: 100%;
-                }
-                #editor-container {
-                    width: 100%;
-                    height: 100%;
-                }
-            </style>
-            <link rel="stylesheet" data-name="vs/editor/editor.main" href="/lib/monaco-editor-0.55.1/package/min/vs/editor/editor.main.css" />
-            <div id="editor-container"></div>
+        template.innerHTML = ` 
+        <style>
+
+            ::slotted(*) {
+                all: unset;
+            } 
+
+            :host {
+                all: initial;               
+                box-sizing: border-box;
+                display: block;
+                
+                height: 100%;
+                margin: 0;
+                padding: 0; 
+                overflow: hidden;
+            } 
+            #editor-container { 
+                height: 100%;
+            }
+            
+        </style>
+        <link rel="stylesheet" data-name="vs/editor/editor.main" href="/lib/monaco-editor-0.55.1/package/min/vs/editor/editor.main.css" />
+
+        <div id="editor-container"></div>
         `;
-        this.shadowRoot.appendChild(template.content.cloneNode(true));
-        this.editorContainer = this.shadowRoot.getElementById('editor-container');
+        this.shadow.appendChild(template.content.cloneNode(true));
+        this.editorContainer = this.shadow.getElementById('editor-container');
     }
 
     connectedCallback() {
@@ -50,7 +61,7 @@ class NinoMonacoEditor extends HTMLElement {
             script.onerror = (error) => {
                 console.error("Failed to load Monaco loader:", error);
             };
-            this.shadowRoot.appendChild(script); // Append to head for global availability
+            this.shadow.appendChild(script); // Append to head for global availability
         } else {
             this._initializeMonaco();
         }

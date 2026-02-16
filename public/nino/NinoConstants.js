@@ -285,7 +285,16 @@ export const MASK_KEYWORDS = [
 ];
 
 
-export const HELPER_LOAD_METADATA = (folderName) => `cd ${folderName}/source 
+export const NĭnŏTemplate = {
+  inputDataconnector: (folderName) => `
+# boiler plate project setup 
+mkdir -p "${folderName}/source";
+mkdir -p "${folderName}/target";
+ln -sf "../dataconnector.yaml" "${folderName}/source/dataconnector.yaml"
+ln -sf "../dataconnector.yaml" "${folderName}/target/dataconnector.yaml"
+  
+# extract metadata from source and target
+cd ${folderName}/source 
 lino table extract source
 lino relation extract source
 # lino analyse source > analyze.yaml
@@ -294,21 +303,67 @@ cd ../target
 lino table extract target
 lino relation extract target
 # lino analyse target > analyze.yaml
-`;
 
 
-export const api = {
-  files: 'files',
-  schema: ''
+`,
+  inputDescriptor: (folderName, tableName) => `cd ${folderName}
+# lino pull -l 1 --table ${tableName} source
+lino pull -l 1 -i ${tableName}-descriptor.yaml
+`,
+  inputPlaybook: (folderName, tableName) => ` 
+ansible-playbook ${tableName} playbook.yaml
+`,
+  inputDocker: (folderName, tableName) => ` 
+docker compose up docker-compose.yaml  
+`,
+  inputMasking: (folderName, tableName) => `
+lino pull -l 1 -i ${tableName}-descriptor.yaml | pimo -c ${tableName}-masking.yaml
+`,  
 };
 
-export const fileTypes = [
-  { name: "yaml", regex: "*.yml" },
-  { name: "connector", regex: "*dataconnector.yml" },
-  { name: "descriptor", regex: "*descriptor.yml" },
-  { name: "masking", regex: "*masking.yml" },
-  { name: "playbook", regex: "*playbook.yml" },
-  { name: "table", regex: "*table.yml" },
-  { name: "relation", regex: "*relation.yml" },
-  { name: "analyse", regex: "*analyse.yml" },
+export const NĭnŏAPI = {
+  getFiles: () => '/api/files',
+  getFile : (filename) => `/api/file/${filename}`,
+  postFile: (filename) => `/api/file/${filename}`,
+  pimoExec: () => '/api/pimo/exec',
+  execPlaybook: (folder, filename) => `/api/exec/playbook/${folder}/${filename}`,
+  execPull: (folder, filename) => `/api/exec/pull/${folder}/${filename}`,
+  linoFetch: (folder, filename) => `/api/exec/lino/fetch/${folder}/${filename}`,
+  getSchema: (format = 'dot', folder = '') => `/api/schema${folder ? `/${folder}` : ''}.${format}`,
+  getPlot: (folder, tableName) => `/api/plot/${folder}/${tableName}`,
+  getPlaybook: (folder) => `/api/playbook/${folder}`,
+  createMaskFile: (folderName, tableName) => `/api/mask/${folderName}/${tableName}`,
+};
+
+const fileTypes = [
+  { language: "yaml", suffix: ["yaml", "yml"], dialect: "connector", regex: "dataconnector" },
+  { language: "yaml", suffix: ["yaml", "yml"], dialect: "descriptor", regex: "descriptor" },
+  { language: "yaml", suffix: ["yaml", "yml"], dialect: "masking", regex: "masking" },
+  { language: "yaml", suffix: ["yaml", "yml"], dialect: "playbook", regex: "playbook" },
+  { language: "yaml", suffix: ["yaml", "yml"], dialect: "table", regex: "table" },
+  { language: "yaml", suffix: ["yaml", "yml"], dialect: "relation", regex: "relation" },
+  { language: "yaml", suffix: ["yaml", "yml"], dialect: "", regex: "analyse" },
+  { language: "yaml", suffix: ["yaml", "yml"], dialect: "", regex: ".yml" },
+
+  { language: "shell", suffix: ["sh", "bash", "zsh"], dialect: "", regex: "sh" },
+  { language: "json", suffix: ["json"], dialect: "", regex: "json" }, 
+
+  { language: "md", suffix: ["md"], dialect: "", regex: "md" },  
 ];
+
+export function getFileType(filename) {
+  const lowerFilename = filename.toLowerCase(); 
+  const parts = lowerFilename.split('.');
+  const suffix = parts.length > 1 ? parts.pop() : '';
+  const nameWithoutSuffix = parts.join('.');
+
+  for (const type of fileTypes) {
+    const suffixMatch = type.suffix && type.suffix.includes(suffix);
+    const regexMatch = type.regex && (nameWithoutSuffix.includes(type.regex) || lowerFilename.includes(type.regex));
+
+    if (suffixMatch && regexMatch) {
+        return type;
+    }
+  }
+  return { language: "plaintext", suffix: [], dialect: "", regex: "" }; // Default if no match
+}

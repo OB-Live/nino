@@ -1,7 +1,0 @@
-version: v1
-dataconnectors:
-  - name: target
-    url: postgresql://jhpetclinic@localhost:5433/jhpetclinic?sslmode=disable
-    readonly: false
-    password:
-      valueFromEnv: ADMIN

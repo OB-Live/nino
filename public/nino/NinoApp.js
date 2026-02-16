@@ -1,4 +1,4 @@
-import { HELPER_LOAD_METADATA, staticExamples } from './NinoConstants.js';
+import { NĭnŏTemplate, staticExamples, NĭnŏAPI } from './NinoConstants.js';
 import './NinoEditor.js';
 import './NinoWorkspace.js';
 import './NinoExecution.js';
@@ -38,6 +38,7 @@ function makeHorizontalResizable() {
             const newPrevWidth = moveEvent.clientX - rect.left - sidebarWidth - handleWidth;
             $(ninoEditor).css('flex', `1 1 ${newPrevWidth}px`);
             ninoExecution.layoutEditors();
+            ninoEditor.layoutEditors();
         };
 
         const onMouseUp = () => {
@@ -127,12 +128,12 @@ function toggleSidebar() {
  */
 async function handleExecute(yamlValue, jsonValue) {
     const executeBtn = ninoExecution.shadowRoot.getElementById('execute-btn');
-    executeBtn.textContent = "Executing...";
+    // executeBtn.textContent = "Executing...";
     executeBtn.disabled = true;
     ninoExecution.setOutputEditorValue("");
 
     try {
-        const response = await fetch("/api/pimo/exec", {
+        const response = await fetch(NĭnŏAPI.pimoExec(), {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
@@ -153,7 +154,7 @@ async function handleExecute(yamlValue, jsonValue) {
             JSON.stringify({ error: "API request failed" }, null, 2)
         );
     } finally {
-        executeBtn.textContent = "";
+        // executeBtn.textContent = "";
         executeBtn.disabled = false;
     }
 }
@@ -169,11 +170,11 @@ async function handleExecute(yamlValue, jsonValue) {
 async function handleFileAction(event) {
     const { action, example } = event.detail;
     if (action === 'play') {
-        let url = '';
+        let url;
         if (example.name.includes('playbook')) {
-            url = `/api/exec/playbook/${example.description}/${example.name}`;
+            url = NĭnŏAPI.execPlaybook(example.description, example.name);
         } else if (example.name.includes('dataconnector')) {
-            url = `/api/exec/pull/${example.description}/${example.name}`;
+            url = NĭnŏAPI.execPull(example.description, example.name);
         }
         if (!url) return;
 
@@ -245,15 +246,15 @@ function handleTabActivation(event) {
     if (tabId === 'graph') {
         ninoExecution.setOutputEditorValue('');
     } else {
-        ninoExecution.restoreInputOutputEditors();
+        ninoExecution.layoutEditors();
     }
 
     if (fileName && fileName.includes('dataconnector.yaml')) {
         ninoExecution.setInputEditorLanguage('shell');
-        ninoExecution.setInputEditorValue(HELPER_LOAD_METADATA(folderName));
+        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDataconnector(folderName));
     } else if (fileName && fileName.includes('playbook.yaml')) {
         ninoExecution.setInputEditorLanguage('shell');
-        ninoExecution.setInputEditorValue(`ansible-playbook ${folderName}/${fileName} --connection=local`);
+        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputPlaybook(folderName, fileName));
     } else if (tabId === 'yaml') {
         ninoExecution.setInputEditorLanguage('json');
         if (!fromClick) {

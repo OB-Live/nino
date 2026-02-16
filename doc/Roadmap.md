@@ -1,6 +1,18 @@
-# Add features 
+# Fix
 
-## 
+- execute button 
+- make the methods available in console 
+- add actions :
+     - create prefiled mask for a given entity
+     - create default dataconnector source & target 
+     - create bash script 
+     - create playbook 
+- execution plan buttons and paragraph
+- Uncaught TypeError: Cannot read properties of undefined (reading 'yaml') 
+    this.editorInstances.yaml ? this.editorInstances
+
+
+# Add features 
 
 - improve yaml autocompletion an validation for 
     - dataconnector
@@ -17,8 +29,6 @@
         - tables.yaml 
         - relations.yaml 
         - analyze.yaml
-
-- create 
 
 # Quality  
 - stabilize static examples 

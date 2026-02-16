@@ -1,14 +1,14 @@
 // c:\Users\benjamin.bertrand\ws\nino\public\nino\NinoEditor.js
 
 import './LinoAnalyse.js';
-import './NinoMonacoEditor.js'; // Import the new web component // Import the new web component
-import { staticExamples, HELPER_LOAD_METADATA } from './NinoConstants.js'; // Import staticExamples and HELPER_LOAD_METADATA// Import staticExamples and HELPER_LOAD_METADATA
+import './NinoMonacoEditor.js'; 
+import { staticExamples, NĭnŏTemplate, NĭnŏAPI } from './NinoConstants.js';  
 class NinoEditor extends HTMLElement {
   constructor() {
     super();
     this.attachShadow({ mode: 'open' });
     this.jsyaml = null;
-    this.editorInstances = {}; // To hold Monaco editor instances
+    this.editorInstances = {};  
     this.activeTab = 'yaml';
     this.yamlEditorFileType = 'yaml'; // Default file type for YAML editor // Default file type for YAML editor
 
@@ -16,71 +16,73 @@ class NinoEditor extends HTMLElement {
     const template = document.createElement('template');
     template.innerHTML = `
       <link rel="stylesheet" href="NinoStyle.css">
-      <div id="editor-panel" class="panel" >
+      <div id="editor-panel" class="panel">
         <div class="tab-header">
-           <button class="tab-button" data-tab="graph">
-            <span id="download-graph-btn" class="download-btn">⤓</span>Transformation Plan 
+          <button class="tab-button" data-tab="graph">
+          <span id="download-graph-btn" class="download-btn">⤓</span>Transformation Plan 
           </button>
           <button class="tab-button" data-tab="execution">Execution Plan</button>
           <button class="tab-button" data-tab="stats">Analyse</button>
           <button class="tab-button active" data-tab="yaml">Examples</button>
-       
         </div> 
-        <div id="yaml-editor-container" class="tab-content active editor-wrapper"></div>
-        <div id="graph-view-container" class="tab-content editor-wrapper"></div>
-        <div id="execution-view-container" class="tab-content editor-wrapper"></div>
-        <div id="stats-view-container" class="tab-content editor-wrapper"></div>
+
+        <nino-monaco-editor 
+          language="yaml"
+          id="example-editor-container"
+          value="${staticExamples[0].examples[0].yaml}"  
+          class="tab-content editor-wrapper"
+        ></nino-monaco-editor> 
+
+        <nino-graphviz 
+          id="graph-view-container" 
+          url="${NĭnŏAPI.getSchema('dot')}" 
+          class="tab-content editor-wrapper"
+        ></nino-graphviz> 
+        
+        <nino-graphviz 
+          id="execution-view-container" 
+          url="${NĭnŏAPI.getPlaybook('petstore')}" 
+          class="tab-content editor-wrapper"
+        ></nino-graphviz>
+        
+        <lino-analyse 
+          id="stats-view-container" 
+          folder-name="petstore" 
+          table-name="pets" 
+          class="tab-content editor-wrapper"
+        ></lino-analyse>
+
       </div>
     `;
     this.shadowRoot.appendChild(template.content.cloneNode(true));
     this.tabHeader = this.shadowRoot.querySelector('.tab-header');
-    this.yamlEditorContainer = this.shadowRoot.getElementById('yaml-editor-container');
-    this.graphContainer = this.shadowRoot.getElementById('graph-view-container');
-    this.executionContainer = this.shadowRoot.getElementById('execution-view-container');
+    this.panel = this.shadowRoot.getElementById('editor-panel');
+    this.exampleEditor = this.shadowRoot.getElementById('example-editor-container');
+    this.graphTransformation = this.shadowRoot.getElementById('graph-view-container');
+    this.graphExecution = this.shadowRoot.getElementById('execution-view-container');
     this.statsViewContainer = this.shadowRoot.getElementById('stats-view-container');
     this.linoAnalyseInstance = null; // To store the single instance of LinoAnalyse
     this.downloadGraphBtn = this.shadowRoot.getElementById('download-graph-btn');
     this.tabHeader.addEventListener('click', this.handleTabClick.bind(this));
     this.downloadGraphBtn.addEventListener('click', this.handleDownloadGraph.bind(this));
+
+    
+    this.editorInstances  = { 
+      yaml: this.exampleEditor,
+      graph: this.graphTransformation,
+      execution: this.graphExecution,
+      stats: this.statsViewContainer
+    }
+
   }
 
   connectedCallback() {
-    // NinoMonacoEditor components will load Monaco themselves.
-    // We just need to create them.
-    this.createEditors();
-    // Listen for 'monaco-editor-ready' events from child components
-    this.shadowRoot.addEventListener('monaco-editor-ready', this.handleChildEditorReady.bind(this));
-    this.readyEditorCount = 0;
+    // NinoMonacoEditor components will load Monaco themselves. 
   }
 
   setNinoExecution(ninoExecution) {
     this._ninoExecution = ninoExecution;
-  }
-
-  setJsyaml(jsyaml) {
-    this.jsyaml = jsyaml;
-  }
-
-  handleChildEditorReady() {
-    this.readyEditorCount++;
-    // Assuming 'yaml' is the first editor, dispatch monaco-ready when it's ready
-    // More robust logic might involve tracking all expected editors if there were more initial ones.
-    if (this.readyEditorCount === 1) { // Only dispatch once for the main editor
-      this.dispatchEvent(new CustomEvent('monaco-ready', { bubbles: true, composed: true }));
-    }
-  }
-
-  async createEditors() {
-    // Create the main YAML editor using the new web component
-    const yamlEditor = document.createElement('nino-monaco-editor');
-    yamlEditor.setAttribute('language', 'yaml');
-    yamlEditor.setAttribute('value', staticExamples[0].examples[0].yaml); // Set initial value to the "Random Name" example
-    this.yamlEditorContainer.appendChild(yamlEditor);
-    this.editorInstances['yaml'] = yamlEditor;
-
-    // The graph, transformation, and stats containers will not host Monaco editors directly.
-    // They will host other web components or content.
-  }
+  } 
 
   // Helper to get the actual Monaco editor instance from the web component
   _getMonacoEditorInstance(id) {
@@ -91,30 +93,27 @@ class NinoEditor extends HTMLElement {
     return null;
   }
 
-  layoutEditors() {
-    // Monaco editors handle their own layout if automaticLayout is true
-    // However, if there are multiple editors in a split view or tabs,
-    // explicitly calling layout can be useful after container size changes.
+  layoutEditors() { 
     if (this.editorInstances['yaml']) {
-      this.editorInstances['yaml'].layout(); // Call layout on the web component
+      this.editorInstances['yaml'].layout(); 
     }
   }
 
   setYamlValue(value) {
     if (this.editorInstances['yaml']) {
-      this.editorInstances['yaml'].setValue(value); // Call setValue on the web component
+      this.editorInstances['yaml'].setValue(value);  
     }
   }
 
   getYamlValue() {
-    return this.editorInstances['yaml'] ? this.editorInstances['yaml'].getValue() : ''; // Call getValue on the web component
+    return this.editorInstances['yaml'] ? this.editorInstances['yaml'].getValue() : '';  
   }
 
   setYamlEditorFileType(fileName) {
     this.yamlEditorFileType = fileName;
     if (this.editorInstances['yaml']) {
-      const language = fileName.endsWith('.json') ? 'json' : 'yaml'; // Determine language based on file extension
-      this.editorInstances['yaml'].setLanguage(language); // Call setLanguage on the web component
+      const language = fileName.endsWith('.json') ? 'json' : 'yaml';  
+      this.editorInstances['yaml'].setLanguage(language); 
     }
   }
 
@@ -138,7 +137,9 @@ class NinoEditor extends HTMLElement {
     if (currentActiveButton) currentActiveButton.classList.remove('active');
     if (currentActiveContent) currentActiveContent.classList.remove('active');
     // Activate new tab
-    const newActiveContent = this.shadowRoot.getElementById(`${tabId}-editor-container`) || this.shadowRoot.getElementById(`${tabId}-view-container`);
+    const newActiveContent = this.shadowRoot.getElementById(`${tabId}-editor-container`) 
+                          || this.shadowRoot.getElementById(`${tabId}-view-container`)
+                          || this.exampleEditor;
 
     if (newActiveButton) newActiveButton.classList.add('active');
     if (newActiveContent) newActiveContent.classList.add('active');
@@ -155,7 +156,7 @@ class NinoEditor extends HTMLElement {
     // Handle specific tab content rendering
     switch (tabId) {
       case 'graph':
-        this.renderGraphTab(data);
+        this.updateGraphTab(data);
         break;
       case 'execution':
         this.renderExecutionPlanTab(data.folderName);
@@ -182,15 +183,15 @@ class NinoEditor extends HTMLElement {
     if (tabId === 'graph') {
       this._ninoExecution.setOutputEditorValue('');
     } else {
-      this._ninoExecution.restoreInputOutputEditors();
+      this._ninoExecution.layoutEditors();
     }
 
     if (fileName && fileName.includes('dataconnector.yaml')) {
       this._ninoExecution.setInputEditorLanguage('shell');
-      this._ninoExecution.setInputEditorValue(HELPER_LOAD_METADATA(folderName));
+      this._ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDataconnector(folderName));
     } else if (fileName && fileName.includes('playbook.yaml')) {
       this._ninoExecution.setInputEditorLanguage('shell');
-      this._ninoExecution.setInputEditorValue(`ansible-playbook ${folderName}/${fileName} --connection=local`);
+      this._ninoExecution.setInputEditorValue(NĭnŏTemplate.inputPlaybook(folderName, fileName));
     } else if (tabId === 'yaml') {
       this._ninoExecution.setInputEditorLanguage('json');
       if (!fromClick) {
@@ -201,28 +202,22 @@ class NinoEditor extends HTMLElement {
     }
 
   }
-  renderGraphTab(data) {
-    // Clear previous graph content
-    this.graphContainer.innerHTML = "";
-    const url = data.url || '/api/schema.dot'; // Get URL from data passed during tab activation
-    // Render the generic nino-graphviz component
-    const ninoGraphviz = document.createElement("nino-graphviz");
-    ninoGraphviz.setAttribute("url", url);
-    this.graphContainer.appendChild(ninoGraphviz);
+  updateGraphTab(data) { 
+    this.graphTransformation.setAttribute("url", data.url || '/api/schema.dot'); 
   }
 
   renderExecutionPlanTab(folderName) {
 
-    if (folderName) {
-      const execPlan = document.createElement('nino-graphviz');
-      execPlan.setAttribute('url', `/api/playbook/${folderName}`); 
+    if (folderName) { 
+      this.graphExecution.setAttribute('url', `/api/playbook/${folderName}`); 
     
-      this.executionContainer.innerHTML = `<p><span> 
+      this.graphExecution.innerHTML += `
+      <p><span class="action-buttons"> 
         <button class="btn"><i class="iPlaybook mediumIcon"></i> Create Playbook</button> 
         <button class="btn"><i class="iScript mediumIcon"></i> Create Script</button> 
         <button class="btn"><i class="iPlaybook mediumIcon"></i> Run it</button> 
       </span></p>`;
-      this.executionContainer.appendChild(execPlan);
+      // this.graphExecution.appendChild(execPlan);
     }
   }
 
@@ -309,24 +304,22 @@ class NinoEditor extends HTMLElement {
         this.dispatchEvent(new CustomEvent('file-action', { detail: { action: 'play', example: { name: fileName, description: example["data-folder-name"] } }, bubbles: true, composed: true }));
       });
 
-      // Create editor container for the new file
-      const editorContainer = document.createElement('div');
-      editorContainer.id = `${tabId}-editor-container`;
-      editorContainer.classList.add('tab-content', 'editor-wrapper');
-      this.yamlEditorContainer.parentElement.appendChild(editorContainer);
 
-      // Create Monaco editor for the new file using the web component
       const language = example["data-file-name"].endsWith('.json') ? 'json' : 'yaml';
-      const newEditorComponent = document.createElement('nino-monaco-editor');
-      newEditorComponent.setAttribute('language', language);
-      newEditorComponent.setAttribute('value', `# Loading...`);
-      editorContainer.appendChild(newEditorComponent);
-      this.editorInstances[tabId] = newEditorComponent;
+
+      // Create editor container for the new file
+      const editorContainer = document.createElement('nino-monaco-editor');
+      editorContainer.id = `${tabId}-editor-container`;
+      editorContainer.classList.add('tab-content', 'editor-wrapper'); 
+      editorContainer.setAttribute('language', language);
+      editorContainer.setAttribute('value', `# Loading...`);
+      this.panel.appendChild(editorContainer);
+      this.editorInstances[tabId] = editorContainer;  
 
       // Fetch content if URL is provided
       if (url) {
         try {
-          const response = await fetch(url);
+          const response = await fetch(url); // url is already constructed from NĭnŏAPI.getFile()
           const text = await response.text();
           this.editorInstances[tabId].setValue(text);
         } catch (err) {

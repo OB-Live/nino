@@ -4,3 +4,10 @@ petstore/ingress-descriptor.dot
 ./nino
 node_modules/*
 package-lock.json
+petstore/source/dataconnector.yaml
+petstore/source/relations.yaml
+petstore/source/tables.yaml
+petstore/target/dataconnector.yaml
+petstore/target/relations.yaml
+petstore/target/tables.yaml
+petstore/target/dataconnector.yaml

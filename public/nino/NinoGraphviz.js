@@ -1,5 +1,6 @@
 import * as d3 from '/lib/d3.v7.min.js';
 import '/lib/d3-graphviz.js';
+import { NĭnŏAPI } from './NinoConstants.js';
 class NinoGraphviz extends HTMLElement {
     static get observedAttributes() {
         return ['url'];
@@ -41,8 +42,8 @@ class NinoGraphviz extends HTMLElement {
         }
 
         const graphContainer = this.shadowRoot.querySelector('#graph-container');
-        if (!this._graphviz) {
-            this._graphviz = window.d3.select(graphContainer).graphviz({ useWorker: false , fit: true});
+        if (!this._graphviz) { 
+            this._graphviz = window.d3.select(graphContainer).graphviz({ useWorker: false, fit: true });
         }
 
         fetch(url)
@@ -53,7 +54,7 @@ class NinoGraphviz extends HTMLElement {
                 return response.text();
             })
             .then(dot => {
-                 if (dot) {
+                if (dot) {
                     this._graphviz.renderDot(dot);
                 } else {
                     console.error(`Received empty dot source from ${url}`);

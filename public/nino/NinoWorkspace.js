@@ -1,4 +1,4 @@
-import { staticExamples } from './NinoConstants.js';
+import { staticExamples, NĭnŏAPI } from './NinoConstants.js';
 import * as  jstree from 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js';
 
 class NinoWorkspace extends HTMLElement {
@@ -9,7 +9,7 @@ class NinoWorkspace extends HTMLElement {
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/themes/default-dark/style.min.css" /> 
             <link rel="stylesheet" href="NinoStyle.css" />
             <div class="sidebar-header">
-                <span>Data masks</span>
+                <span>Masks & Workspace</span>
             </div>
             <div id="sidebar-content" class="sidebar-content">
                 <div id="examples-container" class="scroll-area"></div>
@@ -88,8 +88,8 @@ class NinoWorkspace extends HTMLElement {
     * Fetches workspace files from the backend API and transforms them into jstree-compatible data.
     */
     async fetchWorkspaceFiles() {
-        try {
-            const response = await fetch('/api/files');
+        try { 
+            const response = await fetch(NĭnŏAPI.getFiles());
             if (!response.ok) return [];
             const files = await response.json();
             console.log(files);

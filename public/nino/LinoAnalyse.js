@@ -1,20 +1,18 @@
+import { NĭnŏAPI } from './NinoConstants.js';  
 class LinoAnalyse extends HTMLElement {
     constructor() {
         super();
         this.attachShadow({ mode: 'open' });
         this.shadowRoot.innerHTML = `
             <link rel="stylesheet" href="NinoStyle.css">
-            <style>
-                
 
-            </style>
-            <p>
-                <span> 
+            <p><span class="action-buttons"> 
+
                 <button class="btn"> 📈 (Re)Start Analysis</button> 
-                 or 
+                 
                 <button class="btn"><i class="iMask mediumIcon"></i> Create a mask</button> 
-                </span> 
-            </p>
+                 
+            </span></p>
             <div id="stats-container"></div>
         `;
     }
@@ -44,7 +42,7 @@ class LinoAnalyse extends HTMLElement {
             return;
         }
 
-        const plotUrl = `/api/plot/${folderName}/${tableName}`;
+        const plotUrl = NĭnŏAPI.getPlot(folderName, tableName);
         const plotImage = document.createElement('img');
         plotImage.src = plotUrl;
         plotImage.alt = `Statistics plot for ${tableName} in ${folderName}`;
