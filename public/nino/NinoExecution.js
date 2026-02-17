@@ -105,21 +105,22 @@ class NinoExecution extends HTMLElement {
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({
                     yaml: yamlValue,
-                    json: jsonValue,
+                    json: JSON.stringify(JSON.parse(jsonValue)),
                 }),
             });
     
             if (!response.ok) {
                 const errorText = await response.text();
-                this.outputEditor.setValue(JSON.stringify({ error: `Command execution failed: ${errorText}` }, null, 2));
+                this.setOutputEditorLanguage('shell');
+                this.outputEditor.setValue(`Command execution failed: ${errorText}`);
             } else {
                 const resultJson = await response.json();
+                this.setOutputEditorLanguage('json');
                 this.outputEditor.setValue(JSON.stringify(resultJson, null, 2));
             }
         } catch (error) {
-            this.outputEditor.setValue(
-                JSON.stringify({ error: "API request failed" }, null, 2)
-            );
+            this.setOutputEditorLanguage('shell');
+            this.outputEditor.setValue("API request failed");
         } finally {
             // executeBtn.textContent = "";
             this.executeBtn.disabled = false;

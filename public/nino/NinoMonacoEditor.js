@@ -89,6 +89,7 @@ class NinoMonacoEditor extends HTMLElement {
         } else if (name === 'value' && oldValue !== newValue) {
             this.setValue(newValue);
         }
+        this.editorInstance.getAction('editor.action.formatDocument').run()
     }
 
     createEditor() {
@@ -109,9 +110,6 @@ class NinoMonacoEditor extends HTMLElement {
             // No theme specified to ignore all theming, as requested.
         });
 
-        this.editorInstance.getAction('editor.action.formatDocument').run()
-
-        this.dispatchEvent(new CustomEvent('monaco-editor-ready', { bubbles: true, composed: true }));
     }
 
     setValue(value) {
