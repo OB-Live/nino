@@ -101,6 +101,7 @@ class NinoMonacoEditor extends HTMLElement {
             value: value,
             language: language,
             lineNumbers: "on",
+            wordWrap: 'on',
             theme: "vs-dark",
             minimap: { enabled: true },
             automaticLayout: true,

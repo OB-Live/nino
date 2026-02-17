@@ -1,5 +1,6 @@
 // No longer importing makeResizable from NinoApp.js
 import { NĭnŏAPI } from './NinoConstants.js'; 
+import { Nĭnŏ } from './NinoApp.js'; 
 class NinoExecution extends HTMLElement {
     constructor() {
         super();
@@ -36,7 +37,7 @@ class NinoExecution extends HTMLElement {
             <div id="execution-panel" class="panel"> 
                 <div class="editor-header">
                     <span>Input</span>
-                    <button id="fetch-row-btn" class="tab-button" style="display: none;">
+                    <button id="fetch-row-btn" class="execute-btn" style="display: none;">
                         <span class="refresh-icon">↻</span> fetch 1 row 
                     </button>
                 </div>
@@ -70,14 +71,9 @@ class NinoExecution extends HTMLElement {
         this.fetchRowBtn = this.shadowRoot.getElementById('fetch-row-btn');
 
         this.executeBtn.addEventListener('click', () => {
-            this.dispatchEvent(new CustomEvent('execute-nino', {
-                // detail: {
-                //     yaml: this.editorInstances.yaml ? this.editorInstances.yaml.getValue() : '', // Assuming yaml editor is external or passed
-                //     json: this.inputEditor ? this.inputEditor.getValue() : '',
-                // },
-                bubbles: true,
-                composed: true
-            }));
+            const yamlValue = Nĭnŏ.getCurrentTabContent();
+            const jsonValue = this.inputEditor.getValue();
+            this.handlePimoExecution(yamlValue, jsonValue);
         });
 
         this.fetchRowBtn.addEventListener('click', this.handleFetchRow.bind(this));
@@ -90,6 +86,44 @@ class NinoExecution extends HTMLElement {
     set activeFile(fileInfo) {
         this._activeFile = fileInfo;
         this.updateFetchRowButton();
+    }
+
+    /**
+     * Handles the click event for the execute button.
+     * It sends the YAML and JSON content from the editors to the backend for execution
+     * and displays the result in the output editor.
+     */
+    async handlePimoExecution(yamlValue, jsonValue) {
+        // const executeBtn = ninoExecution.shadowRoot.getElementById('execute-btn');
+        // executeBtn.textContent = "Executing...";
+        this.executeBtn.disabled = true;
+        this.outputEditor.setValue("");
+    
+        try {
+            const response = await fetch(NĭnŏAPI.execPimo(), {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    yaml: yamlValue,
+                    json: jsonValue,
+                }),
+            });
+    
+            if (!response.ok) {
+                const errorText = await response.text();
+                this.outputEditor.setValue(JSON.stringify({ error: `Command execution failed: ${errorText}` }, null, 2));
+            } else {
+                const resultJson = await response.json();
+                this.outputEditor.setValue(JSON.stringify(resultJson, null, 2));
+            }
+        } catch (error) {
+            this.outputEditor.setValue(
+                JSON.stringify({ error: "API request failed" }, null, 2)
+            );
+        } finally {
+            // executeBtn.textContent = "";
+            this.executeBtn.disabled = false;
+        }
     }
 
     /**
@@ -120,6 +154,11 @@ class NinoExecution extends HTMLElement {
     setInputEditorLanguage(language) {
         if (this.inputEditor) {
             this.inputEditor.setAttribute('language', language);
+        }
+    }    
+    setOutputEditorLanguage(language) {
+        if (this.outputEditor) {
+            this.outputEditor.setAttribute('language', language);
         }
     }
     setInputEditorValue(value) {
@@ -156,7 +195,7 @@ class NinoExecution extends HTMLElement {
         this.fetchRowBtn.querySelector('.refresh-icon').textContent = '...';
 
         try {
-            const response = await fetch(NĭnŏAPI.linoFetch(folderName, fileName));
+            const response = await fetch(NĭnŏAPI.execLinoFetch(folderName, fileName));
 
             if (!response.ok) {
                 const errorText = await response.text();

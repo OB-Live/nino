@@ -5,7 +5,7 @@ meta {
 }
 
 post {
-  url: {{baseUrl}}/api/pimo/exec
+  url: {{baseUrl}}/api/exec/pimo
   body: json
   auth: inherit
 }
@@ -28,7 +28,7 @@ example {
   description: The masked output from the pimo command.
   
   request: {
-    url: {{baseUrl}}/api/pimo/exec
+    url: {{baseUrl}}/api/exec/pimo
     method: POST
     mode: json
     body:json: {

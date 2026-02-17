@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"io"
@@ -29,7 +30,7 @@ func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths 
 	r.Get("/api/schema/{folder}.{format:(dot|svg|png)}", serveSchema(&projectData))
 	r.Get("/api/plot/{folder}/{tableName}", servePlot(projectData))
 	r.Get("/api/playbook/{folder}", servePlaybook(&projectData))
-	r.Get("/api/mask/{folderName}/{tableName}", createMaskFile(&projectData, inputPaths, fileMap))
+	r.Get("/api/new/mask/{folderName}/{tableName}", createMaskFile(&projectData, inputPaths, fileMap))
 
 	// API routes for external tool integration
 	r.Get("/api/files", listFilesHandler(inputPaths))
@@ -37,7 +38,7 @@ func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths 
 	r.Post("/api/file/*", updateFileHandler(inputPaths, &projectData))
 
 	// API route for pimo execution
-	r.Post("/api/pimo/exec", pimoExecHandler())
+	r.Post("/api/exec/pimo", pimoExecHandler())
 
 	// API routes that executes Command lines actions
 	r.Post("/api/exec/playbook/{folder}/{filename}", execCommandHandler())
@@ -480,12 +481,12 @@ func pimoExecHandler() http.HandlerFunc {
 		}
 
 		// Define temporary file paths
-		maskFile, err := os.CreateTemp("", "mask-*.yaml")
+		maskFile, err := os.CreateTemp("tmp", "mask-*.yaml")
 		if err != nil {
 			http.Error(w, "Failed to create temporary mask file", http.StatusInternalServerError)
 			return
 		}
-		defer os.Remove(maskFile.Name()) // Clean up the file afterwards
+		// defer os.Remove(maskFile.Name()) // Clean up the file afterwards
 
 		// Write the YAML and JSON content to temporary files
 		if _, err := maskFile.Write([]byte(req.YAML)); err != nil {
@@ -496,14 +497,20 @@ func pimoExecHandler() http.HandlerFunc {
 
 		// Prepare the command
 		cmd := exec.Command("pimo", "-c", maskFile.Name())
+		var stderr bytes.Buffer
+		cmd.Stderr = &stderr
 		cmd.Stdin = strings.NewReader(req.JSON)
-		cmd.Stdout = w // Pipe command output directly to the HTTP response writer
 
 		// Execute the command
-		if err := cmd.Run(); err != nil {
-			http.Error(w, fmt.Sprintf("Failed to execute pimo command: %v", err), http.StatusInternalServerError)
+		output, err := cmd.Output()
+		if err != nil {
+			log.Printf("Error executing pimo command %s: %v\n%s", cmd, err, stderr.String())
+			http.Error(w, fmt.Sprintf("Failed to execute pimo command: %v\n%s", err, stderr.String()), http.StatusInternalServerError)
 			return
 		}
+
+		w.Header().Set("Content-Type", "application/json")
+		w.Write(output)
 	}
 }
 

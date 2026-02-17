@@ -1,12 +1,15 @@
 # Fix
 
 - execute button 
-- make the methods available in console 
-- add actions :
-     - create prefiled mask for a given entity
-     - create default dataconnector source & target 
-     - create bash script 
-     - create playbook 
+
+
+- Have an object Nĭnŏ, globaly accessible through window.Nĭnŏ. created in NinoApp.js. The object will be containing {createMasking, createPlaybook, createBash, createDataconnector, createFolder}, methods calling the backend API :
+    - createMasking using api URL: NĭnŏAPI.createMasking then log the result in the console 
+    - createDataconnector using api URL: NĭnŏAPI.createDataConnector then log the result in the console 
+    - createBash using api URL: NĭnŏAPI.createBash then log the result in the console 
+    - create playbook calling api URL: NĭnŏAPI.createPlaybook then log the result in the console 
+    - createFolder calling api URL: NĭnŏAPI.postFolder then log the result in the console 
+
 - execution plan buttons and paragraph
 - Uncaught TypeError: Cannot read properties of undefined (reading 'yaml') 
     this.editorInstances.yaml ? this.editorInstances

@@ -253,35 +253,35 @@ masking:
 ];
 
 export const MASK_KEYWORDS = [
-    { keyword: "add", description: "Adds a new field with a specified value." },
-    { keyword: "addTransient", description: "Adds a transient field that can be used by other masks but is removed from the final output." },
-    { keyword: "apply", description: "Applies a masking configuration from an external file." },
-    { keyword: "clear", description: "Clears the value of a field, setting it to null or an empty value." },
-    { keyword: "command", description: "Executes a shell command and uses its output as the masked value." },
-    { keyword: "constant", description: "Replaces the field's value with a fixed, constant value." },
-    { keyword: "dateParser", description: "Parses a date from one format and outputs it in another." },
-    { keyword: "duration", description: "Adds or subtracts a duration from a date/time value." },
-    { keyword: "ff1", description: "Format-Preserving Encryption using the FF1 algorithm. Requires a key and radix." },
-    { keyword: "fpe", description: "Alias for ff1. Format-Preserving Encryption." },
-    { keyword: "hash", description: "Computes a hash (SHA-256 by default) of the input value. Can be configured with a domain for consistent pseudonymization." },
-    { keyword: "keep", description: "Explicitly keeps the original value of the field." },
-    { keyword: "luhn", description: "Calculates and appends a Luhn checksum, often used for ID numbers." },
-    { keyword: "markov", description: "Generates pseudo-random text using a Markov chain model from a sample text." },
-    { keyword: "randomChoice", description: "Selects a random value from a provided list of choices." },
-    { keyword: "randomChoiceInUri", description: "Selects a random value from a list specified in an external file (e.g., pimo://nameFR)." },
-    { keyword: "randomDate", description: "Generates a random date within a specified minimum and maximum range." },
-    { keyword: "randomDecimal", description: "Generates a random decimal number within a specified range and precision." },
-    { keyword: "randomInt", description: "Generates a random integer within a specified minimum and maximum range." },
-    { keyword: "randomString", description: "Generates a random string of a specified length." },
-    { keyword: "randomUUID", description: "Generates a standard UUID." },
-    { keyword: "regex", description: "Generates a random string that matches a given regular expression." },
-    { keyword: "remove", description: "Removes the field entirely from the output." },
-    { keyword: "replace", description: "Performs a regex-based search and replace on the field's value." },
-    { keyword: "sha3", description: "Computes a SHAKE/SHA3 hash of the input." },
-    { keyword: "template", description: "Uses Go template syntax to construct a new value from existing fields." },
-    { keyword: "truncate", description: "Truncates a string to a maximum length." },
-    { keyword: "weightedChoice", description: "Selects a random value from a list of choices, where each choice has a specific weight." },
-    { keyword: "xml", description: "Masks attributes or tags within an XML string." }
+  { keyword: "add", description: "Adds a new field with a specified value." },
+  { keyword: "addTransient", description: "Adds a transient field that can be used by other masks but is removed from the final output." },
+  { keyword: "apply", description: "Applies a masking configuration from an external file." },
+  { keyword: "clear", description: "Clears the value of a field, setting it to null or an empty value." },
+  { keyword: "command", description: "Executes a shell command and uses its output as the masked value." },
+  { keyword: "constant", description: "Replaces the field's value with a fixed, constant value." },
+  { keyword: "dateParser", description: "Parses a date from one format and outputs it in another." },
+  { keyword: "duration", description: "Adds or subtracts a duration from a date/time value." },
+  { keyword: "ff1", description: "Format-Preserving Encryption using the FF1 algorithm. Requires a key and radix." },
+  { keyword: "fpe", description: "Alias for ff1. Format-Preserving Encryption." },
+  { keyword: "hash", description: "Computes a hash (SHA-256 by default) of the input value. Can be configured with a domain for consistent pseudonymization." },
+  { keyword: "keep", description: "Explicitly keeps the original value of the field." },
+  { keyword: "luhn", description: "Calculates and appends a Luhn checksum, often used for ID numbers." },
+  { keyword: "markov", description: "Generates pseudo-random text using a Markov chain model from a sample text." },
+  { keyword: "randomChoice", description: "Selects a random value from a provided list of choices." },
+  { keyword: "randomChoiceInUri", description: "Selects a random value from a list specified in an external file (e.g., pimo://nameFR)." },
+  { keyword: "randomDate", description: "Generates a random date within a specified minimum and maximum range." },
+  { keyword: "randomDecimal", description: "Generates a random decimal number within a specified range and precision." },
+  { keyword: "randomInt", description: "Generates a random integer within a specified minimum and maximum range." },
+  { keyword: "randomString", description: "Generates a random string of a specified length." },
+  { keyword: "randomUUID", description: "Generates a standard UUID." },
+  { keyword: "regex", description: "Generates a random string that matches a given regular expression." },
+  { keyword: "remove", description: "Removes the field entirely from the output." },
+  { keyword: "replace", description: "Performs a regex-based search and replace on the field's value." },
+  { keyword: "sha3", description: "Computes a SHAKE/SHA3 hash of the input." },
+  { keyword: "template", description: "Uses Go template syntax to construct a new value from existing fields." },
+  { keyword: "truncate", description: "Truncates a string to a maximum length." },
+  { keyword: "weightedChoice", description: "Selects a random value from a list of choices, where each choice has a specific weight." },
+  { keyword: "xml", description: "Masks attributes or tags within an XML string." }
 ];
 
 
@@ -302,9 +302,7 @@ lino relation extract source
 cd ../target
 lino table extract target
 lino relation extract target
-# lino analyse target > analyze.yaml
-
-
+# lino analyse target > analyze.yaml 
 `,
   inputDescriptor: (folderName, tableName) => `cd ${folderName}
 # lino pull -l 1 --table ${tableName} source
@@ -318,23 +316,51 @@ docker compose up docker-compose.yaml
 `,
   inputMasking: (folderName, tableName) => `
 lino pull -l 1 -i ${tableName}-descriptor.yaml | pimo -c ${tableName}-masking.yaml
-`,  
+`,
 };
 
 export const NĭnŏAPI = {
-  getFiles: () => '/api/files',
-  getFile : (filename) => `/api/file/${filename}`,
-  postFile: (filename) => `/api/file/${filename}`,
-  pimoExec: () => '/api/pimo/exec',
-  execPlaybook: (folder, filename) => `/api/exec/playbook/${folder}/${filename}`,
-  execPull: (folder, filename) => `/api/exec/pull/${folder}/${filename}`,
-  linoFetch: (folder, filename) => `/api/exec/lino/fetch/${folder}/${filename}`,
-  getSchema: (format = 'dot', folder = '') => `/api/schema${folder ? `/${folder}` : ''}.${format}`,
-  getPlot: (folder, tableName) => `/api/plot/${folder}/${tableName}`,
-  getPlaybook: (folder) => `/api/playbook/${folder}`,
-  createMaskFile: (folderName, tableName) => `/api/mask/${folderName}/${tableName}`,
+  // General Files handling
+  getFiles: () =>
+    '/api/files',
+  getFile: (filename) =>
+    `/api/file/${filename}`,
+  postFile: (filename) =>
+    `/api/file/${filename}`,
+  postFolder: (folderName) =>
+    `/api/folder/${folderName}`,
+
+  // New business files 
+  createMasking: (folderName, tableName) =>
+    `/api/new/mask/${folderName}/${tableName}`,
+  createPlaybook: (folderName) =>
+    `/api/new/playbook/${folderName}`,
+  createDataConnector: (folderName) =>
+    `/api/new/dataconnector/${folderName}`,
+  createBash: (folderName) =>
+    `/api/new/bash/${folderName}`,
+
+  // Execution of Business commands in the backend
+  execPimo: () =>
+    '/api/exec/pimo',
+  execPlaybook: (folder, filename) =>
+    `/api/exec/playbook/${folder}/${filename}`,
+  execPull: (folder, filename) =>
+    `/api/exec/pull/${folder}/${filename}`,
+  execLinoFetch: (folder, filename) =>
+    `/api/exec/lino/fetch/${folder}/${filename}`,
+
+  // Visualisations 
+  getSchema: (format = 'dot', folder = '') =>
+    `/api/schema${folder ? `/${folder}` : ''}.${format}`,
+  getPlot: (folder, tableName) =>
+    `/api/plot/${folder}/${tableName}`,
+  getPlaybook: (folder) =>
+    `/api/playbook/${folder}`,
+
 };
 
+/** @type {FileType} */
 const fileTypes = [
   { language: "yaml", suffix: ["yaml", "yml"], dialect: "connector", regex: "dataconnector" },
   { language: "yaml", suffix: ["yaml", "yml"], dialect: "descriptor", regex: "descriptor" },
@@ -346,13 +372,21 @@ const fileTypes = [
   { language: "yaml", suffix: ["yaml", "yml"], dialect: "", regex: ".yml" },
 
   { language: "shell", suffix: ["sh", "bash", "zsh"], dialect: "", regex: "sh" },
-  { language: "json", suffix: ["json"], dialect: "", regex: "json" }, 
+  { language: "json", suffix: ["json"], dialect: "", regex: "json" },
 
-  { language: "md", suffix: ["md"], dialect: "", regex: "md" },  
+  { language: "md", suffix: ["md"], dialect: "", regex: "md" },
 ];
 
+/**
+ * infer language and dialect from a given filename based on its suffix and name patterns. 
+ * It checks against a predefined list of file types and returns the best match.
+ * If no match is found, it defaults to plaintext.
+ * 
+ * @param {string} filename 
+ * @returns {Object} FileType. the file type ex : { language: "yaml", suffix: ["yaml", "yml"], dialect: "masking", regex: "masking" } 
+ */
 export function getFileType(filename) {
-  const lowerFilename = filename.toLowerCase(); 
+  const lowerFilename = filename.toLowerCase();
   const parts = lowerFilename.split('.');
   const suffix = parts.length > 1 ? parts.pop() : '';
   const nameWithoutSuffix = parts.join('.');
@@ -362,7 +396,7 @@ export function getFileType(filename) {
     const regexMatch = type.regex && (nameWithoutSuffix.includes(type.regex) || lowerFilename.includes(type.regex));
 
     if (suffixMatch && regexMatch) {
-        return type;
+      return type;
     }
   }
   return { language: "plaintext", suffix: [], dialect: "", regex: "" }; // Default if no match

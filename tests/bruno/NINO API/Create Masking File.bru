@@ -5,7 +5,7 @@ meta {
 }
 
 get {
-  url: {{baseUrl}}/api/mask/:folderName/:tableName
+  url: {{baseUrl}}/api/new/mask/:folderName/:tableName
   body: none
   auth: inherit
 }
@@ -26,7 +26,7 @@ example {
   description: Masking file created successfully.
   
   request: {
-    url: {{baseUrl}}/api/mask/:folderName/:tableName
+    url: {{baseUrl}}/api/new/mask/:folderName/:tableName
     method: GET
     mode: none
     params:path: {

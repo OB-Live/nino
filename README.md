@@ -15,7 +15,7 @@ The interactive web interface allows users to explore the data schema, view data
 *   `GET /api/schema/{folder}`: Returns the DOT graph for a specific folder.
 *   `GET /api/plot/{folder}/{tableName}`: Returns a PNG image plotting the data distribution for a table's columns.
 *   `GET /api/playbook/{folder}`: Returns the DOT graph for an Ansible playbook execution plan.
-*   `GET /api/mask/{folderName}/{tableName}`: Creates a new boilerplate masking masking file for a table.
+*   `GET /api/new/mask/{folderName}/{tableName}`: Creates a new boilerplate masking masking file for a table.
 *   `GET /api/files`: Returns a JSON object listing all files within the project directories.
 *   `GET /api/file/{folder}/{filename}`: Retrieves the raw content of a specific file.
 *   `GET /api/exec/lino/fetch/{folder}/{filename}`: Fetches a single row of data as an example for a masking file.

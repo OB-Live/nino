@@ -1,4 +1,5 @@
 import { staticExamples, NĭnŏAPI } from './NinoConstants.js';
+import {  Nĭnŏ } from './NinoApp.js';
 import * as  jstree from 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js';
 
 class NinoWorkspace extends HTMLElement {
@@ -199,43 +200,51 @@ class NinoWorkspace extends HTMLElement {
                 "contextmenu":{
                     "items": function($node) {
                         return {
+                            createFolder : {
+                                "separator_before"	: false,
+					            "separator_after"	: true,
+                                "icon": 'iFolder',
+                                "label" : "Create Folder",
+                                "action" : function(obj) { Nĭnŏ.createFolder(obj); }
+                            },
                             createDB : {
                                 "separator_before"	: false,
 					            "separator_after"	: true,
                                 "icon": 'iDataconnector',
                                 "label" : "Create DataConnector",
-                                "action" : function(obj) { this.create(obj); alert(obj.text())},
+                                "action" : function(obj) { Nĭnŏ.createDataconnector(obj)},
                                 "_class" : "class"
                             },
                             createMasking : {
                                 "separator_before"	: false,
 					            "separator_after"	: true,
                                 "icon": 'iMask',
+                                "class": "folder",
                                 "label" : "Create Masking File",
-                                "action" : function(obj) { this.rename(obj);}
+                                "action" : function(obj) { Nĭnŏ.createMasking(obj) },
                             },
                             createPlaybook : {
                                 "separator_before"	: false,
-					            "separator_after"	: false,
-                                "icon": 'iPlaybook',
+					            "separator_after"	: true,
+                                "icon": 'iAnsible',
                                 "label" : "Create Playbook",
-                                "action" : function(obj) { this.remove(obj); }
+                                "action" : function(obj) { Nĭnŏ.createPlaybook(obj) }
                             },
                             createScript : {
                                 "separator_before"	: false,
-					            "separator_after"	: false,
-                                "icon": 'iPlaybook',
+					            "separator_after"	: true,
+                                "icon": 'iBash',
                                 "label" : "Create bash script",
-                                "action" : function(obj) { this.remove(obj); }
-                            }
+                                "action" : function(obj) {Nĭnŏ.createBashScript(obj) }
+                            },
                         };
                     }
                 },
             })
             .on('select_node.jstree', (e, data) => {
-                if (data.node.type === 'file') {
-                    this.dispatchEvent(new CustomEvent('select-file', { detail: { node: data.node } }));
-                }
+                // if (data.node.type === 'file') {
+                //     this.dispatchEvent(new CustomEvent('select-file', { detail: { node: data.node } }));
+                // }
             })
             .on('dblclick.jstree', (e) => {
                 const instance = $.jstree.reference(e.target);

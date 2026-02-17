@@ -103,7 +103,7 @@ paths:
               schema:
                 type: string
 
-  /api/mask/{folderName}/{tableName}:
+  /api/new/mask/{folderName}/{tableName}:
     get:
       summary: Create Masking File
       description: Creates a new boilerplate masking file for a table.
@@ -171,7 +171,7 @@ paths:
         '200':
           description: File updated successfully.
 
-  /api/pimo/exec:
+  /api/exec/pimo:
     post:
       summary: Execute Pimo
       description: Executes the `pimo` CLI tool with the provided YAML masking rules and JSON input.

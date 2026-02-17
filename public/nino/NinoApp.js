@@ -1,4 +1,4 @@
-import { NĭnŏTemplate, staticExamples, NĭnŏAPI } from './NinoConstants.js';
+import { NĭnŏTemplate, staticExamples, NĭnŏAPI, getFileType } from './NinoConstants.js';
 import './NinoEditor.js';
 import './NinoWorkspace.js';
 import './NinoExecution.js';
@@ -12,7 +12,64 @@ export const ninoWorkspace = document.querySelector('nino-workspace');
 
 window.openTableStat = openTableStat;
 window.openExecutionGraph = openExecutionGraph;
+window.openTableStat = openTableStat;
+window.openExecutionGraph = openExecutionGraph;
 $(sidebarToggle).on("click", toggleSidebar);
+
+/**
+ * @typedef {Object} Nĭnŏ
+ * @property {function(string, string): Promise<void>} createMasking - Creates a masking file.
+ * @property {function(string, string): Promise<void>} createPlaybook - Creates a playbook file.
+ * @property {function(string, string): Promise<void>} createBash - Creates a bash script.
+ * @property {function(string, string): Promise<void>} createDataconnector - Creates a dataconnector file.
+ * @property {function(string): Promise<void>} createFolder - Creates a folder.
+ */
+
+/** @type {Nĭnŏ} */
+export const Nĭnŏ = {
+    createMasking: async (folderName, tableName) => {
+        const response = await fetch(NĭnŏAPI.createMasking(folderName, tableName), { method: 'POST' });
+        const result = await response.json();
+        console.log(result);
+    },
+    createPlaybook: async (folderName) => {
+        const response = await fetch(NĭnŏAPI.createPlaybook(folderName), { method: 'POST' });
+        const result = await response.json();
+        console.log(result);
+    },
+    createBash: async (folderName) => {
+        const response = await fetch(NĭnŏAPI.createBash(folderName), { method: 'POST' });
+        const result = await response.json();
+        console.log(result);
+    },
+    createDataconnector: async (folderName) => {
+        const response = await fetch(NĭnŏAPI.createDataConnector(folderName), { method: 'POST' });
+        const result = await response.json();
+        console.log(result);
+    },
+    createFolder: async (folderName) => {
+        const response = await fetch(NĭnŏAPI.postFolder(folderName), { method: 'POST' });
+        const result = await response.json();
+        console.log(result);
+    },
+    
+    // UI elements
+    executionComponent: ninoExecution,
+    editorComponent: ninoEditor,
+    workspaceComponent: ninoWorkspace,
+    getCurrentTabContent: () => ninoEditor.editorInstances[ninoEditor.activeTab].getValue(),
+    getCurrentInputContent: () => ninoExecution.inputEditor.getValue(),
+    setOutputContent: (value) => ninoExecution.outputEditor.setValue(value),
+
+    constants: {
+        "API": NĭnŏAPI,
+        "Template": NĭnŏTemplate,
+        "Examples": staticExamples,
+    }
+};
+window.Nĭnŏ = Nĭnŏ;
+
+
 makeHorizontalResizable();
 
 document.addEventListener("DOMContentLoaded", initializeApp);
@@ -121,43 +178,7 @@ function toggleSidebar() {
 }
 
 
-/**
- * Handles the click event for the execute button.
- * It sends the YAML and JSON content from the editors to the backend for execution
- * and displays the result in the output editor.
- */
-async function handleExecute(yamlValue, jsonValue) {
-    const executeBtn = ninoExecution.shadowRoot.getElementById('execute-btn');
-    // executeBtn.textContent = "Executing...";
-    executeBtn.disabled = true;
-    ninoExecution.setOutputEditorValue("");
 
-    try {
-        const response = await fetch(NĭnŏAPI.pimoExec(), {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-                yaml: yamlValue,
-                json: jsonValue,
-            }),
-        });
-
-        if (!response.ok) {
-            const errorText = await response.text();
-            ninoExecution.setOutputEditorValue(JSON.stringify({ error: `Command execution failed: ${errorText}` }, null, 2));
-        } else {
-            const resultJson = await response.json();
-            ninoExecution.setOutputEditorValue(JSON.stringify(resultJson, null, 2));
-        }
-    } catch (error) {
-        ninoExecution.setOutputEditorValue(
-            JSON.stringify({ error: "API request failed" }, null, 2)
-        );
-    } finally {
-        // executeBtn.textContent = "";
-        executeBtn.disabled = false;
-    }
-}
 
 
 /**
@@ -191,21 +212,12 @@ async function handleFileAction(event) {
         }
     }
 }
-
-/**
- * Opens a workspace file in a new tab, creating a Monaco editor for it.
- * It fetches the file content, sets up syntax validation, and adds save and play (if applicable) functionalities.
- * @param {Object} example - The example object containing file information (id, name, description, url).
- */
-async function openWorkspaceFileInNewTab(example) {
-    await ninoEditor.openFile(example);
-}
-
+ 
 /**
  * Handles the selection of an example from the static examples menu or a file from the workspace tree.
  * It loads the corresponding content into the main YAML and input editors.
  */
-async function handleSelectExample(example) {
+async function openExample(example) {
     // Switch to the main YAML tab in NinoEditor
     ninoEditor.activateTab('yaml');
 
@@ -219,29 +231,23 @@ async function handleSelectExample(example) {
         await fetch(example.url)
             .then(res => res.text())
             .then(text => ninoEditor.setYamlValue(text))
-            .catch(err => ninoEditor.setYamlValue(`# Failed to load: ${example.url}`));
+            .catch(err => ninoEditor.setYamlValue(`# Failed to load: ${example.url} : ${err}`));
     }
+    ninoExecution.setInputEditorLanguage("json")
     ninoExecution.setInputEditorValue(example.input ?? example['data-input'] ?? '');
-    ninoExecution.setOutputEditorValue("");
+    ninoExecution.setOutputEditorLanguage("json");
 }
 
-/**
- * handleExecution - Handles the execution of the current YAML and input content.
- * @param {*} event 
- */
-async function handleExecution(event) {
-    const yamlValue = ninoEditor.getYamlValue();
-    const jsonValue = ninoExecution.getInputEditorValue();
-    await handleExecute(yamlValue, jsonValue);
-}
+ 
 
 /**
  * handleTabActivation - Handles the activation of different tabs in the editor.
- * @param {*} event 
+ * @param {fileDesc} event 
  */
 function handleTabActivation(event) {
+        
     const { tabId, fromClick, fileName, folderName } = event.detail;
-
+// getFileType(fileName)
 
     if (tabId === 'graph') {
         ninoExecution.setOutputEditorValue('');
@@ -286,10 +292,8 @@ function findFirstPlaybookFolder(items) {
 }
 
 ninoExecution.addEventListener('execute-nino', (e) => handleExecution(e));
-
 ninoEditor.addEventListener('tab-activated', (e) => handleTabActivation(e));
 ninoEditor.addEventListener('file-action', handleFileAction);
-
-ninoWorkspace.addEventListener('select-example', (e) => handleSelectExample(e.detail));
-ninoWorkspace.addEventListener('select-file', (e) => handleSelectExample(e.detail.node.li_attr));
-ninoWorkspace.addEventListener('open-file', (e) => openWorkspaceFileInNewTab(e.detail.node.li_attr));
+ninoWorkspace.addEventListener('select-example', (e) => openExample(e.detail));
+// ninoWorkspace.addEventListener('select-file', (e) => handleSelectExample(e.detail.node.li_attr));
+ninoWorkspace.addEventListener('open-file', (e) =>  ninoEditor.openFile(e));

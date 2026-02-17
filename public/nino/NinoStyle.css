@@ -1,79 +1,108 @@
 :root {
-  /* 🌿 Olive Tree Palette */
-  /* 🌿 Olive Leaves */
-  --pale-silver-leaf: #bac6b0;
-  --sunlit-olive-leaf: #a4b28c;
-  --classic-olive-green: #808c52;
-  --muted-sage-olive: #788660;
-  --deep-leaf-shadow: #485c36;
-  --blue-tinted-olive-shade: #586852;
 
-  /* 🫒 Olives (Fruit) */
-  --fresh-green-olive: #8e9e42;
-  --yellow-green-olive: #a6ac4e;
-  --maturing-olive: #6e603a;
-  --bruised-olive-brown: #5c4830;
-  --deep-purple-olive: #3a2c34;
-  --ripe-black-olive: #22261e;
+    /* =========================
+       Main Header – Purplish Olive Texture
+       ========================= */
 
-  /* 🌳 Trunk & Bark */
-  --weathered-bark-light: #948a7a;
-  --olive-bark-midtone: #706656;
-  --dark-bark-crevice: #463e32;
+    --main-header-background:
+        radial-gradient(circle at 30% 40%, rgba(255,255,255,0.06) 0%, transparent 55%),
+        radial-gradient(circle at 70% 60%, rgba(0,0,0,0.25) 0%, transparent 60%),
+        linear-gradient(
+            to right,
+            #2f2a3a 0%,   /* deep muted purple */
+            #3f4a2f 40%,  /* olive infusion */
+            #4b3f35 70%,  /* earthy olive-brown */
+            #2a262e 100%  /* dark purplish base */
+        );
 
-  /* 🌞 Mediterranean Environment */
-  --dry-olive-soil: #b0966c;
-  --sun-baked-earth: #9c7848;
-  --dusty-stone-gray: #848676;
+    --main-header-color: #ffffff;
+    --main-header-border-color: #1b1b1b;
 
-  /* 🌞 Olive leaf */
-  --olive-leaf-1: #a8b8a2;
-  --olive-leaf-2: #9fb09a;
-  --olive-leaf-3: #b7c6af;
-  --olive-leaf-4: #8fa48e;
-  --olive-leaf-5: #a3b5a6;
-  --olive-leaf-6: #c2d0c0;
-  --olive-leaf-7: #96afa1;
-  --olive-leaf-8: #b0c2b4;
-  --olive-leaf-9: #879f92;
-  --olive-leaf-10: #d4ded1;
 
-  /* --- Functional Colors --- */
+    /* =========================
+       Panel
+       ========================= */
 
-  /* Main Header */
-  --main-header-background: linear-gradient(to right, var(--deep-purple-olive), var(--blue-tinted-olive-shade));
-  --main-header-color: var(--pale-silver-leaf);
-  --main-header-border-color: var(--dark-bark-crevice);
+    --panel-background: linear-gradient(to top left, #f8fafc, #e2e8f0);
 
-  /* Panels & Editors */
-  /* */
-  --panel-background: linear-gradient(to top left, var(--olive-leaf-10), var(--olive-leaf-4));
-  --panel-header-background-color: var(--muted-sage-olive);
-  --panel-header-border-color: var(--olive-bark-midtone);
-  --panel-text-color: var(--deep-leaf-shadow);
+    --panel-header-background:
+        linear-gradient(
+            to bottom right,
+            #c9d7a5 0%,
+            #b4c788 45%,
+            #9fb06c 100%
+        );
 
-  /* Tabs */
-  --tab-button-color: linear-gradient(to top right, var(--pale-silver-leaf), var(--olive-leaf-7));
-  --tab-button-active-background-color: var(--classic-olive-green);
-  --tab-button-active-border-color: var(--sunlit-olive-leaf);
+    --panel-header-border-color: #8fa160;
+    --panel-text-color: #1e293b;
 
-  /* Sidebar, Accordion & General Surfaces */
-  --sidebar-background: linear-gradient(to top left, var(--olive-leaf-6), var(--olive-leaf-7));
-  --sidebar-content-background-color: var(--olive-leaf-2);
-  --sidebar-border-color: var(--dark-bark-crevice);
 
-  /* Buttons & Interactive Elements */
-  --button-background-color: var(--muted-sage-olive);
-  --button-border-color: var(--deep-purple-olive);
-  --button-hover-background-color: var(--maturing-olive);
-  --execute-button-border-color: var(--sunlit-olive-leaf);
-  --link-color: var(--deep-purple-olive);
-  --link-background-color: var(--olive-leaf-4);
-  --link-hover-color: var(--dry-olive-soil);
+    /* =========================
+       Tabs
+       ========================= */
 
-  /* Resizer */
-  --border-background: var(--olive-bark-midtone);
-  --border-hover-background: var(--sunlit-olive-leaf);
+    --tab-button-color: linear-gradient(to top right, #ffffff, #e2e8f0);
+    --tab-button-active-background-color: #2563eb;
+    --tab-button-active-border-color: #3b82f6;
+
+
+    /* =========================
+       Sidebar – Olive Forest + Subtle Noise
+       ========================= */
+
+    --sidebar-background:
+        repeating-radial-gradient(
+            circle at 0 0,
+            rgba(0,0,0,0.03) 0px,
+            rgba(0,0,0,0.03) 1px,
+            transparent 1px,
+            transparent 3px
+        ),
+        linear-gradient(
+            to bottom right,
+            #dbe7c9 0%,     
+            #c8d9a0 30%,    
+            #b4c788 55%,    
+            #e6f0c7 75%,    
+            #a9bb72 100%
+        );
+
+    --sidebar-content-background-color: rgba(255, 255, 255, 0.65);
+    --sidebar-border-color: #8fa160;
+
+
+    /* =========================
+       Buttons
+       ========================= */
+
+    --button-background-color:#94b1db;
+    --button-border-color: #1e293b;
+    --button-hover-background-color: #475569;
+    --execute-button-border-color: #22c55e;
+
+
+    /* =========================
+       Links
+       ========================= */
+
+    --link-color: #2563eb;
+    --link-background-color: #e0f2fe;
+    --link-hover-color: #1d4ed8;
+
+
+    /* =========================
+       Borders
+       ========================= */
+
+    --border-background: linear-gradient(
+        to bottom,
+        #0f1e3a 0%,
+        #1e3a8a 35%,
+        #ffffff 50%,
+        #7f1d1d 65%,
+        #3b0a0a 100%
+    );
+    --border-hover-background: #94a3b8;
 
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 0px;
@@ -188,6 +217,7 @@ a.jstree-anchor {
   border-bottom: 2px;
   position: relative;
   overflow: hidden;
+  background: var(--panel-header-background);
 }
 
 .sidebar-trigger {
@@ -291,16 +321,16 @@ a.jstree-anchor {
   width: 6px;
   flex-shrink: 0;
   cursor: col-resize;
-  background-color: var(--border-background);
+  background: var(--border-background);
 }
 
 .resize-handle-v {
-  background-color: var(--border-background);
+  background: var(--border-background);
   height: 5px;
 }
 
 .resize-handle-v.active {
-  background-color: var(--border-hover-background);
+  background: var(--border-hover-background);
 }
 
 .jstree {
@@ -372,20 +402,13 @@ nino-execution,
   flex-direction: column;
 }
 
-.execute-btn {
-    /* width: 0; */
-    /* height: 0; */
-    /* border-style: solid; */
-    /* border-width: 7px 0 7px 12; */
- 
-    /* padding: 0; */
+.execute-btn { 
     margin-right: 8px;
     cursor: pointer;
-    transition: border-color 0.2s ease;
-    /* display: block; */
+    transition: border-color 0.2s ease; 
     display: flex;
-    gap: 10px;
-    /* padding: 4px; */
+    gap: 10px; 
+    padding: 2px 6px;
     align-items: center;
     background-color: var(--button-background-color);
 }
@@ -427,9 +450,9 @@ nino-execution,
 }
 
 .tab-header {
-  background: var(--main-header-background);
+  background: var(--panel-header-background);
   display: flex;
-  border-bottom: 1px solid var(--border-background);
+  border-bottom: 1px solid var(--panel-border-color);
   flex-wrap: wrap;
 }
 
@@ -467,7 +490,7 @@ nino-execution,
 
 .editor-header {
   padding: 8px 12px;
-  background: var(--panel-background);
+  background: var(--panel-header-background);
   border-bottom: 1px solid var(--panel-header-border-color);
   /* display: flex; */
   align-items: center;
@@ -515,6 +538,26 @@ nino-graphviz,
 .vakata-context .iMask,
 .iMask {
   background-image: url("/img/masks.png");
+  background-size: contain;
+}
+
+.iFolder,
+.vakata-context .iFolder {
+  background-image: url("/img/folder.png");
+  background-size: contain;
+}
+
+.iAnsible,
+.vakata-context .iAnsible {
+  background-image: url("/img/ansible.png");
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position-x: center;
+}
+
+.iBash,
+.vakata-context .iBash {
+  background-image: url("/img/bash.jpg");
   background-size: contain;
 }
 
