@@ -109,6 +109,8 @@ class NinoMonacoEditor extends HTMLElement {
             // No theme specified to ignore all theming, as requested.
         });
 
+        this.editorInstance.getAction('editor.action.formatDocument').run()
+
         this.dispatchEvent(new CustomEvent('monaco-editor-ready', { bubbles: true, composed: true }));
     }
 
