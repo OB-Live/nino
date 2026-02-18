@@ -199,20 +199,22 @@ class NinoWorkspace extends HTMLElement {
                 },
                 "contextmenu":{
                     "items": function($node) {
+                        const directory = $node.li_attr['data-folder-name']
+                        const filename = $node.li_attr['data-file-name']
                         return {
                             createFolder : {
                                 "separator_before"	: false,
 					            "separator_after"	: true,
                                 "icon": 'iFolder',
                                 "label" : "Create Folder",
-                                "action" : function(obj) { Nĭnŏ.createFolder(obj); }
+                                "action" : function(obj) { Nĭnŏ.createFolder(obj.reference); }
                             },
                             createDB : {
                                 "separator_before"	: false,
 					            "separator_after"	: true,
                                 "icon": 'iDataconnector',
                                 "label" : "Create DataConnector",
-                                "action" : function(obj) { Nĭnŏ.createDataconnector(obj)},
+                                "action" : function(obj) { Nĭnŏ.createDataconnector(directory)},
                                 "_class" : "class"
                             },
                             createMasking : {
@@ -221,21 +223,21 @@ class NinoWorkspace extends HTMLElement {
                                 "icon": 'iMask',
                                 "class": "folder",
                                 "label" : "Create Masking File",
-                                "action" : function(obj) { Nĭnŏ.createMasking(obj) },
+                                "action" : function(obj) { Nĭnŏ.createMasking(directory, filename) },
                             },
                             createPlaybook : {
                                 "separator_before"	: false,
 					            "separator_after"	: true,
                                 "icon": 'iAnsible',
                                 "label" : "Create Playbook",
-                                "action" : function(obj) { Nĭnŏ.createPlaybook(obj) }
+                                "action" : function(obj) { Nĭnŏ.createPlaybook(directory) }
                             },
                             createScript : {
                                 "separator_before"	: false,
 					            "separator_after"	: true,
                                 "icon": 'iBash',
                                 "label" : "Create bash script",
-                                "action" : function(obj) {Nĭnŏ.createBashScript(obj) }
+                                "action" : function(obj) {Nĭnŏ.createBash(directory, filename) }
                             },
                         };
                     }

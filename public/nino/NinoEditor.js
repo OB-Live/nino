@@ -10,7 +10,7 @@ class NinoEditor extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.jsyaml = null;
     this.editorInstances = {};
-    this.activeTab = 'yaml';
+    this.activeTab = 'example';
     this.yamlEditorFileType = 'yaml'; // Default file type for YAML editor // Default file type for YAML editor
 
     this._ninoExecution = null; // Reference to NinoExecution component
@@ -24,7 +24,7 @@ class NinoEditor extends HTMLElement {
           </button>
           <button class="tab-button" data-tab="execution">Execution Plan</button>
           <button class="tab-button" data-tab="stats">Analyse</button>
-          <button class="tab-button active" data-tab="yaml">Examples</button>
+          <button class="tab-button active" data-tab="example">Examples</button>
         </div> 
 
         <nino-monaco-editor 
@@ -69,7 +69,7 @@ class NinoEditor extends HTMLElement {
 
 
     this.editorInstances = {
-      yaml: this.exampleEditor,
+      example: this.exampleEditor,
       graph: this.graphTransformation,
       execution: this.graphExecution,
       stats: this.statsViewContainer
@@ -80,41 +80,29 @@ class NinoEditor extends HTMLElement {
   connectedCallback() {
     // NinoMonacoEditor components will load Monaco themselves. 
   }
-
-  setNinoExecution(ninoExecution) {
-    this._ninoExecution = ninoExecution;
-  }
-
-  // Helper to get the actual Monaco editor instance from the web component
-  _getMonacoEditorInstance(id) {
-    const component = this.editorInstances[id];
-    if (component && component.editorInstance) {
-      return component.editorInstance;
-    }
-    return null;
-  }
+ 
 
   layoutEditors() {
-    if (this.editorInstances['yaml']) {
-      this.editorInstances['yaml'].layout();
+    if (this.editorInstances['example']) {
+      this.editorInstances['example'].layout();
     }
   }
 
   setYamlValue(value) {
-    if (this.editorInstances['yaml']) {
-      this.editorInstances['yaml'].setValue(value);
+    if (this.editorInstances['example']) {
+      this.editorInstances['example'].setValue(value);
     }
   }
 
   getYamlValue() {
-    return this.editorInstances['yaml'] ? this.editorInstances['yaml'].getValue() : '';
+    return this.editorInstances['example'] ? this.editorInstances['example'].getValue() : '';
   }
 
   setYamlEditorFileType(fileName) {
     this.yamlEditorFileType = fileName;
-    if (this.editorInstances['yaml']) {
+    if (this.editorInstances['example']) {
       const language = fileName.endsWith('.json') ? 'json' : 'yaml';
-      this.editorInstances['yaml'].setLanguage(language);
+      this.editorInstances['example'].setLanguage(language);
     }
   }
 
@@ -165,44 +153,17 @@ class NinoEditor extends HTMLElement {
       case 'stats':
         this.renderStatsTab(data.tableName, data.folderName);
         break;
-      case 'yaml':
+      case 'example':
         // For the main YAML tab, ensure the editor is visible and potentially update its content
         // This is handled by openFile or initial setup, so no specific action here unless needed.
         break;
       default:
         console.warn(`Unknown tabId: ${tabId}`);
-    }
-    this._handleTabActivated(fileName, folderName, tabId, fromClick);
+    } 
 
     this.layoutEditors();
   }
-
-
-  _handleTabActivated(fileName, folderName, tabId, fromClick) {
-    if (!this._ninoExecution) return;
-
-    if (tabId === 'graph') {
-      this._ninoExecution.setOutputEditorValue('');
-    } else {
-      this._ninoExecution.layoutEditors();
-    }
-
-    if (fileName && fileName.includes('dataconnector.yaml')) {
-      this._ninoExecution.setInputEditorLanguage('shell');
-      this._ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDataconnector(folderName));
-    } else if (fileName && fileName.includes('playbook.yaml')) {
-      this._ninoExecution.setInputEditorLanguage('shell');
-      this._ninoExecution.setInputEditorValue(NĭnŏTemplate.inputPlaybook(folderName, fileName));
-    } else if (tabId === 'yaml') {
-      this._ninoExecution.setInputEditorLanguage('json');
-      if (!fromClick) {
-        const activeExampleId = localStorage.getItem('nino-active-example-id');
-        const example = staticExamples.flatMap(c => c.examples).find(e => e.id === activeExampleId);
-        this._ninoExecution.setInputEditorValue(example?.input || '{}');
-      }
-    }
-
-  }
+ 
   updateGraphTab(data) {
     this.graphTransformation.setAttribute("url", data.url || '/api/schema.dot');
   }
@@ -237,7 +198,8 @@ class NinoEditor extends HTMLElement {
 
   handleDownloadGraph(event) {
     event.stopPropagation(); // Prevent tab activation
-    this.openSvgInNewTab();
+    // this.openSvgInNewTab();
+    window.open(NĭnŏAPI.getSchema('dot', 'petstore'), '_blank');
   }
 
   openSvgInNewTab() {
@@ -360,7 +322,7 @@ class NinoEditor extends HTMLElement {
 
       // If the closed tab was active, activate the YAML tab
       if (this.activeTab === tabId) {
-        this.activateTab('yaml');
+        this.activateTab('example');
       }
 
       this.dispatchEvent(new CustomEvent('tab-closed', {

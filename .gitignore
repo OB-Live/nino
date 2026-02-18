@@ -9,3 +9,9 @@ petstore/source/*
 petstore/target/* 
 **/analyze.yaml
 **-descriptor.dot
+.idea/.gitignore
+.idea/misc.xml
+.idea/modules.xml
+.idea/nino.iml
+.idea/vcs.xml
+nino

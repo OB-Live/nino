@@ -201,9 +201,11 @@ class NinoExecution extends HTMLElement {
             if (!response.ok) {
                 const errorText = await response.text();
                 this.setOutputEditorValue(`Error fetching example row: ${errorText}`);
+                
             } else {
                 const result = await response.text();
                 this.setInputEditorValue(result);
+                this.setInputEditorLanguage('json');
             }
         } catch (error) {
             this.setOutputEditorValue(`API request failed during fetch: ${error.message}`);

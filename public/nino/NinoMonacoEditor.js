@@ -31,12 +31,14 @@ class NinoMonacoEditor extends HTMLElement {
                 margin: 0;
                 padding: 0; 
                 overflow: hidden;
-            } 
+            }
+            
             #editor-container { 
                 height: 100%;
             }
             
         </style>
+        
         <link rel="stylesheet" data-name="vs/editor/editor.main" href="/lib/monaco-editor-0.55.1/package/min/vs/editor/editor.main.css" />
 
         <div id="editor-container"></div>
@@ -104,7 +106,7 @@ class NinoMonacoEditor extends HTMLElement {
             lineNumbers: "on",
             wordWrap: 'on',
             theme: "vs-dark",
-            minimap: { enabled: true },
+            minimap: { enabled: false },
             automaticLayout: true,
             mouseWheelZoom: true,
             // No theme specified to ignore all theming, as requested.

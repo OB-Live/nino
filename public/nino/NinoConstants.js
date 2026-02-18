@@ -287,34 +287,42 @@ export const MASK_KEYWORDS = [
 
 export const NĭnŏTemplate = {
   inputDataconnector: (folderName) => `
+
+cd  ${folderName}
 # boiler plate project setup 
-mkdir -p "${folderName}/source";
-mkdir -p "${folderName}/target";
-ln -sf "../dataconnector.yaml" "${folderName}/source/dataconnector.yaml"
-ln -sf "../dataconnector.yaml" "${folderName}/target/dataconnector.yaml"
+mkdir -p "./source";
+mkdir -p "./target";
+ln -sf "../dataconnector.yaml" "source/dataconnector.yaml"
+ln -sf "../dataconnector.yaml" "target/dataconnector.yaml"
   
 # extract metadata from source and target
 cd ${folderName}/source 
 lino table extract source
 lino relation extract source
-# lino analyse source > analyze.yaml
+# Analyse operation may be costly 
+lino analyse source > analyze.yaml
 
 cd ../target
 lino table extract target
 lino relation extract target
-# lino analyse target > analyze.yaml 
+lino analyse target > analyze.yaml 
+
+# examples 
+cat tables.yaml | yq .tables.[].name
 `,
   inputDescriptor: (folderName, tableName) => `cd ${folderName}
 # lino pull -l 1 --table ${tableName} source
 lino pull -l 1 -i ${tableName}-descriptor.yaml
 `,
-  inputPlaybook: (folderName, tableName) => ` 
-ansible-playbook ${tableName} playbook.yaml
+  inputPlaybook: (folderName, tableName) => `cd ${folderName} 
+# Test the docker-compose
+ansible-playbook playbook.yaml
 `,
-  inputDocker: (folderName, tableName) => ` 
-docker compose up docker-compose.yaml  
+  inputDocker: (folderName, tableName) => `cd ${folderName}
+# Test the docker-compose
+docker-compose up docker-compose.yaml  
 `,
-  inputMasking: (folderName, tableName) => `
+  inputMasking: (folderName, tableName) => `# Quick test your mask 
 lino pull -l 1 -i ${tableName}-descriptor.yaml | pimo -c ${tableName}-masking.yaml
 `,
 };

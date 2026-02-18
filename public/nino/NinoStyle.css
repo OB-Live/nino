@@ -95,10 +95,10 @@
        ========================= */
 
     --border-background: linear-gradient(
-        to bottom,
+        to top,
         #0f1e3a 0%,
         #1e3a8a 35%,
-        #ffffff 50%,
+        #000000 50%,
         #7f1d1d 65%,
         #3b0a0a 100%
     );

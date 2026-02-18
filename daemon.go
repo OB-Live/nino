@@ -32,18 +32,26 @@ func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths 
 	r.Get("/api/playbook/{folder}", servePlaybook(&projectData))
 	r.Get("/api/new/mask/{folderName}/{tableName}", createMaskFile(&projectData, inputPaths, fileMap))
 
-	// API routes for external tool integration
+	// New API routes for folder and file creation
+	r.Get("/api/folder/*", createFolderHandler())
+	// r.Post("/api/new/mask/*", createFileHandler("mask", &projectData, inputPaths))
+	r.Get("/api/new/playbook/*", createFileHandler("playbook", &projectData, inputPaths))
+	r.Get("/api/new/dataconnectors/*", createFileHandler("dataconnectors", &projectData, inputPaths))
+	r.Get("/api/new/bash/*", createFileHandler("bash", &projectData, inputPaths))
+
+	// API routes for file handling
 	r.Get("/api/files", listFilesHandler(inputPaths))
 	r.Get("/api/file/*", getFileHandler(inputPaths))
 	r.Post("/api/file/*", updateFileHandler(inputPaths, &projectData))
 
-	// API route for pimo execution
-	r.Post("/api/exec/pimo", pimoExecHandler())
-
 	// API routes that executes Command lines actions
+	r.Post("/api/exec/pimo", pimoExecHandler())
 	r.Post("/api/exec/playbook/{folder}/{filename}", execCommandHandler())
 	r.Get("/api/exec/lino/fetch/{folder}/{filename}", fetchLinoExampleHandler(inputPaths, fileMap))
 	r.Post("/api/exec/pull/{folder}/{filename}", execCommandHandler())
+
+	// New API route for reloading schemas
+	r.Post("/api/reload", reloadHandler(&projectData, inputPaths))
 
 	log.Printf("Starting web server on http://localhost:%s", port)
 
@@ -169,7 +177,7 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 
 		switch format {
 		case "dot":
-			// w.Header().Set("Content-Type", "text/vnd.graphviz")
+			w.Header().Set("Content-Type", "text/vnd.graphviz")
 			// w.Header().Set("Content-Disposition", `attachment; filename="schema.dot"`)
 			w.Write([]byte(dotString))
 			// return // Explicitly return here
@@ -181,18 +189,11 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 
 			output, err := cmd.Output() // Use Output() to get only stdout
 			if err != nil {
-				if len(output) == 0 {
-					// If there's an error AND no output, it's a fatal error.
-					log.Printf("Error executing dot command for format %s: %v. No output was generated.", format, err)
-					http.Error(w, "Failed to generate graph image", http.StatusInternalServerError)
-					return
-				}
 				// If there's an error but we still got some output, log it as a warning and proceed.
 				log.Printf("Warning: dot command for format %s exited with an error but still produced output. Error: %v", format, err)
 				// If there's an error AND no output, it's a fatal error.
-				log.Printf("Error executing dot command for format %s: %v. Output: %s", format, err, string(output))
-				http.Error(w, "Failed to generate graph image", http.StatusInternalServerError)
-				return
+				log.Printf("Warning executing dot command for format %s: %v. Output: %s", format, err)
+
 			}
 
 			if len(output) == 0 {
@@ -211,6 +212,112 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 		default:
 			http.Error(w, fmt.Sprintf("Unsupported format: %s", format), http.StatusBadRequest)
 		}
+	}
+}
+
+// createFolderHandler creates a new folder recursively.
+func createFolderHandler() http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		folderName := chi.URLParam(r, "*")
+		if folderName == "" {
+			http.Error(w, "Folder name is required", http.StatusBadRequest)
+			return
+		}
+
+		// Sanitize folderName to prevent directory traversal
+		cleanFolderName := filepath.Clean(folderName)
+		if strings.HasPrefix(cleanFolderName, "..") || filepath.IsAbs(cleanFolderName) {
+			http.Error(w, "Invalid folder name: cannot use absolute or parent paths", http.StatusBadRequest)
+			return
+		}
+
+		// For simplicity, new folders are created relative to the current working directory
+		fullPath := cleanFolderName
+
+		err := os.MkdirAll(fullPath, 0755) // 0755 gives read/write/execute for owner, read/execute for group/others
+		if err != nil {
+			log.Printf("Error creating folder '%s': %v", fullPath, err)
+			http.Error(w, fmt.Sprintf("Failed to create folder: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprintf(w, "Folder '%s' created successfully", fullPath)
+	}
+}
+
+// createFileHandler creates a new file with boilerplate content based on type.
+func createFileHandler(fileType string, projectData *ProjectData, inputPaths []string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		path := chi.URLParam(r, "*")
+		// filename := chi.URLParam(r, "filename")
+
+		// if folderName == "" {
+		// 	http.Error(w, "Folder name is required", http.StatusBadRequest)
+		// 	return
+		// }
+
+		content, ok := templates[fileType]
+		if !ok {
+			http.Error(w, "Unsupported file type", http.StatusBadRequest)
+			return
+		} 
+		switch fileType {
+		case "mask":
+			if !strings.HasSuffix(path, "-masking.yaml") {
+				path += "-masking.yaml"
+			}
+		case "playbook":
+			path += "/playbook.yaml"
+		case "dataconnectors":
+			path += "/dataconnector.yaml"
+
+		case "bash":
+			if !strings.HasSuffix(path, ".sh") {
+				path += ".sh"
+			}
+		}
+		// For simplicity, new files are created relative to the current working directory
+		// or within the first input path if available.
+		basePath := "." // Default to current directory
+		if len(inputPaths) > 0 {
+			basePath = inputPaths[0]
+			info, err := os.Stat(basePath)
+			if err == nil && !info.IsDir() {
+				basePath = filepath.Dir(basePath) // If inputPath is a file, use its directory
+			}
+		}
+
+		// fullPath := filepath.Join(basePath, folderName, finalFilename)
+
+		// Ensure the directory exists
+		dir := filepath.Dir(path)
+		if err := os.MkdirAll(dir, 0755); err != nil {
+			log.Printf("Error creating directory '%s': %v", dir, err)
+			http.Error(w, fmt.Sprintf("Failed to create directory: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
+			log.Printf("Error creating file '%s': %v", path, err)
+			http.Error(w, fmt.Sprintf("Failed to create file: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		// Reload schemas after file creation
+		reloadSchemas(projectData, inputPaths)
+
+		w.WriteHeader(http.StatusCreated)
+		fmt.Fprintf(w, "File '%s' created successfully", path)
+	}
+}
+
+// reloadHandler resets and re-parses all YAML files.
+func reloadHandler(projectData *ProjectData, inputPaths []string) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		reloadSchemas(projectData, inputPaths)
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprint(w, "Schemas reloaded successfully")
 	}
 }
 
@@ -481,12 +588,12 @@ func pimoExecHandler() http.HandlerFunc {
 		}
 
 		// Define temporary file paths
-		maskFile, err := os.CreateTemp("tmp", "mask-*.yaml")
+		maskFile, err := os.CreateTemp("", "mask-*.yaml")
 		if err != nil {
 			http.Error(w, "Failed to create temporary mask file", http.StatusInternalServerError)
 			return
 		}
-		// defer os.Remove(maskFile.Name()) // Clean up the file afterwards
+		defer os.Remove(maskFile.Name()) // Clean up the file afterwards
 
 		// Write the YAML and JSON content to temporary files
 		if _, err := maskFile.Write([]byte(req.YAML)); err != nil {
@@ -590,4 +697,96 @@ func fetchLinoExampleHandler(inputPaths []string, fileMap map[string]string) htt
 		w.Header().Set("Content-Type", "text/plain")
 		w.Write(output)
 	}
+}
+
+// templates contains the boilerplate content for different file types.
+var templates = map[string]string{
+	"mask": `version: "1"
+seed: 42
+masking:
+  - selector:
+      jsonpath: "$.id"
+    mask:
+      randomUUID: {}
+`,
+	"playbook": `---
+- name: LINO Petstore Example
+  hosts: localhost
+  connection: local
+  become: false
+  gather_facts: true
+  environment:
+    PATH: "{{ ansible_env.PATH }}:{{ install_dir }}"
+    ADMIN: admin
+  vars:
+    #  Business variables
+    workspace: "./" 
+    truncate_target: true
+    # fifos_dir: "/tmp/lino"
+    source_db: "postgresql://localhost:5432/jhpetclinic?sslmode=disable -P ADMIN -u jhpetclinic"
+    target_db: "postgresql://localhost:5433/jhpetclinic?sslmode=disable -P ADMIN -u jhpetclinic"
+    id_json: "{{ fifos_dir }}/{{ idName }}.jsonl"
+    id_mask: "{{ fifos_dir }}/{{ idName }}-masked.jsonl"
+    # yaml_mask: "{{ workspace }}/target/{{ idName }}-masking.yml"
+
+  pre_tasks:
+    - name: "Example Docker environnement"
+      # become: true
+      community.docker.docker_compose_v2:
+        project_src: "{{ workspace }}"
+        files:
+          - docker-compose.yml 
+        state: present
+        wait: true                   
+        # build: never                 
+      register: compose_output
+
+    - name: Debug compose status
+      debug:
+        var: compose_output.actions
+    
+    - name: "Cron task"
+      ansible.builtin.cron:
+        name: "check dirs"
+        minute: "0"
+        hour: "0"
+        job: "ansible-playbook -i tests/inventory tests/petstore-test.yml --connection=local -c ansible.cfg > cron.log"
+        # state: present
+        state: absent
+
+
+  
+  #### BUSINESS LOGIC HERE ####
+  roles:
+    - name: OB-Live.nino
+  # tasks:
+  #   - include_tasks: tasks/main.yml  
+      vars:
+        entities:
+          - name: "owners"
+            id_json: "{{ fifos_dir }}/owners.jsonl"
+          - name: "pets"
+            id_json: "{{ fifos_dir }}/pets.jsonl"
+            id_mask: "{{ fifos_dir }}/pets-masking.jsonl"
+            yaml_mask: "{{ workspace }}/target/pets-masking.yml"  # Required
+            # id_json: "{{ fifos_dir }}/{{ idName }}.jsonl"         # Optional
+            # id_mask: "{{ fifos_dir }}/{{ idName }}-masked.jsonl"  # Optional  
+`,
+	"dataconnectors": `version: v1
+dataconnectors:
+  - name: source
+    url: postgresql://jhpetclinic@bdd_prod:5432/jhpetclinic?sslmode=disable
+    readonly: true
+    password:
+      valueFromEnv: ADMIN
+  - name: target
+    url: postgresql://jhpetclinic@bdd_qualif:5433/jhpetclinic?sslmode=disable
+    readonly: false
+    password:
+      valueFromEnv: ADMIN
+
+`,
+	"bash": `#!/bin/bash
+echo "Hello from bash script!"
+`,
 }

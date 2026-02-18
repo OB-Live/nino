@@ -42,3 +42,8 @@
 - conteneurisation
 - product release
 - product demo 
+
+# commandes utiles 
+```sh
+go build . &&  docker build -t 0blive/nino . && docker run -it -p 2442:2442 0blive/nino
+```

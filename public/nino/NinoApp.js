@@ -28,35 +28,35 @@ $(sidebarToggle).on("click", toggleSidebar);
 /** @type {Nĭnŏ} */
 export const Nĭnŏ = {
     createMasking: async (folderName, tableName) => {
-        const response = await fetch(NĭnŏAPI.createMasking(folderName, tableName), { method: 'POST' });
+        const response = await fetch(NĭnŏAPI.createMasking(folderName, tableName), { method: 'GET' });
         const result = await response.json();
         console.log(result);
     },
     createPlaybook: async (folderName) => {
-        const response = await fetch(NĭnŏAPI.createPlaybook(folderName), { method: 'POST' });
+        const response = await fetch(NĭnŏAPI.createPlaybook(folderName), { method: 'GET' });
         const result = await response.json();
         console.log(result);
     },
     createBash: async (folderName) => {
-        const response = await fetch(NĭnŏAPI.createBash(folderName), { method: 'POST' });
+        const response = await fetch(NĭnŏAPI.createBash(folderName), { method: 'GET' });
         const result = await response.json();
         console.log(result);
     },
     createDataconnector: async (folderName) => {
-        const response = await fetch(NĭnŏAPI.createDataConnector(folderName), { method: 'POST' });
+        const response = await fetch(NĭnŏAPI.createDataConnector(folderName), { method: 'GET' });
         const result = await response.json();
         console.log(result);
     },
     createFolder: async (folderName) => {
-        const response = await fetch(NĭnŏAPI.postFolder(folderName), { method: 'POST' });
+        const response = await fetch(NĭnŏAPI.postFolder(folderName), { method: 'GET' });
         const result = await response.json();
         console.log(result);
     },
-    
+
     // UI elements
-    executionComponent: ninoExecution,
-    editorComponent: ninoEditor,
-    workspaceComponent: ninoWorkspace,
+    editors: () => ninoEditor.editorInstances,
+    inputEditor: () => ninoExecution.inputEditor,
+    outputEditor: () => ninoExecution.outputEditor,
     getCurrentTabContent: () => ninoEditor.editorInstances[ninoEditor.activeTab].getValue(),
     getCurrentInputContent: () => ninoExecution.inputEditor.getValue(),
     setOutputContent: (value) => ninoExecution.outputEditor.setValue(value),
@@ -65,7 +65,8 @@ export const Nĭnŏ = {
         "API": NĭnŏAPI,
         "Template": NĭnŏTemplate,
         "Examples": staticExamples,
-    }
+    },
+    fileType: getFileType
 };
 window.Nĭnŏ = Nĭnŏ;
 
@@ -115,7 +116,6 @@ async function initializeApp() {
     await new Promise(resolve => ninoEditor.addEventListener('monaco-ready', resolve, { once: true }));
     await new Promise(resolve => ninoExecution.addEventListener('monaco-ready', resolve, { once: true }));
 }
-
 
 /**
  * openTableStat
@@ -177,10 +177,6 @@ function toggleSidebar() {
     ninoEditor.layoutEditors();
 }
 
-
-
-
-
 /**
  * handleFileAction - Handles file actions such as "play" for playbooks and dataconnector files.
  * It constructs the appropriate API endpoint based on the file type and sends a POST request with the input editor content.
@@ -212,14 +208,14 @@ async function handleFileAction(event) {
         }
     }
 }
- 
+
 /**
  * Handles the selection of an example from the static examples menu or a file from the workspace tree.
  * It loads the corresponding content into the main YAML and input editors.
  */
 async function openExample(example) {
     // Switch to the main YAML tab in NinoEditor
-    ninoEditor.activateTab('yaml');
+    ninoEditor.activateTab('example');
 
     // Track the file type being loaded into the main editor
     const fileName = (example.url && example.url.includes('/')) ? example.url.split('/').pop() : 'masking.yaml';
@@ -238,18 +234,15 @@ async function openExample(example) {
     ninoExecution.setOutputEditorLanguage("json");
 }
 
- 
-
 /**
- * handleTabActivation - Handles the activation of different tabs in the editor.
- * @param {fileDesc} event 
+ * handleTabActivation - Handles the activation of different tabs in the editor. 
  */
 function handleTabActivation(event) {
-        
-    const { tabId, fromClick, fileName, folderName } = event.detail;
-// getFileType(fileName)
 
-    if (tabId === 'graph') {
+    const { tabId, fromClick, fileName, folderName } = event.detail;
+    // getFileType(fileName)
+
+    if (tabId === 'graph' || tabId === 'execution') {
         ninoExecution.setOutputEditorValue('');
     } else {
         ninoExecution.layoutEditors();
@@ -258,16 +251,39 @@ function handleTabActivation(event) {
     if (fileName && fileName.includes('dataconnector.yaml')) {
         ninoExecution.setInputEditorLanguage('shell');
         ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDataconnector(folderName));
+
     } else if (fileName && fileName.includes('playbook.yaml')) {
         ninoExecution.setInputEditorLanguage('shell');
         ninoExecution.setInputEditorValue(NĭnŏTemplate.inputPlaybook(folderName, fileName));
-    } else if (tabId === 'yaml') {
+
+    } else if (fileName && fileName.includes('descriptor.yaml')) {
+        ninoExecution.setInputEditorLanguage('shell');
+        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDescriptor(folderName, fileName));
+
+    } else if (fileName && fileName.includes('docker-compose')) {
+        ninoExecution.setInputEditorLanguage('shell');
+        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDocker(folderName, fileName));
+
+    } else if (fileName && fileName.includes('tables.yaml')) {
+        ninoExecution.setInputEditorLanguage('shell');
+        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputTables(folderName, fileName));
+
+    } else if (fileName && fileName.includes('docker-compose')) {
+        ninoExecution.setInputEditorLanguage('shell');
+        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDocker(folderName, fileName));
+
+    } else if (fileName && fileName.includes('masking.yaml')) {
+        ninoExecution.setInputEditorLanguage('json');
+
+    } else if (tabId === 'example') {
         ninoExecution.setInputEditorLanguage('json');
         if (!fromClick) {
             const activeExampleId = localStorage.getItem('nino-active-example-id');
             const example = staticExamples.flatMap(c => c.examples).find(e => e.id === activeExampleId);
             ninoExecution.setInputEditorValue(example?.input || '{}');
         }
+    } else {
+        ninoExecution.setInputEditorLanguage('shell');
     }
 
     ninoExecution.activeFile = { fileName, folderName };
@@ -296,4 +312,4 @@ ninoEditor.addEventListener('tab-activated', (e) => handleTabActivation(e));
 ninoEditor.addEventListener('file-action', handleFileAction);
 ninoWorkspace.addEventListener('select-example', (e) => openExample(e.detail));
 // ninoWorkspace.addEventListener('select-file', (e) => handleSelectExample(e.detail.node.li_attr));
-ninoWorkspace.addEventListener('open-file', (e) =>  ninoEditor.openFile(e));
+ninoWorkspace.addEventListener('open-file', (e) => ninoEditor.openFile(e));

@@ -1,20 +1,14 @@
 {
 	"name": "NINŎ Dev Container",
-	"image": "ghcr.io/cgi-fr/lino-dev-container:v2.0.0",
-
-	"customizations": {
-		"vscode": {
-			"extensions": [
-				"humao.bruno",
-				"dbaeumer.vscode-eslint"
-			]
-		}
+	"build": {
+		"dockerfile": "Dockerfile"
 	},
+	"workspaceFolder": "/workspace",
+	"workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
 
-	"forwardPorts": [3000],
+	"forwardPorts": [2442],
 
 	"postCreateCommand": "npm install",
 
 	"remoteUser": "node"
 }
- 
