@@ -333,8 +333,8 @@ export const NĭnŏAPI = {
     '/api/files',
   getFile: (filename) =>
     `/api/file/${filename}`,
-  postFile: (filename) =>
-    `/api/file/${filename}`,
+  postFile: (folderName, filename) =>
+    `/api/file/${folderName}/${filename}`,
   postFolder: (folderName) =>
     `/api/folder/${folderName}`,
 

@@ -207,6 +207,17 @@ async function handleFileAction(event) {
             ninoExecution.setOutputEditorValue(`Error: ${error.message}`);
         }
     }
+
+    if (action == 'save') {
+        let url = NĭnŏAPI.postFile(example.folderName, example.name);
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'text/plain' },
+            body: ninoEditor.editorInstances[ninoEditor.activeTab].getValue()
+        });
+        const text = await response.text();
+        ninoExecution.setOutputEditorValue(text);
+    }
 }
 
 /**
