@@ -17,6 +17,17 @@ import (
 	"github.com/go-chi/chi/v5/middleware"
 )
 
+const (
+	CONTENT_TYPE        = "Content-Type"
+	CONTENT_TYPE_GRAPH  = "text/vnd.graphviz"
+	CONTENT_TYPE_JSON   = "application/json"
+	CONTENT_TYPE_YAML   = "application/yaml"
+	CONTENT_DISPOSITION = "Content-Disposition"
+	CONTENT_TYPE_IMAGE  = "image/png"
+	SUFFIX_MASKING      = "-masking.yaml"
+	SUFFIX_SH           = ".sh"
+)
+
 // startDaemon initializes and starts the web server.
 func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths []string, port string, publicFS fs.FS) {
 	r := chi.NewRouter()
@@ -69,7 +80,7 @@ func customFileServer(fs fs.FS) http.Handler {
 	fsh := http.FileServer(http.FS(fs))
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		if strings.HasSuffix(r.URL.Path, ".css") {
-			w.Header().Set("Content-Type", "text/css; charset=utf-8")
+			w.Header().Set(CONTENT_TYPE, "text/css; charset=utf-8")
 		}
 		fsh.ServeHTTP(w, r)
 	})
@@ -100,7 +111,7 @@ func createMaskFile(projectData *ProjectData, inputPaths []string, fileMap map[s
 			basePath = filepath.Join(basePath, tableFolder)
 		}
 
-		filePath := filepath.Join(basePath, fmt.Sprintf("%s-masking.yaml", tableName))
+		filePath := filepath.Join(basePath, fmt.Sprintf("%s"+SUFFIX_MASKING, tableName))
 
 		var sb strings.Builder
 		sb.WriteString("version: \"1\"\n")
@@ -177,8 +188,8 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 
 		switch format {
 		case "dot":
-			w.Header().Set("Content-Type", "text/vnd.graphviz")
-			w.Header().Set("Content-Disposition", `attachment; filename="schema.dot"`)
+			w.Header().Set(CONTENT_TYPE, CONTENT_TYPE_GRAPH)
+			w.Header().Set("CONTENT_DISPOSITION", `attachment; filename="schema.dot"`)
 			w.Write([]byte(dotString))
 			// return // Explicitly return here
 
@@ -199,11 +210,11 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 			}
 
 			if format == "svg" {
-				w.Header().Set("Content-Type", "image/svg+xml")
-				w.Header().Set("Content-Disposition", `attachment; filename="schema.svg"`)
+				w.Header().Set(CONTENT_TYPE, "image/svg+xml")
+				w.Header().Set("CONTENT_DISPOSITION", `attachment; filename="schema.svg"`)
 			} else {
-				w.Header().Set("Content-Type", "image/png")
-				w.Header().Set("Content-Disposition", `attachment; filename="schema.png"`)
+				w.Header().Set(CONTENT_TYPE, CONTENT_TYPE_IMAGE)
+				w.Header().Set("CONTENT_DISPOSITION", `attachment; filename="schema.png"`)
 			}
 			w.Write(output)
 		default:
@@ -261,8 +272,8 @@ func createFileHandler(fileType string, projectData *ProjectData, inputPaths []s
 		}
 		switch fileType {
 		case "mask":
-			if !strings.HasSuffix(path, "-masking.yaml") {
-				path += "-masking.yaml"
+			if !strings.HasSuffix(path, SUFFIX_MASKING) {
+				path += SUFFIX_MASKING
 			}
 		case "playbook":
 			path += "/playbook.yaml"
@@ -270,8 +281,8 @@ func createFileHandler(fileType string, projectData *ProjectData, inputPaths []s
 			path += "/dataconnector.yaml"
 
 		case "bash":
-			if !strings.HasSuffix(path, ".sh") {
-				path += ".sh"
+			if !strings.HasSuffix(path, SUFFIX_SH) {
+				path += SUFFIX_SH
 			}
 		}
 		// For simplicity, new files are created relative to the current working directory
@@ -325,7 +336,6 @@ func servePlaybook(projectData *ProjectData) http.HandlerFunc {
 		if folderData, ok := (*projectData)[folderName]; ok {
 			if folderData.Playbook != nil {
 				dotString := generateAnsiblePlaybookGraph(folderData.Playbook)
-				// w.Header().Set("Content-Type", "text/vnd.graphviz")
 				w.Write([]byte(dotString))
 				return
 			}
@@ -348,11 +358,11 @@ func servePlot(projectData ProjectData) http.HandlerFunc {
 		if err != nil {
 			log.Printf("Error generating plot for table %s: %v", tableName, err)
 			// Return a placeholder DOT graph instead of an image
-			w.Header().Set("Content-Type", "text/vnd.graphviz")
+			w.Header().Set(CONTENT_TYPE, "text/vnd.graphviz")
 			dotPlaceholder := fmt.Sprintf(`digraph G { label="No plot data available for %s"; node [shape=box]; "No Data"; }`, tableName)
 			w.Write([]byte(dotPlaceholder))
 			// Return a placeholder image instead of a dot graph
-			w.Header().Set("Content-Type", "image/png")
+			w.Header().Set(CONTENT_TYPE, CONTENT_TYPE_IMAGE)
 			// Create a 1x1 transparent PNG
 			w.Write([]byte{
 				0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00, 0x00, 0x0d,
@@ -365,7 +375,7 @@ func servePlot(projectData ProjectData) http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "image/png")
+		w.Header().Set(CONTENT_TYPE, CONTENT_TYPE_IMAGE)
 		w.Write(imgBytes)
 	}
 }
@@ -387,53 +397,46 @@ func reloadSchemas(projectData *ProjectData, inputPaths []string) {
 	log.Println("Successfully reloaded schemas.")
 }
 
+// buildFileTree recursively builds a tree of files and folders for a given path.
+// It skips hidden files/folders and the "public" directory.
+func buildFileTree(path string) ([]interface{}, error) {
+	entries, err := os.ReadDir(path)
+	if err != nil {
+		return nil, err
+	}
+
+	content := make([]interface{}, 0, len(entries))
+	for _, entry := range entries {
+		name := entry.Name()
+		// Skip hidden files and folders, and the 'public' folder
+		if strings.HasPrefix(name, ".") || name == "public" {
+			continue
+		}
+
+		entryPath := filepath.Join(path, name)
+
+		if entry.IsDir() {
+			subfolderContent, err := buildFileTree(entryPath)
+			if err != nil {
+				return nil, err
+			}
+			if len(subfolderContent) > 0 {
+				content = append(content, map[string][]interface{}{name: subfolderContent})
+			}
+		} else if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") {
+			content = append(content, name)
+		}
+	}
+
+	return content, nil
+}
+
 // listFilesHandler serves a JSON structure of all discovered YAML files.
 func listFilesHandler(inputPaths []string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		// The top-level structure should be a map with "Workspace" as the key,
 		// and its value an array of items (files or folders).
 		workspaceItems := make([]interface{}, 0)
-
-		// Helper function to recursively build the file tree for a given directory
-		// Returns an array of items (files or nested folders)
-		var buildFolderContent func(folderPath string) ([]interface{}, error)
-		buildFolderContent = func(folderPath string) ([]interface{}, error) {
-			content := make([]interface{}, 0)
-			entries, err := os.ReadDir(folderPath)
-			if err != nil {
-				return nil, err
-			}
-
-			for _, entry := range entries {
-				name := entry.Name()
-				// Skip hidden files and folders, and the 'public' folder
-				if strings.HasPrefix(name, ".") || name == "public" {
-					continue // Just skip this entry
-				}
-
-				entryPath := filepath.Join(folderPath, name)
-
-				if entry.IsDir() {
-					// Recursively get content for the subfolder
-					subfolderContent, err := buildFolderContent(entryPath)
-					if err != nil {
-						return nil, err // Propagate actual errors
-					}
-					// If the subfolder has content, add it as a nested object
-					if len(subfolderContent) > 0 {
-						nestedFolder := make(map[string][]interface{})
-						nestedFolder[name] = subfolderContent
-						content = append(content, nestedFolder)
-					}
-				} else {
-					// It's a file, append its name to the current folder's content
-					if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") {
-						content = append(content, name)
-					}
-				}
-			}
-			return content, nil
-		}
 
 		for _, basePath := range inputPaths {
 			// Normalize basePath to ensure consistent path separators
@@ -447,7 +450,7 @@ func listFilesHandler(inputPaths []string) http.HandlerFunc {
 
 			if info.IsDir() {
 				// If basePath is a directory, its name becomes a top-level folder under "Workspace"
-				folderContent, err := buildFolderContent(basePath)
+				folderContent, err := buildFileTree(basePath)
 				if err != nil {
 					http.Error(w, fmt.Sprintf("Failed to build file tree for %s: %v", basePath, err), http.StatusInternalServerError)
 					return
@@ -458,9 +461,7 @@ func listFilesHandler(inputPaths []string) http.HandlerFunc {
 						// If the folder is '.', flatten its content into the workspace
 						workspaceItems = append(workspaceItems, folderContent...)
 					} else {
-						nestedFolder := make(map[string][]interface{})
-						nestedFolder[folderName] = folderContent
-						workspaceItems = append(workspaceItems, nestedFolder)
+						workspaceItems = append(workspaceItems, map[string][]interface{}{folderName: folderContent})
 					}
 				}
 			} else {
@@ -476,7 +477,7 @@ func listFilesHandler(inputPaths []string) http.HandlerFunc {
 			"Workspace": workspaceItems,
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(CONTENT_TYPE, CONTENT_TYPE_JSON)
 		if err := json.NewEncoder(w).Encode(fileTree); err != nil {
 			http.Error(w, "Failed to encode file list to JSON", http.StatusInternalServerError)
 		}
@@ -613,7 +614,7 @@ func pimoExecHandler() http.HandlerFunc {
 			return
 		}
 
-		w.Header().Set("Content-Type", "application/json")
+		w.Header().Set(CONTENT_TYPE, "application/json")
 		w.Write(output)
 	}
 }
@@ -644,7 +645,7 @@ func execCommandHandler() http.HandlerFunc {
 		}
 		responseOutput := fmt.Sprintf("$ %s\n%s", script, string(output))
 
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set(CONTENT_TYPE, "text/plain")
 		w.Write([]byte(responseOutput))
 	}
 }
@@ -655,12 +656,12 @@ func fetchLinoExampleHandler(inputPaths []string, fileMap map[string]string) htt
 		folderName := chi.URLParam(r, "folder")
 		fileName := chi.URLParam(r, "filename")
 
-		if !strings.HasSuffix(fileName, "-masking.yaml") {
+		if !strings.HasSuffix(fileName, SUFFIX_MASKING) {
 			http.Error(w, "File is not a masking file", http.StatusBadRequest)
 			return
 		}
 
-		tableName := strings.TrimSuffix(fileName, "-masking.yaml")
+		tableName := strings.TrimSuffix(fileName, SUFFIX_MASKING)
 
 		// Find the base path for the folder to execute the lino command from.
 		basePath, ok := findBasePathForFolder(inputPaths, folderName, fileMap)
@@ -691,7 +692,7 @@ func fetchLinoExampleHandler(inputPaths []string, fileMap map[string]string) htt
 			return
 		}
 
-		w.Header().Set("Content-Type", "text/plain")
+		w.Header().Set(CONTENT_TYPE, "text/plain")
 		w.Write(output)
 	}
 }

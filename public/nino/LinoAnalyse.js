@@ -1,4 +1,4 @@
-import { NĭnŏAPI } from './NinoConstants.js';  
+import { NĭnŏAPI } from './NinoConstants.js';
 class LinoAnalyse extends HTMLElement {
     constructor() {
         super();

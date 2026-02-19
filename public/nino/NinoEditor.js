@@ -62,7 +62,7 @@ class NinoEditor extends HTMLElement {
     this.graphTransformation = this.shadowRoot.getElementById('graph-view-container');
     this.graphExecution = this.shadowRoot.getElementById('execution-view-container');
     this.statsViewContainer = this.shadowRoot.getElementById('stats-view-container');
-     this.downloadGraphBtn = this.shadowRoot.getElementById('download-graph-btn');
+    this.downloadGraphBtn = this.shadowRoot.getElementById('download-graph-btn');
     this.tabHeader.addEventListener('click', this.handleTabClick.bind(this));
     this.downloadGraphBtn.addEventListener('click', this.handleDownloadGraph.bind(this));
 
@@ -79,7 +79,7 @@ class NinoEditor extends HTMLElement {
   connectedCallback() {
     // NinoMonacoEditor components will load Monaco themselves. 
   }
- 
+
 
   layoutEditors() {
     if (this.editorInstances['example']) {
@@ -158,11 +158,11 @@ class NinoEditor extends HTMLElement {
         break;
       default:
         console.warn(`Unknown tabId: ${tabId}`);
-    } 
+    }
 
     this.layoutEditors();
   }
- 
+
   updateGraphTab(data) {
     this.graphTransformation.setAttribute("url", data.url || '/api/schema.dot');
   }
@@ -183,7 +183,7 @@ class NinoEditor extends HTMLElement {
   }
 
   renderStatsTab(tableName, folderName) {
-    if (tableName) { 
+    if (tableName) {
       this.statsViewContainer.setAttribute('table-name', tableName);
       this.statsViewContainer.setAttribute('folder-name', folderName);
     }

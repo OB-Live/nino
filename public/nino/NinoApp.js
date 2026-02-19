@@ -12,7 +12,7 @@ const ninoWorkspace = document.querySelector('nino-workspace');
 window.openTableStat = openTableStat;
 window.openExecutionGraph = openExecutionGraph;
 $(sidebarToggle).on("click", toggleSidebar);
- 
+
 async function _createFileOrFolder(apiCall, ...args) {
     const response = await fetch(apiCall(...args), { method: 'GET' });
     const result = await response.json();
@@ -54,13 +54,13 @@ export const Nĭnŏ = {
     // constants 
     "API": NĭnŏAPI,
     "Templates": fileTypes,
-    "Examples": pimoExamples, 
+    "Examples": pimoExamples,
 };
 window.Nĭnŏ = Nĭnŏ;
 
 
 makeHorizontalResizable();
- 
+
 
 /**
  * Makes the right panel, execution-panel resizable  
@@ -168,7 +168,7 @@ function openExecutionGraph(folderName) {
  * and adjusts the width of the left panel to compensate for the sidebar's change in width.
  */
 function toggleSidebar() {
-    const isCollapsed = ninoWorkspace.toggleCollapse(); 
+    const isCollapsed = ninoWorkspace.toggleCollapse();
 
     // Adjust left panel width to keep right panel width constant
     const editorPanel = $(ninoEditor);
@@ -306,5 +306,5 @@ function findFirstPlaybookFolder(items) {
 ninoExecution.addEventListener('execute-nino', (e) => handleExecution(e));
 ninoEditor.addEventListener('tab-activated', (e) => handleTabActivation(e));
 ninoEditor.addEventListener('file-action', handleFileAction);
-ninoWorkspace.addEventListener('select-example', (e) => openExample(e.detail)); 
+ninoWorkspace.addEventListener('select-example', (e) => openExample(e.detail));
 ninoWorkspace.addEventListener('open-file', (e) => ninoEditor.openFile(e));

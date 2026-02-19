@@ -15,3 +15,7 @@ petstore/target/*
 .idea/nino.iml
 .idea/vcs.xml
 nino
+.problems/
+
+cypress/screenshots
+tests/cypress/screenshots

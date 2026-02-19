@@ -1,6 +1,5 @@
 import * as d3 from '/lib/d3.v7.min.js';
-import '/lib/d3-graphviz.js';
-import { NĭnŏAPI } from './NinoConstants.js';
+import '/lib/d3-graphviz.js'; 
 class NinoGraphviz extends HTMLElement {
     static get observedAttributes() {
         return ['url'];
