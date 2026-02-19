@@ -12,7 +12,7 @@
 	--main-header-border-color: #1b1b1b;
 
 	--panel-background: linear-gradient(to top left, #f8fafc, #e2e8f0);
-	--panel-header-background: linear-gradient(to bottom right,#c9d7a5 0%,#b4c788 45%,#9fb06c 100%);
+	--panel-header-background: linear-gradient(to bottom right, #c9d7a5 0%, #b4c788 45%, #9fb06c 100%);
 	--panel-header-border-color: #8fa160;
 	--panel-text-color: #1e293b;
 
@@ -237,7 +237,7 @@ nino-workspace {
 	flex-shrink: 0;
 	cursor: col-resize;
 	background: var(--border-background);
-} 
+}
 
 .resize-handle-h.active {
 	background: var(--border-hover-background);
@@ -377,19 +377,7 @@ nino-execution,
 	color: var(--panel-text-color);
 	border: 2px solid var(--tab-button-active-border-color);
 	background-color: var(--tab-button-active-background-color);
-}
-
-#input-panel {
-	flex: 50 1 0%;
-	min-height: 20vh !important;
-	flex-direction: column;
-}
-
-#output-panel {
-	flex: 50 1 0%;
-	min-height: 20vh !important;
-	flex-direction: column;
-}
+} 
 
 .editor-header {
 	padding: 8px 12px;
@@ -410,12 +398,7 @@ nino-graphviz,
 	flex: 1;
 	overflow: auto;
 	padding: 1em;
-}
-
-
-.ime-text-area {
-	display: none
-}
+} 
 
 .vakata-context .iDataconnector {
 	background-image: url("/img/db_icon.png");

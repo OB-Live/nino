@@ -52,7 +52,7 @@ window.Nĭnŏ = Nĭnŏ;
 
 makeHorizontalResizable();
 
-document.addEventListener("DOMContentLoaded", initializeApp);
+// document.addEventListener("DOMContentLoaded", initializeApp);
 
 /**
  * Makes the right panel, execution-panel resizable  
@@ -118,8 +118,8 @@ async function initializeApp() {
     // Monaco initialization is now handled within NinoEditor.js and NinoExecution.js
     // Wait for both components to signal that Monaco is ready and editors are created.
     // NinoEditor now waits for its child components to be ready.
-    await new Promise(resolve => ninoEditor.addEventListener('monaco-ready', resolve, { once: true }));
-    await new Promise(resolve => ninoExecution.addEventListener('monaco-ready', resolve, { once: true }));
+    // await new Promise(resolve => ninoEditor.addEventListener('monaco-ready', resolve, { once: true }));
+    // await new Promise(resolve => ninoExecution.addEventListener('monaco-ready', resolve, { once: true }));
 }
 
 /**
