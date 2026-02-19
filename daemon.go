@@ -178,7 +178,7 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 		switch format {
 		case "dot":
 			w.Header().Set("Content-Type", "text/vnd.graphviz")
-			// w.Header().Set("Content-Disposition", `attachment; filename="schema.dot"`)
+			w.Header().Set("Content-Disposition", `attachment; filename="schema.dot"`)
 			w.Write([]byte(dotString))
 			// return // Explicitly return here
 
@@ -191,9 +191,6 @@ func serveSchema(projectData *ProjectData) http.HandlerFunc {
 			if err != nil {
 				// If there's an error but we still got some output, log it as a warning and proceed.
 				log.Printf("Warning: dot command for format %s exited with an error but still produced output. Error: %v", format, err)
-				// If there's an error AND no output, it's a fatal error.
-				log.Printf("Warning executing dot command for format %s: %v. Output: %s", format, err)
-
 			}
 
 			if len(output) == 0 {
@@ -261,7 +258,7 @@ func createFileHandler(fileType string, projectData *ProjectData, inputPaths []s
 		if !ok {
 			http.Error(w, "Unsupported file type", http.StatusBadRequest)
 			return
-		} 
+		}
 		switch fileType {
 		case "mask":
 			if !strings.HasSuffix(path, "-masking.yaml") {
@@ -588,7 +585,7 @@ func pimoExecHandler() http.HandlerFunc {
 		}
 
 		// Define temporary file paths
-		maskFile, err := os.CreateTemp("", "mask-*.yaml")
+		maskFile, err := os.CreateTemp(".", "mask-*.yaml")
 		if err != nil {
 			http.Error(w, "Failed to create temporary mask file", http.StatusInternalServerError)
 			return

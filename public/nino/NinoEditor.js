@@ -2,8 +2,8 @@
 
 import './LinoAnalyse.js';
 import './NinoMonacoEditor.js';
-import { staticExamples, NĭnŏTemplate, NĭnŏAPI, getFileType } from './NinoConstants.js';
-import { Nĭnŏ } from './NinoApp.js';
+import { pimoExamples, NĭnŏAPI } from './NinoConstants.js';
+import { Nĭnŏ, getFileType } from './NinoApp.js';
 class NinoEditor extends HTMLElement {
   constructor() {
     super();
@@ -30,7 +30,7 @@ class NinoEditor extends HTMLElement {
         <nino-monaco-editor 
           language="yaml"
           id="example-editor-container"
-          value="${staticExamples[0].examples[0].yaml}"  
+          value="${pimoExamples[0].examples[0].yaml}"  
           class="tab-content editor-wrapper"
         ></nino-monaco-editor> 
 
@@ -62,8 +62,7 @@ class NinoEditor extends HTMLElement {
     this.graphTransformation = this.shadowRoot.getElementById('graph-view-container');
     this.graphExecution = this.shadowRoot.getElementById('execution-view-container');
     this.statsViewContainer = this.shadowRoot.getElementById('stats-view-container');
-    this.linoAnalyseInstance = null; // To store the single instance of LinoAnalyse
-    this.downloadGraphBtn = this.shadowRoot.getElementById('download-graph-btn');
+     this.downloadGraphBtn = this.shadowRoot.getElementById('download-graph-btn');
     this.tabHeader.addEventListener('click', this.handleTabClick.bind(this));
     this.downloadGraphBtn.addEventListener('click', this.handleDownloadGraph.bind(this));
 
@@ -184,14 +183,9 @@ class NinoEditor extends HTMLElement {
   }
 
   renderStatsTab(tableName, folderName) {
-    if (tableName) {
-      if (!this.linoAnalyseInstance) {
-        this.linoAnalyseInstance = document.createElement('lino-analyse');
-        this.statsViewContainer.appendChild(this.linoAnalyseInstance);
-      }
-      // Update attributes, which will trigger render in LinoAnalyse.js if values changed
-      this.linoAnalyseInstance.setAttribute('table-name', tableName);
-      this.linoAnalyseInstance.setAttribute('folder-name', folderName);
+    if (tableName) { 
+      this.statsViewContainer.setAttribute('table-name', tableName);
+      this.statsViewContainer.setAttribute('folder-name', folderName);
     }
 
   }
@@ -235,66 +229,9 @@ class NinoEditor extends HTMLElement {
     let tabButton = this.shadowRoot.querySelector(`.tab-button[data-tab="${tabId}"]`);
     let url = example["data-url"];
 
-
     if (!tabButton) {
-      // Create new tab button
-      tabButton = document.createElement('button');
-      tabButton.classList.add('tab-button');
-      tabButton.dataset.tab = tabId;
-      tabButton.dataset.exampleId = example.id;
-      tabButton.dataset.fileName = fileName;
-      tabButton.dataset.folderName = folderName;
-      tabButton.dataset.url = url;
-      tabButton.innerHTML = `<span>${fileName}</span><span class="close-tab">&times;</span>`;
-
-      let tabHTML = `<span class="save-icon">&#x1f4be;</span>`; // Floppy disk emoji for save
-
-      if (fileName.includes('dataconnector.yaml') || fileName.includes('playbook.yaml')) {
-        tabHTML += `<span class="play-icon"></span>`;
-      }
-
-      tabHTML += `<span>${fileName}</span><span class="close-tab">&times;</span>`;
-      tabButton.innerHTML = tabHTML;
-
-      this.tabHeader.appendChild(tabButton);
-
-      // Add close functionality
-      tabButton.querySelector('.save-icon')?.addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent tab activation
-        this.dispatchEvent(new CustomEvent('file-action', { detail: { action: 'save', example: { id: example.id, name: fileName, folderName: example["data-folder-name"], url: example.url } }, bubbles: true, composed: true }));
-      });
-
-      tabButton.querySelector('.close-tab').addEventListener('click', (e) => {
-        e.stopPropagation(); // Prevent tab activation
-        this.closeTab(tabId);
-      });
-
-      tabButton.querySelector('.play-icon')?.addEventListener('click', (e) => {
-        e.stopPropagation();
-        this.dispatchEvent(new CustomEvent('file-action', { detail: { action: 'play', example: { name: fileName, description: example["data-folder-name"] } }, bubbles: true, composed: true }));
-      });
-
-
-
-      // Create editor container for the new file
-      const editorContainer = document.createElement('nino-monaco-editor');
-      editorContainer.id = `${tabId}-editor-container`;
-      editorContainer.classList.add('tab-content', 'editor-wrapper');
-      editorContainer.setAttribute('language', language);
-      editorContainer.setAttribute('value', `# Loading...`);
-      this.panel.appendChild(editorContainer);
-      this.editorInstances[tabId] = editorContainer;
-
-      // Fetch content if URL is provided
-      if (url) {
-        try {
-          const response = await fetch(url); // url is already constructed from NĭnŏAPI.getFile()
-          const text = await response.text();
-          this.editorInstances[tabId].setValue(text);
-        } catch (err) {
-          this.editorInstances[tabId].setValue(`# Failed to load: ${url}`);
-        }
-      }
+      tabButton = this._createTabButton(tabId, fileName, folderName, url, example.id);
+      this._createEditorContainer(tabId, language, url);
     }
 
     this.activateTab(tabId);
@@ -303,6 +240,62 @@ class NinoEditor extends HTMLElement {
       bubbles: true,
       composed: true
     }));
+  }
+
+  _createTabButton(tabId, fileName, folderName, url, exampleId) {
+    const tabButton = document.createElement('button');
+    tabButton.classList.add('tab-button');
+    tabButton.dataset.tab = tabId;
+    tabButton.dataset.exampleId = exampleId;
+    tabButton.dataset.fileName = fileName;
+    tabButton.dataset.folderName = folderName;
+    tabButton.dataset.url = url;
+
+    let tabHTML = `<span class="save-icon">&#x1f4be;</span>`; // Floppy disk emoji for save
+    if (fileName.includes('dataconnector.yaml') || fileName.includes('playbook.yaml')) {
+      tabHTML += `<span class="play-icon"></span>`;
+    }
+    tabHTML += `<span>${fileName}</span><span class="close-tab">&times;</span>`;
+    tabButton.innerHTML = tabHTML;
+
+    this.tabHeader.appendChild(tabButton);
+
+    tabButton.querySelector('.save-icon')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.dispatchEvent(new CustomEvent('file-action', { detail: { action: 'save', example: { id: exampleId, name: fileName, folderName: folderName, url: url } }, bubbles: true, composed: true }));
+    });
+
+    tabButton.querySelector('.close-tab').addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.closeTab(tabId);
+    });
+
+    tabButton.querySelector('.play-icon')?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      this.dispatchEvent(new CustomEvent('file-action', { detail: { action: 'play', example: { name: fileName, description: folderName } }, bubbles: true, composed: true }));
+    });
+
+    return tabButton;
+  }
+
+  async _createEditorContainer(tabId, language, url) {
+    const editorContainer = document.createElement('nino-monaco-editor');
+    editorContainer.id = `${tabId}-editor-container`;
+    editorContainer.classList.add('tab-content', 'editor-wrapper');
+    editorContainer.setAttribute('language', language);
+    editorContainer.setAttribute('value', `# Loading...`);
+    this.panel.appendChild(editorContainer);
+    this.editorInstances[tabId] = editorContainer;
+
+    if (url) {
+      try {
+        const response = await fetch(url);
+        const text = await response.text();
+        this.editorInstances[tabId].setValue(text);
+      } catch (err) {
+        this.editorInstances[tabId].setValue(`# Failed to load: ${url}`);
+      }
+    }
   }
 
   closeTab(tabId) {

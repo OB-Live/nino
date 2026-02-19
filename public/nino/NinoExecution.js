@@ -79,6 +79,11 @@ class NinoExecution extends HTMLElement {
         this.fetchRowBtn.addEventListener('click', this.handleFetchRow.bind(this));
     }
 
+    _setButtonState(button, disabled, text) {
+        button.disabled = disabled;
+        button.querySelector('span').textContent = text;
+    }
+
     /**
      * Sets the active file information and updates the UI accordingly.
      * @param {{fileName: string, folderName: string}} fileInfo - The active file information.
@@ -94,9 +99,8 @@ class NinoExecution extends HTMLElement {
      * and displays the result in the output editor.
      */
     async handlePimoExecution(yamlValue, jsonValue) {
-        // const executeBtn = ninoExecution.shadowRoot.getElementById('execute-btn');
-        // executeBtn.textContent = "Executing...";
-        this.executeBtn.disabled = true;
+        this._setButtonState(this.executeBtn, true, "Executing...");
+
         this.outputEditor.setValue("");
     
         try {
@@ -174,9 +178,6 @@ class NinoExecution extends HTMLElement {
         if (this.outputEditor) {
             this.outputEditor.setAttribute('value',value);
         }
-    }
-    getOutputEditorValue() {
-        return this.outputEditor ? this.outputEditor.getAttribute('value') : '';
     } 
 
     /**
@@ -192,8 +193,7 @@ class NinoExecution extends HTMLElement {
             return;
         }
 
-        this.fetchRowBtn.disabled = true;
-        this.fetchRowBtn.querySelector('.refresh-icon').textContent = '...';
+        this._setButtonState(this.fetchRowBtn, true, '...');
 
         try {
             const response = await fetch(NĭnŏAPI.execLinoFetch(folderName, fileName));
@@ -210,8 +210,7 @@ class NinoExecution extends HTMLElement {
         } catch (error) {
             this.setOutputEditorValue(`API request failed during fetch: ${error.message}`);
         } finally {
-            this.fetchRowBtn.disabled = false;
-            this.fetchRowBtn.querySelector('.refresh-icon').textContent = '↻';
+            this._setButtonState(this.fetchRowBtn, false, '↻');
         }
     }
 }

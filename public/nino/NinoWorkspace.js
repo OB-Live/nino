@@ -1,5 +1,5 @@
-import { staticExamples, NĭnŏAPI } from './NinoConstants.js';
-import {  Nĭnŏ } from './NinoApp.js';
+import { pimoExamples, NĭnŏAPI } from './NinoConstants.js';
+import { Nĭnŏ } from './NinoApp.js';
 import * as  jstree from 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js';
 
 class NinoWorkspace extends HTMLElement {
@@ -17,8 +17,8 @@ class NinoWorkspace extends HTMLElement {
                 <div id="jstree-workspace" class="jstree-default-dark"></div>
             </div>
         `;
-        }
-       
+    }
+
     toggleCollapse() {
         this.classList.toggle('collapsed');
         return this.classList.contains('collapsed');
@@ -47,7 +47,7 @@ class NinoWorkspace extends HTMLElement {
       */
     renderExamplesMenu() {
         const examplesContainer = this.shadowRoot.querySelector("#examples-container");
-        staticExamples.forEach(category => {
+        pimoExamples.forEach(category => {
             const item = document.createElement("div");
             item.className = "accordion-item";
 
@@ -89,7 +89,7 @@ class NinoWorkspace extends HTMLElement {
     * Fetches workspace files from the backend API and transforms them into jstree-compatible data.
     */
     async fetchWorkspaceFiles() {
-        try { 
+        try {
             const response = await fetch(NĭnŏAPI.getFiles());
             if (!response.ok) return [];
             const files = await response.json();
@@ -108,44 +108,49 @@ class NinoWorkspace extends HTMLElement {
             };
 
             jstreeData.push(workspaceRootNode);
+
+            let currentIdCounter = 1; // Use a local counter for unique IDs
+
             /**
              * Recursively processes a node (folder or file) from the input data
              * and adds it to the jstreeData array.
+             * Recursively processes a node (folder or file) from the input data and adds it to the jstreeData array.
              * @param {Array<string|object>} items - An array of file names (strings) or folder objects.
              * @param {string} parentId - The ID of the parent node in the jstree.
              * @param {string} currentPath - The current path in the file tree (e.g., "Workspace/folderA").
+             * @param {string} currentTreePath - The current path in the file tree (e.g., "Workspace/folderA").
+             * @param {string} currentUrlPath - The current path for constructing URLs.
              */
             const processNode = (items, parentId, currentTreePath, currentUrlPath) => {
                 const children = [];
                 for (const item of items) {
-                    if (typeof item === 'string') {
-                        // It's a file
+                    if (typeof item === 'string') { // It's a file
                         if (item.endsWith(".yaml") || item.endsWith(".yml")) {
                             const fileName = item;
                             const nodeTreePath = `${currentTreePath}/${fileName}`;
                             const nodeUrlPath = currentUrlPath ? `${currentUrlPath}/${fileName}` : fileName;
                             jstreeData.push({
-                                id: `ws_file_${idCounter++}`,
+                                id: `ws_file_${currentIdCounter++}`,
                                 parent: parentId,
                                 text: fileName,
                                 icon: 'jstree-file',
                                 li_attr: {
                                     'data-url': `/api/file/${nodeUrlPath}`,
-                                    'data-input': '{}', // Default input for workspace files 
+                                    'data-input': '{}', // Default input for workspace files  
                                     'data-file-name': fileName,
                                     'data-folder-name': currentUrlPath.split('/').pop() || '', // Get the immediate parent folder name for the URL path
-                                    'data-example-id': `workspace-${nodeTreePath}` // To identify it later 
+                                    'data-example-id': `workspace-${nodeTreePath}` // To identify it later  
                                 },
                                 type: 'file'
                             });
                         }
-                    } else if (typeof item === 'object' && item !== null) {
-                        // It's a folder
+                    } else if (typeof item === 'object' && item !== null) { // It's a folder
                         const folderName = Object.keys(item)[0];
                         const folderContent = item[folderName];
-                        const newFolderId = `ws_folder_${idCounter++}`; // This is the jstree node ID
-                        const newCurrentTreePath = `${currentTreePath}/${folderName}`; // This is the full path for jstree hierarchy
-                        const newCurrentUrlPath = currentUrlPath ? `${currentUrlPath}/${folderName}` : folderName; // This is the path for the URL
+
+                        const newFolderId = `ws_folder_${currentIdCounter++}`;
+                        const newCurrentTreePath = `${currentTreePath}/${folderName}`;
+                        const newCurrentUrlPath = currentUrlPath ? `${currentUrlPath}/${folderName}` : folderName;
                         jstreeData.push({
                             id: newFolderId,
                             parent: parentId,
@@ -159,9 +164,8 @@ class NinoWorkspace extends HTMLElement {
                 }
             };
 
-            // Assuming the top-level 'files' object contains a 'Workspace' key with an array of items
-            if (files.Workspace && Array.isArray(files.Workspace)) {
-                workspaceRootNode.children = processNode(files.Workspace, 'ws_root', 'Workspace', '');
+            if (files.Workspace && Array.isArray(files.Workspace)) { // Assuming the top-level 'files' object contains a 'Workspace' key
+                processNode(files.Workspace, 'ws_root', 'Workspace', '');
             }
 
             return jstreeData;
@@ -182,11 +186,11 @@ class NinoWorkspace extends HTMLElement {
             .jstree({
                 core: {
                     data: jstreeData,
-                    dots : true,
+                    dots: true,
                     check_callback: true,
                 },
-                plugins: [ "state", "types", "sort", "search", "contextmenu"],
-                
+                plugins: ["state", "types", "sort", "search", "contextmenu"],
+
                 types: {
                     default: { icon: 'jstree-file' },
                     folder: { icon: 'jstree-folder' },
@@ -197,47 +201,47 @@ class NinoWorkspace extends HTMLElement {
                     table: { icon: '📊' },
                     analyse: { icon: '🔍' },
                 },
-                "contextmenu":{
-                    "items": function($node) {
+                "contextmenu": {
+                    "items": function ($node) {
                         const directory = $node.li_attr['data-folder-name']
                         const filename = $node.li_attr['data-file-name']
                         return {
-                            createFolder : {
-                                "separator_before"	: false,
-					            "separator_after"	: true,
+                            createFolder: {
+                                "separator_before": false,
+                                "separator_after": true,
                                 "icon": 'iFolder',
-                                "label" : "Create Folder",
-                                "action" : function(obj) { Nĭnŏ.createFolder(obj.reference); }
+                                "label": "Create Folder",
+                                "action": function (obj) { Nĭnŏ.createFolder(directory); }
                             },
-                            createDB : {
-                                "separator_before"	: false,
-					            "separator_after"	: true,
+                            createDB: {
+                                "separator_before": false,
+                                "separator_after": true,
                                 "icon": 'iDataconnector',
-                                "label" : "Create DataConnector",
-                                "action" : function(obj) { Nĭnŏ.createDataconnector(directory)},
-                                "_class" : "class"
+                                "label": "Create DataConnector",
+                                "action": function (obj) { Nĭnŏ.createDataconnector(directory) },
+                                "_class": "class"
                             },
-                            createMasking : {
-                                "separator_before"	: false,
-					            "separator_after"	: true,
+                            createMasking: {
+                                "separator_before": false,
+                                "separator_after": true,
                                 "icon": 'iMask',
                                 "class": "folder",
-                                "label" : "Create Masking File",
-                                "action" : function(obj) { Nĭnŏ.createMasking(directory, filename) },
+                                "label": "Create Masking File",
+                                "action": function (obj) { Nĭnŏ.createMasking(directory, filename) },
                             },
-                            createPlaybook : {
-                                "separator_before"	: false,
-					            "separator_after"	: true,
+                            createPlaybook: {
+                                "separator_before": false,
+                                "separator_after": true,
                                 "icon": 'iAnsible',
-                                "label" : "Create Playbook",
-                                "action" : function(obj) { Nĭnŏ.createPlaybook(directory) }
+                                "label": "Create Playbook",
+                                "action": function (obj) { Nĭnŏ.createPlaybook(directory) }
                             },
-                            createScript : {
-                                "separator_before"	: false,
-					            "separator_after"	: true,
+                            createScript: {
+                                "separator_before": false,
+                                "separator_after": true,
                                 "icon": 'iBash',
-                                "label" : "Create bash script",
-                                "action" : function(obj) {Nĭnŏ.createBash(directory, filename) }
+                                "label": "Create bash script",
+                                "action": function (obj) { Nĭnŏ.createBash(directory, filename) }
                             },
                         };
                     }

@@ -1,20 +1,23 @@
-import { NĭnŏTemplate, staticExamples, NĭnŏAPI, getFileType } from './NinoConstants.js';
+import { pimoExamples, NĭnŏAPI, fileTypes } from './NinoConstants.js';
 import './NinoEditor.js';
 import './NinoWorkspace.js';
 import './NinoExecution.js';
 import './NinoGraphviz.js';
 
-const sidebar = document.querySelector("nino-workspace");
 const sidebarToggle = document.querySelector("#sidebar-toggle");
-export const ninoEditor = document.querySelector('nino-editor');
-export const ninoExecution = document.querySelector('nino-execution');
-export const ninoWorkspace = document.querySelector('nino-workspace');
+const ninoEditor = document.querySelector('nino-editor');
+const ninoExecution = document.querySelector('nino-execution');
+const ninoWorkspace = document.querySelector('nino-workspace');
 
 window.openTableStat = openTableStat;
 window.openExecutionGraph = openExecutionGraph;
-window.openTableStat = openTableStat;
-window.openExecutionGraph = openExecutionGraph;
 $(sidebarToggle).on("click", toggleSidebar);
+ 
+async function _createFileOrFolder(apiCall, ...args) {
+    const response = await fetch(apiCall(...args), { method: 'GET' });
+    const result = await response.json();
+    console.log(result);
+}
 
 /**
  * @typedef {Object} Nĭnŏ
@@ -23,35 +26,13 @@ $(sidebarToggle).on("click", toggleSidebar);
  * @property {function(string, string): Promise<void>} createBash - Creates a bash script.
  * @property {function(string, string): Promise<void>} createDataconnector - Creates a dataconnector file.
  * @property {function(string): Promise<void>} createFolder - Creates a folder.
- */
-
-/** @type {Nĭnŏ} */
+ */ 
 export const Nĭnŏ = {
-    createMasking: async (folderName, tableName) => {
-        const response = await fetch(NĭnŏAPI.createMasking(folderName, tableName), { method: 'GET' });
-        const result = await response.json();
-        console.log(result);
-    },
-    createPlaybook: async (folderName) => {
-        const response = await fetch(NĭnŏAPI.createPlaybook(folderName), { method: 'GET' });
-        const result = await response.json();
-        console.log(result);
-    },
-    createBash: async (folderName) => {
-        const response = await fetch(NĭnŏAPI.createBash(folderName), { method: 'GET' });
-        const result = await response.json();
-        console.log(result);
-    },
-    createDataconnector: async (folderName) => {
-        const response = await fetch(NĭnŏAPI.createDataConnector(folderName), { method: 'GET' });
-        const result = await response.json();
-        console.log(result);
-    },
-    createFolder: async (folderName) => {
-        const response = await fetch(NĭnŏAPI.postFolder(folderName), { method: 'GET' });
-        const result = await response.json();
-        console.log(result);
-    },
+    createMasking: (folderName, tableName) => _createFileOrFolder(NĭnŏAPI.createMasking, folderName, tableName),
+    createPlaybook: (folderName) => _createFileOrFolder(NĭnŏAPI.createPlaybook, folderName),
+    createBash: (folderName) => _createFileOrFolder(NĭnŏAPI.createBash, folderName),
+    createDataconnector: (folderName) => _createFileOrFolder(NĭnŏAPI.createDataConnector, folderName),
+    createFolder: (folderName) => _createFileOrFolder(NĭnŏAPI.postFolder, folderName),
 
     // UI elements
     editors: () => ninoEditor.editorInstances,
@@ -61,12 +42,10 @@ export const Nĭnŏ = {
     getCurrentInputContent: () => ninoExecution.inputEditor.getValue(),
     setOutputContent: (value) => ninoExecution.outputEditor.setValue(value),
 
-    constants: {
-        "API": NĭnŏAPI,
-        "Template": NĭnŏTemplate,
-        "Examples": staticExamples,
-    },
-    fileType: getFileType
+    // constants 
+    "API": NĭnŏAPI,
+    "Templates": fileTypes,
+    "Examples": pimoExamples, 
 };
 window.Nĭnŏ = Nĭnŏ;
 
@@ -81,11 +60,11 @@ document.addEventListener("DOMContentLoaded", initializeApp);
 function makeHorizontalResizable() {
     let handle = $("#resize-handle-h")
     $(handle).on("mousedown", (e) => {
-        console.log("mousedown", e);
+        // console.log("mousedown", e);
         e.preventDefault();
         const container = $(handle).parent();
         const rect = container[0].getBoundingClientRect();
-        console.log("mousedown", rect);
+        // console.log("mousedown", rect);
         const onMouseMove = (moveEvent) => {
             const sidebarWidth = $(ninoWorkspace).outerWidth();
             const handleWidth = $(handle).outerWidth();
@@ -107,6 +86,32 @@ function makeHorizontalResizable() {
         $(document).on("mousemove", onMouseMove);
         $(document).on("mouseup", onMouseUp);
     });
+}
+
+/**
+ * infer language and dialect from a given filename based on its suffix and name patterns. 
+ * It checks against a predefined list of file types and returns the best match.
+ * If no match is found, it defaults to plaintext.
+ * 
+ * @param {string} filename 
+ * @returns {Object} FileType. the file type ex : { language: "yaml", suffix: ["yaml", "yml"], dialect: "masking", regex: "masking" } 
+ */
+export function getFileType(filename) {
+    const lowerFilename = filename.toLowerCase();
+    const parts = lowerFilename.split('.');
+    const suffix = parts.length > 1 ? parts.pop() : '';
+    const nameWithoutSuffix = parts.join('.');
+
+    for (const key in fileTypes) {
+        const type = fileTypes[key];
+        const suffixMatch = type.suffix && type.suffix.includes(suffix);
+        const regexMatch = type.regex && (nameWithoutSuffix.includes(type.regex) || lowerFilename.includes(type.regex));
+
+        if (suffixMatch && regexMatch) {
+            return type;
+        }
+    }
+    return { language: "plaintext", suffix: [], dialect: "plaintext", regex: "" }; // Default if no match
 }
 
 async function initializeApp() {
@@ -132,6 +137,8 @@ function openTableStat(tableName, folderName) {
         tableName: tableName,
         folderName: folderName
     });
+    ninoEditor.statsViewContainer.setAttribute('folder-name', folderName)
+    ninoEditor.statsViewContainer.setAttribute('table-name', tableName)
 }
 
 /**
@@ -161,8 +168,7 @@ function openExecutionGraph(folderName) {
  * and adjusts the width of the left panel to compensate for the sidebar's change in width.
  */
 function toggleSidebar() {
-    const isCollapsed = ninoWorkspace.toggleCollapse();
-    localStorage.setItem("nino-sidebar-collapsed", isCollapsed);
+    const isCollapsed = ninoWorkspace.toggleCollapse(); 
 
     // Adjust left panel width to keep right panel width constant
     const editorPanel = $(ninoEditor);
@@ -251,52 +257,31 @@ async function openExample(example) {
 function handleTabActivation(event) {
 
     const { tabId, fromClick, fileName, folderName } = event.detail;
-    // getFileType(fileName)
+    let inputEditorLanguage = 'shell';
+    let inputEditorContent = '';
 
     if (tabId === 'graph' || tabId === 'execution') {
         ninoExecution.setOutputEditorValue('');
     } else {
         ninoExecution.layoutEditors();
     }
-
-    if (fileName && fileName.includes('dataconnector.yaml')) {
-        ninoExecution.setInputEditorLanguage('shell');
-        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDataconnector(folderName));
-
-    } else if (fileName && fileName.includes('playbook.yaml')) {
-        ninoExecution.setInputEditorLanguage('shell');
-        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputPlaybook(folderName, fileName));
-
-    } else if (fileName && fileName.includes('descriptor.yaml')) {
-        ninoExecution.setInputEditorLanguage('shell');
-        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDescriptor(folderName, fileName));
-
-    } else if (fileName && fileName.includes('docker-compose')) {
-        ninoExecution.setInputEditorLanguage('shell');
-        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDocker(folderName, fileName));
-
-    } else if (fileName && fileName.includes('tables.yaml')) {
-        ninoExecution.setInputEditorLanguage('shell');
-        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputTables(folderName, fileName));
-
-    } else if (fileName && fileName.includes('docker-compose')) {
-        ninoExecution.setInputEditorLanguage('shell');
-        ninoExecution.setInputEditorValue(NĭnŏTemplate.inputDocker(folderName, fileName));
-
-    } else if (fileName && fileName.includes('masking.yaml')) {
-        ninoExecution.setInputEditorLanguage('json');
-
-    } else if (tabId === 'example') {
-        ninoExecution.setInputEditorLanguage('json');
-        if (!fromClick) {
-            const activeExampleId = localStorage.getItem('nino-active-example-id');
-            const example = staticExamples.flatMap(c => c.examples).find(e => e.id === activeExampleId);
-            ninoExecution.setInputEditorValue(example?.input || '{}');
+    if (fileName) {
+        const fileType = getFileType(fileName);
+        inputEditorLanguage = fileType.language;
+        if (fileType.template) {
+            inputEditorContent = fileType.template(folderName, fileName);
         }
+    } else if (tabId === 'example' && !fromClick) {
+        inputEditorLanguage = 'json';
+        // Removed localStorage logic
+        const example = pimoExamples[0].examples[0]; // Default to first example
+        inputEditorContent = example?.input || '{}';
     } else {
-        ninoExecution.setInputEditorLanguage('shell');
+        inputEditorLanguage = 'shell';
     }
 
+    ninoExecution.setInputEditorLanguage(inputEditorLanguage);
+    ninoExecution.setInputEditorValue(inputEditorContent);
     ninoExecution.activeFile = { fileName, folderName };
 }
 
@@ -321,6 +306,5 @@ function findFirstPlaybookFolder(items) {
 ninoExecution.addEventListener('execute-nino', (e) => handleExecution(e));
 ninoEditor.addEventListener('tab-activated', (e) => handleTabActivation(e));
 ninoEditor.addEventListener('file-action', handleFileAction);
-ninoWorkspace.addEventListener('select-example', (e) => openExample(e.detail));
-// ninoWorkspace.addEventListener('select-file', (e) => handleSelectExample(e.detail.node.li_attr));
+ninoWorkspace.addEventListener('select-example', (e) => openExample(e.detail)); 
 ninoWorkspace.addEventListener('open-file', (e) => ninoEditor.openFile(e));

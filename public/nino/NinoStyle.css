@@ -1,9 +1,5 @@
 :root {
 
-    /* =========================
-       Main Header – Purplish Olive Texture
-       ========================= */
-
     --main-header-background:
         radial-gradient(circle at 30% 40%, rgba(255,255,255,0.06) 0%, transparent 55%),
         radial-gradient(circle at 70% 60%, rgba(0,0,0,0.25) 0%, transparent 60%),
@@ -14,17 +10,11 @@
             #4b3f35 70%,  /* earthy olive-brown */
             #2a262e 100%  /* dark purplish base */
         );
-
     --main-header-color: #ffffff;
     --main-header-border-color: #1b1b1b;
-
-
-    /* =========================
-       Panel
-       ========================= */
+ 
 
     --panel-background: linear-gradient(to top left, #f8fafc, #e2e8f0);
-
     --panel-header-background:
         linear-gradient(
             to bottom right,
@@ -32,23 +22,13 @@
             #b4c788 45%,
             #9fb06c 100%
         );
-
     --panel-header-border-color: #8fa160;
     --panel-text-color: #1e293b;
-
-
-    /* =========================
-       Tabs
-       ========================= */
-
+ 
     --tab-button-color: linear-gradient(to top right, #ffffff, #e2e8f0);
     --tab-button-active-background-color: #2563eb;
     --tab-button-active-border-color: #3b82f6;
 
-
-    /* =========================
-       Sidebar – Olive Forest + Subtle Noise
-       ========================= */
 
     --sidebar-background:
         repeating-radial-gradient(
@@ -70,29 +50,16 @@
     --sidebar-content-background-color: rgba(255, 255, 255, 0.65);
     --sidebar-border-color: #8fa160;
 
-
-    /* =========================
-       Buttons
-       ========================= */
-
     --button-background-color:#94b1db;
     --button-border-color: #1e293b;
     --button-hover-background-color: #475569;
     --execute-button-border-color: #22c55e;
 
 
-    /* =========================
-       Links
-       ========================= */
-
     --link-color: #2563eb;
     --link-background-color: #e0f2fe;
     --link-hover-color: #1d4ed8;
 
-
-    /* =========================
-       Borders
-       ========================= */
 
     --border-background: linear-gradient(
         to top,
@@ -107,8 +74,6 @@
   --sidebar-width: 280px;
   --sidebar-width-collapsed: 0px;
 }
-
-/* HTML elements reset and base styles */
 
 * {
   margin: 0;
@@ -144,12 +109,9 @@ a:hover {
   color: var(--link-hover-color);
 }
 
-p {
-  /* background-color: var(--button-hover-background-color); */
+p { 
   padding: 6px;
-}
-
-/* Header */
+} 
 
 .main-header {
   padding: 12px 16px;
@@ -230,11 +192,7 @@ a.jstree-anchor {
   cursor: pointer;
 }
 
-.logo {
-  width: 80px;
-  transition: opacity 0.2s ease-in-out;
-}
-
+ 
 .sidebar-content {
   background: var(--sidebar-background);
   flex: 1;
@@ -243,19 +201,7 @@ a.jstree-anchor {
   border: 1px solid var(--sidebar-border-color);
 }
 
-.sidebar-content::-webkit-scrollbar {
-  width: 4px;
-}
-
-.sidebar-content::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.sidebar-content::-webkit-scrollbar-thumb {
-  background-color: var(--olive-bark-midtone);
-  border-radius: 20px;
-}
-
+ 
 .accordion-item {
   border-bottom: 1px solid var(--sidebar-border-color);
 }
@@ -458,8 +404,7 @@ nino-execution,
 
 .tab-button {
   font-size: medium;
-  background: var(--tab-button-color);
-  /* Fixed typo: removed '1px solid' */
+  background: var(--tab-button-color); 
   padding: 3px 5px;
   color: var(--panel-text-color);
   border-radius: 2px 12px 2px 2px;
@@ -492,19 +437,8 @@ nino-execution,
   padding: 8px 12px;
   background: var(--panel-header-background);
   border-bottom: 1px solid var(--panel-header-border-color);
-  /* display: flex; */
   align-items: center;
 }
-  /*
-.editor-wrapper {
- flex: 1;
-  min-height: 0;
-  height: 100%;
-  position: relative;
-  background: var(--panel-background); 
-  display: flex;  
-}
-*/
 
 #lino-analyse,
 #stats-container img,
@@ -521,13 +455,9 @@ nino-graphviz,
 }
 
 
-/* temporary fix : monaco editor is creating an extra text area for some reason and it is visible and it is not possible to hide it with the monaco editor options */
 .ime-text-area {
   display: none
 }
-
-
-/* Icons  */
 
 .vakata-context .iDataconnector {
   background-image: url("/img/db_icon.png");
@@ -576,11 +506,9 @@ nino-graphviz,
   width: 24px;
   height: 24px;
   background-color: var(--button-hover-background-color);
-  /* padding: 5px; */
   background-size: contain;
 }
 
-/* Buttons */
 
 .btn {
   background-color: var(--button-background-color);
