@@ -26,7 +26,16 @@ async function _createFileOrFolder(apiCall, ...args) {
  * @property {function(string, string): Promise<void>} createBash - Creates a bash script.
  * @property {function(string, string): Promise<void>} createDataconnector - Creates a dataconnector file.
  * @property {function(string): Promise<void>} createFolder - Creates a folder.
- */ 
+ * @property {function(): Object} editors - Returns all editor instances.
+ * @property {function(): HTMLElement} inputEditor - Returns the input editor instance.
+ * @property {function(): HTMLElement} outputEditor - Returns the output editor instance.
+ * @property {function(): string} getCurrentTabContent - Gets the content of the currently active editor tab.
+ * @property {function(): string} getCurrentInputContent - Gets the content of the input editor.
+ * @property {function(string): void} setOutputContent - Sets the content of the output editor.
+ * @property {Object} API - Constants for API endpoints.
+ * @property {Object} Templates - File type templates and definitions.
+ * @property {Object} Examples - Static pimo examples.
+ */
 export const Nĭnŏ = {
     createMasking: (folderName, tableName) => _createFileOrFolder(NĭnŏAPI.createMasking, folderName, tableName),
     createPlaybook: (folderName) => _createFileOrFolder(NĭnŏAPI.createPlaybook, folderName),
@@ -51,8 +60,7 @@ window.Nĭnŏ = Nĭnŏ;
 
 
 makeHorizontalResizable();
-
-// document.addEventListener("DOMContentLoaded", initializeApp);
+ 
 
 /**
  * Makes the right panel, execution-panel resizable  
@@ -112,14 +120,6 @@ export function getFileType(filename) {
         }
     }
     return { language: "plaintext", suffix: [], dialect: "plaintext", regex: "" }; // Default if no match
-}
-
-async function initializeApp() {
-    // Monaco initialization is now handled within NinoEditor.js and NinoExecution.js
-    // Wait for both components to signal that Monaco is ready and editors are created.
-    // NinoEditor now waits for its child components to be ready.
-    // await new Promise(resolve => ninoEditor.addEventListener('monaco-ready', resolve, { once: true }));
-    // await new Promise(resolve => ninoExecution.addEventListener('monaco-ready', resolve, { once: true }));
 }
 
 /**

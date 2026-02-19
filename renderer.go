@@ -441,6 +441,49 @@ func generateSinglePlotForColumn(projectData ProjectData, tableName, columnName 
 	return fmt.Errorf("no analysis data found for table '%s', column '%s'", tableName, columnName)
 }
 
+// getPlottableColumns extracts plottable columns from a table.
+func getPlottableColumns(table AnalyzeTable) []AnalyzeColumn {
+	var plottableColumns []AnalyzeColumn
+	for _, column := range table.Columns {
+		if len(column.StringMetric.Lengths) > 0 {
+			plottableColumns = append(plottableColumns, column)
+		}
+	}
+	return plottableColumns
+}
+
+// createTablePlotGrid generates a grid of plots for the given columns.
+func createTablePlotGrid(tableName string, columns []AnalyzeColumn) (*vgimg.PngCanvas, error) {
+	n := float64(len(columns))
+	if n == 0 {
+		return nil, fmt.Errorf("no columns to plot for table %s", tableName)
+	}
+
+	l := math.Ceil((1 + math.Sqrt(1+4*n)) / 2)
+	w := math.Ceil(n / l)
+	rows, cols := int(l), int(w)
+
+	img := vgimg.New(vg.Inch*4*vg.Length(cols), vg.Inch*3*vg.Length(rows))
+	dc := draw.New(img)
+
+	for i, col := range columns {
+		p, err := createSingleColumnPlot(tableName, col)
+		if err != nil {
+			log.Printf("Skipping plot for column %s: %v", col.Name, err)
+			continue
+		}
+		row := i / cols
+		col := i % cols
+		y := rows - 1 - row
+		rect := vg.Rectangle{
+			Min: vg.Point{X: vg.Length(col) * 4 * vg.Inch, Y: vg.Length(y) * 3 * vg.Inch},
+			Max: vg.Point{X: vg.Length(col+1) * 4 * vg.Inch, Y: vg.Length(y+1) * 3 * vg.Inch},
+		}
+		p.Draw(draw.Canvas{Canvas: dc.Canvas, Rectangle: rect})
+	}
+	return &vgimg.PngCanvas{Canvas: img}, nil
+}
+
 // generatePlotForTable finds all plottable columns for a table and generates a composite grid image.
 func generatePlotForTable(projectData ProjectData, tableName string, folderName ...string) (err error) {
 	tableFolder, _, err := findTableLocation(projectData, tableName, folderName...)
@@ -450,20 +493,13 @@ func generatePlotForTable(projectData ProjectData, tableName string, folderName 
 	if folderData, ok := projectData[tableFolder]; ok {
 		for _, table := range folderData.Analysis.Tables {
 			if table.Name == tableName {
-				var plottableColumns []AnalyzeColumn
-				for _, column := range table.Columns {
-					// Only consider columns with string length distribution for plotting
-					if len(column.StringMetric.Lengths) > 0 {
-						plottableColumns = append(plottableColumns, column)
-					}
-				}
-
+				plottableColumns := getPlottableColumns(table)
 				if len(plottableColumns) > 0 {
-					err := generateTablePlot(tableName, plottableColumns)
-					if err == nil {
-						fmt.Printf("✅ Fichier plot-%s.png généré avec succès.\n", tableName)
+					pngCanvas, err := createTablePlotGrid(tableName, plottableColumns)
+					if err != nil {
+						return fmt.Errorf("failed to create plot grid: %w", err)
 					}
-					return err
+					return savePlotToFile(pngCanvas, tableName)
 				}
 				return fmt.Errorf("no plottable columns found for table '%s'", tableName)
 			}
@@ -482,27 +518,44 @@ func generatePlotForTableToMemory(projectData ProjectData, tableName string, fol
 
 	if folderData, ok := projectData[tableFolder]; ok {
 		for _, table := range folderData.Analysis.Tables {
-			if table.Name == tableName {
-				var plottableColumns []AnalyzeColumn
-				for _, column := range table.Columns {
-					if len(column.StringMetric.Lengths) > 0 {
-						plottableColumns = append(plottableColumns, column)
-					}
-				}
-
+			if table.Name == tableName { // Check if the table name matches
+				plottableColumns := getPlottableColumns(table)
 				if len(plottableColumns) > 0 {
-					imgBytes, err := generateTablePlotToMemory(tableName, plottableColumns)
+					pngCanvas, err := createTablePlotGrid(tableName, plottableColumns)
 					if err != nil {
-						return nil, fmt.Errorf("failed to generate plot image to memory: %w", err)
+						return nil, fmt.Errorf("failed to create plot grid: %w", err)
 					}
-					return imgBytes, nil
+					return savePlotToMemory(pngCanvas)
 				}
 				return nil, fmt.Errorf("no plottable columns found for table '%s'", tableName)
 			}
 		}
 	}
-
 	return nil, fmt.Errorf("no analysis data found for table '%s'", tableName)
+}
+
+// savePlotToFile saves the plot to a PNG file.
+func savePlotToFile(pngCanvas *vgimg.PngCanvas, tableName string) error {
+	filename := fmt.Sprintf("plot-%s.png", tableName)
+	f, err := os.Create(filename)
+	if err != nil {
+		return fmt.Errorf("could not create file: %w", err)
+	}
+	defer f.Close()
+	if _, err := pngCanvas.WriteTo(f); err != nil {
+		return fmt.Errorf("could not write to file: %w", err)
+	}
+	fmt.Printf("✅ Fichier %s généré avec succès.\n", filename)
+	return nil
+}
+
+// savePlotToMemory writes the plot to a byte buffer.
+func savePlotToMemory(pngCanvas *vgimg.PngCanvas) ([]byte, error) {
+	var buf bytes.Buffer
+	if _, err := pngCanvas.WriteTo(&buf); err != nil {
+		return nil, fmt.Errorf("could not write png to buffer: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 // createSingleColumnPlot creates a single bar chart for a column's string length distribution.
@@ -543,96 +596,6 @@ func createSingleColumnPlot(tableName string, column AnalyzeColumn) (*plot.Plot,
 	p.Y.Min = 0
 
 	return p, nil
-}
-
-// generateTablePlot creates a single image file with a grid of plots for the given columns.
-func generateTablePlot(tableName string, columns []AnalyzeColumn) error {
-	n := float64(len(columns))
-	if n == 0 {
-		return fmt.Errorf("no columns to plot for table %s", tableName)
-	}
-
-	// Calculate optimal grid dimensions (l=rows, w=cols) where 'l' is as small as possible
-	// and l is roughly w+1, ensuring enough cells for all n plots.
-	l := math.Ceil((1 + math.Sqrt(1+4*n)) / 2)
-	w := math.Ceil(n / l)
-
-	rows, cols := int(l), int(w)
-
-	log.Printf("Calculated grid size for table '%s': %d rows x %d columns", tableName, rows, cols)
-
-	// Create a new canvas for the entire image grid.
-	img := vgimg.New(vg.Inch*4*vg.Length(cols), vg.Inch*3*vg.Length(rows))
-	dc := draw.New(img)
-
-	for i, col := range columns {
-		p, err := createSingleColumnPlot(tableName, col)
-		if err != nil {
-			log.Printf("Skipping plot for column %s: %v", col.Name, err)
-			continue
-		}
-		// Define the drawing area for each plot in the grid.
-		row := i / cols
-		col := i % cols
-		// The coordinate system's origin is in the bottom-left, so we must invert the row index.
-		y := rows - 1 - row
-		rect := vg.Rectangle{
-			Min: vg.Point{X: vg.Length(col) * 4 * vg.Inch, Y: vg.Length(y) * 3 * vg.Inch},
-			Max: vg.Point{X: vg.Length(col+1) * 4 * vg.Inch, Y: vg.Length(y+1) * 3 * vg.Inch},
-		}
-		p.Draw(draw.Canvas{Canvas: dc.Canvas, Rectangle: rect})
-	}
-
-	// Save the plot to a PNG file.
-	filename := fmt.Sprintf("plot-%s.png", tableName)
-	f, err := os.Create(filename)
-	if err != nil {
-		return fmt.Errorf("could not create file: %w", err)
-	}
-	defer f.Close()
-	png := vgimg.PngCanvas{Canvas: img}
-	if _, err := png.WriteTo(f); err != nil {
-		return fmt.Errorf("could not write to file: %w", err)
-	}
-	return nil
-}
-
-// generateTablePlotToMemory creates a grid of plots and writes it to a byte buffer.
-func generateTablePlotToMemory(tableName string, columns []AnalyzeColumn) ([]byte, error) {
-	n := float64(len(columns))
-	if n == 0 {
-		return nil, fmt.Errorf("no columns to plot for table %s", tableName)
-	}
-
-	l := math.Ceil((1 + math.Sqrt(1+4*n)) / 2)
-	w := math.Ceil(n / l)
-	rows, cols := int(l), int(w)
-
-	img := vgimg.New(vg.Inch*4*vg.Length(cols), vg.Inch*3*vg.Length(rows))
-	dc := draw.New(img)
-
-	for i, col := range columns {
-		p, err := createSingleColumnPlot(tableName, col)
-		if err != nil {
-			log.Printf("Skipping plot for column %s: %v", col.Name, err)
-			continue
-		}
-		row := i / cols
-		col := i % cols
-		y := rows - 1 - row
-		rect := vg.Rectangle{
-			Min: vg.Point{X: vg.Length(col) * 4 * vg.Inch, Y: vg.Length(y) * 3 * vg.Inch},
-			Max: vg.Point{X: vg.Length(col+1) * 4 * vg.Inch, Y: vg.Length(y+1) * 3 * vg.Inch},
-		}
-		p.Draw(draw.Canvas{Canvas: dc.Canvas, Rectangle: rect})
-	}
-
-	var buf bytes.Buffer
-	pngCanvas := vgimg.PngCanvas{Canvas: img}
-	if _, err := pngCanvas.WriteTo(&buf); err != nil {
-		return nil, fmt.Errorf("could not write png to buffer: %w", err)
-	}
-	return buf.Bytes(), nil
 }
 
 // findTableLocation searches through project data to find which folder a table belongs to.
