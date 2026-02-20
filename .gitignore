@@ -9,13 +9,11 @@ petstore/source/*
 petstore/target/* 
 **/analyze.yaml
 **-descriptor.dot
-.idea/.gitignore
-.idea/misc.xml
-.idea/modules.xml
-.idea/nino.iml
-.idea/vcs.xml
+.idea/
 nino
 .problems/
 
 cypress/screenshots
 tests/cypress/screenshots
+tests/cypress/videos/ui_spec.cy.js-compressed.mp4
+tests/cypress/videos/ui_spec.cy.js.mp4

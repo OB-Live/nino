@@ -23,3 +23,16 @@
 //
 // -- This will overwrite an existing command --
 // Cypress.Commands.overwrite('visit', (originalFn, url, options) => { ... })
+
+Cypress.Commands.add('label', (label) => {
+    // Take test title and the given label, insert into page
+    cy.get('#subtitle').then(($el) => {
+        $el.text(
+            Cypress.currentTest.titlePath.join(' > ') 
+            + ' - ' + label
+        )
+    })
+
+    // This will bloat test execution time
+    cy.wait(1200)
+})

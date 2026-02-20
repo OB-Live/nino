@@ -24,7 +24,13 @@ The interactive web interface allows users to explore the data schema, view data
 # Daemon it (-d)
 To start the interactive web server, run:
 ```sh 
-go run . -d ./petstore
+nino . -d .
+```
+
+## Test
+```sh
+npx run cypress 
+ffmpeg -i tests/cypress/videos/ui_spec.cy.js.mp4 -vf "crop=620:480:460:70" -c:a copy demo.mp4 -y
 ```
 
 # Or CLI it 
