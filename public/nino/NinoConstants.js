@@ -333,7 +333,7 @@ export const NĭnŏAPI = {
 /** @type {FileType} */
 export const fileTypes = {
     connector: {
-        language: "shell", suffix: ["yaml", "yml"], dialect: "connector", regex: "dataconnector",
+        language: "yaml", suffix: ["yaml", "yml"], dialect: "connector", regex: "dataconnector",
         template: (folderName) => `
 cd ${folderName}
 # boiler plate project setup
@@ -358,18 +358,18 @@ lino analyse target > analyze.yaml
 cat tables.yaml | yq .tables.[].name
 ` },
     descriptor: {
-        language: "shell", suffix: ["yaml", "yml"], dialect: "descriptor", regex: "descriptor",
+        language: "yaml", suffix: ["yaml", "yml"], dialect: "descriptor", regex: "descriptor",
         template: (folderName, tableName) => `cd ${folderName}
 # lino pull -l 1 --table ${tableName} source
 lino pull -l 1 -i ${tableName}-descriptor.yaml
 ` },
     masking: {
-        language: "json", suffix: ["yaml", "yml"], dialect: "masking", regex: "masking",
+        language: "yaml", suffix: ["yaml", "yml"], dialect: "masking", regex: "masking",
         template: (folderName, tableName) => `# Quick test your mask 
 lino pull -l 1 -i ${tableName}-descriptor.yaml | pimo -c ${tableName}-masking.yaml
 ` },
     playbook: {
-        language: "shell", suffix: ["yaml", "yml"], dialect: "playbook", regex: "playbook",
+        language: "yaml", suffix: ["yaml", "yml"], dialect: "playbook", regex: "playbook",
         template: (folderName, tableName) => `cd ${folderName} 
 # Test the docker-compose
 ansible-playbook playbook.yaml
@@ -378,7 +378,7 @@ ansible-playbook playbook.yaml
     relation: { language: "yaml", suffix: ["yaml", "yml"], dialect: "relation", regex: "relation" }, // No specific template
     analyse: { language: "yaml", suffix: ["yaml", "yml"], dialect: "analyse", regex: "analyse" }, // No specific template
     docker: {
-        language: "shell", suffix: ["yaml", "yml"], dialect: "docker", regex: "docker-compose",
+        language: "yaml", suffix: ["yaml", "yml"], dialect: "docker", regex: "docker-compose",
         template: (folderName, tableName) => `cd ${folderName}
 # Test the docker-compose
 docker-compose up docker-compose.yaml  
