@@ -1,10 +1,11 @@
 # Fix
 
-- in 
-
+- masking execution json 
 - execution plan buttons and paragraph
-
-- 
+- fix graph 
+- check all execution 
+- analyse/analyze.yaml behaviour 
+- refresh workspace (!important for tests)
 
 
 # Add features 
@@ -16,19 +17,11 @@
     - tables 
     - relations 
     - analyze
-- in NinoWorspace.js : 
-    - add icons for each file type 
-        - dataconnector.yaml
-        - masking.yaml
-        - ingress-descriptor.yaml 
-        - tables.yaml 
-        - relations.yaml 
-        - analyze.yaml
 
 # Quality  
 - stabilize static examples 
 - better css
-- test 
+- cypress scenario petstore
 
 # Deployement
 - conteneurisation

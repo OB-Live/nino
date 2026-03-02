@@ -3,44 +3,37 @@ class NinoDialog extends HTMLElement {
   constructor() {
     // Always call super first in constructor
     super();
-  }
-
-  connectedCallback() {
-    const shadow = this.attachShadow({ mode: "open" });
-
-    const template = document.createElement("template");
-    template.innerHTML = `
-      <link rel="stylesheet" href="NinoStyle.css">
+    this.hidden = true;
+    this.attachShadow({ mode: 'open' });
+    this.shadowRoot.innerHTML = `<link rel="stylesheet" href="NinoStyle.css">
       <style>
         :host {
           position: absolute;
           z-index: 1000;
-          border: 1px solid #ccc;
-          background-color: #252526;
-          padding: 10px;
-          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+          background: var(--sidebar-background);
+           color: black;
+        }
+        :host([hidden]) {
+            display: none;
         }
         .dialog-container {
           display: flex;
           flex-direction: column;
-        }
-        .dialog-container > * {
-            margin-bottom: 5px;
-        }
-        .dialog-container > *:last-child {
-            margin-bottom: 0;
-        }
+          gap: 4px;
+          padding: 6px 6px;
+          border: 2px solid var(--sidebar-border-color)
+
+        }  
         .buttons {
             display: flex;
             justify-content: flex-end;
-        }
-        .buttons button {
-            margin-left: 5px;
+            gap: 5px;
         }
         input {
-            background-color: #3c3c3c;
+            background-color: #4b4b4bff;
             color: #ccc;
             border: 1px solid #555;
+            padding: 2px;
         }
       </style>
       <div class="dialog-container">
@@ -52,8 +45,9 @@ class NinoDialog extends HTMLElement {
         </div>
       </div>
     `;
+  }
 
-    shadow.appendChild(template.content.cloneNode(true));
+  connectedCallback() { 
 
     this.shadowRoot.getElementById('ok-btn').addEventListener('click', this._onOk.bind(this));
     this.shadowRoot.getElementById('cancel-btn').addEventListener('click', this._onCancel.bind(this));
@@ -67,21 +61,21 @@ class NinoDialog extends HTMLElement {
   }
 
   open(x, y, label, defaultValue, onOk) {
+    this.hidden = false;
     this.style.left = `${x}px`;
     this.style.top = `${y}px`;
     this.shadowRoot.getElementById('label').textContent = label;
     const input = this.shadowRoot.getElementById('pathname');
     input.value = defaultValue;
     this._onOkCallback = onOk;
-    document.body.appendChild(this);
     input.focus();
     input.select();
   }
 
-  _onOk() {
+  async _onOk() {
     if (this._onOkCallback) {
       const value = this.shadowRoot.getElementById('pathname').value;
-      this._onOkCallback(value);
+      await this._onOkCallback(value);
     }
     this.close();
   }
@@ -91,9 +85,7 @@ class NinoDialog extends HTMLElement {
   }
 
   close() {
-    if (this.parentNode) {
-      this.parentNode.removeChild(this);
-    }
+    this.hidden = true;
   }
 }
 

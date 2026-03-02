@@ -13,10 +13,18 @@ window.openTableStat = openTableStat;
 window.openExecutionGraph = openExecutionGraph;
 $(sidebarToggle).on("click", toggleSidebar);
 
+async function _deleteFileOrFolder(apiCall, ...args) {
+    const response = await fetch(apiCall(...args), { method: 'DELETE' });
+    const result = await response.json();
+    console.log(result);
+    ninoWorkspace.refresh(); 
+}
+
 async function _createFileOrFolder(apiCall, ...args) {
     const response = await fetch(apiCall(...args), { method: 'GET' });
     const result = await response.json();
     console.log(result);
+    ninoWorkspace.refresh();  
 }
 
 async function _executeBackendApi(apiCall, ...args) {
@@ -49,11 +57,15 @@ async function _executeBackendApi(apiCall, ...args) {
  * @property {Object} Examples - Static pimo examples.
  */
 export const Nĭnŏ = {
-    createMasking: (folderName, tableName) => _createFileOrFolder(NĭnŏAPI.createMasking, folderName, tableName),
-    createPlaybook: (folderName) => _createFileOrFolder(NĭnŏAPI.createPlaybook, folderName),
-    createBash: (folderName) => _createFileOrFolder(NĭnŏAPI.createBash, folderName),
-    createDataconnector: (folderName) => _createFileOrFolder(NĭnŏAPI.createDataConnector, folderName),
-    createFolder: (folderName) => _createFileOrFolder(NĭnŏAPI.postFolder, folderName),
+    // file operations 
+    createMasking: (path) => _createFileOrFolder(NĭnŏAPI.createMasking, path),
+    createPlaybook: (path) => _createFileOrFolder(NĭnŏAPI.createPlaybook, path),
+    createBash: (path) => _createFileOrFolder(NĭnŏAPI.createBash, path),
+    deleteFile: (path) => _deleteFileOrFolder(NĭnŏAPI.getFile, path),
+    createDataconnector: (path) => _createFileOrFolder(NĭnŏAPI.createDataConnector, path),
+    createFolder: (path) => _createFileOrFolder(NĭnŏAPI.postFolder, path),
+
+    // backend actions 
     restartAnalysis: (folderName, tableName) => _executeBackendApi(NĭnŏAPI.execLinoAnalyse, folderName, tableName),
     kanalyze: () => _executeBackendApi(NĭnŏAPI.execKanalyze),
 
@@ -65,6 +77,7 @@ export const Nĭnŏ = {
     getCurrentTabContent: () => ninoEditor.editorInstances[ninoEditor.activeTab].getValue(),
     getCurrentInputContent: () => ninoExecution.inputEditor.getValue(),
     setOutputContent: (value) => ninoExecution.outputEditor.setValue(value),
+    workspace: ninoWorkspace,
 
     // constants 
     "API": NĭnŏAPI,
@@ -264,7 +277,7 @@ function handleTabActivation(event) {
     }
     if (fileName) {
         const fileType = getFileType(fileName);
-        inputEditorLanguage = fileType.language;
+        inputEditorLanguage = fileType.helper_language;
         if (fileType.template) {
             inputEditorContent = fileType.template(folderName, fileName);
         }

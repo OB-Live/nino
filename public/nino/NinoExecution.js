@@ -100,7 +100,7 @@ class NinoExecution extends HTMLElement {
 
     async handleShellExecution() {
 
-        let url = NĭnŏAPI.execScript(example.description, example.name);
+        let url = NĭnŏAPI.execScript();
 
         try {
             const response = await fetch(url, {
@@ -123,7 +123,7 @@ class NinoExecution extends HTMLElement {
      * and displays the result in the output editor.
      */
     async handlePimoExecution(yamlValue, jsonValue) {
-        this._setButtonState(this.executeBtn, true, "Executing...");
+        this._setButtonState(this.executeBtn, true, "Executing Pimo...");
 
         this.outputEditor.setValue("");
 

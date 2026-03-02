@@ -17,6 +17,7 @@ class NinoWorkspace extends HTMLElement {
                 <div id="examples-container" class="scroll-area"></div>
                 <div id="jstree-workspace" class="jstree-default-dark"></div>
             </div>
+            <nino-dialog></nino-dialog>
         `;
     }
 
@@ -37,6 +38,14 @@ class NinoWorkspace extends HTMLElement {
         this.renderExamplesMenu();
         this.loadWorkspace();
         this._contextMenuEvent = null;
+    }
+
+    refresh() {
+        
+        console.log("refresh")
+        const jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
+        jstreeDiv.clear()
+        this.loadWorkspace();
     }
 
     getWorkspaceData() {
@@ -131,23 +140,29 @@ class NinoWorkspace extends HTMLElement {
                             const fileName = item;
                             const nodeTreePath = `${currentTreePath}/${fileName}`;
                             const nodeUrlPath = currentUrlPath ? `${currentUrlPath}/${fileName}` : fileName;
-                            const ico = fileName.includes("masking")?"/img/masks_24.png"
-                                :fileName.includes("dataconnector")?"/img/db_icon_24.png"
-                                :fileName.includes("playbook")?"/img/ansible_24.png"
-                                :fileName.includes("docker-compose")?"/img/docker_24.png"
-                                :fileName.includes("tables")?"/img/tables_24.png"
-                                :fileName.includes("analyze")?"/img/analyze_24.png"
-                                :fileName.includes("swagger")?"/img/swagger_24.png"
-                                :fileName.includes("descriptor")?"/img/description_24.png"
-                                :fileName.includes("relations")?"/img/relations_24.png"
-                                :fileName.endsWith(".sh")?"/img/bash_24.png"
-                                :"jstree-file";
+
+                            const getIconForFile = (fileName) => {
+                                switch (true) {
+                                    case fileName.includes("masking"): return "/img/masks_24.png";
+                                    case fileName.includes("dataconnector"): return "/img/db_icon_24.png";
+                                    case fileName.includes("playbook"): return "/img/ansible_24.png";
+                                    case fileName.includes("docker-compose"): return "/img/docker_24.png";
+                                    case fileName.includes("tables"): return "/img/tables_24.png";
+                                    case fileName.includes("analyze"): return "/img/analyze_24.png";
+                                    case fileName.includes("swagger"): return "/img/swagger_24.png";
+                                    case fileName.includes("descriptor"): return "/img/description_24.png";
+                                    case fileName.includes("relations"): return "/img/relations_24.png";
+                                    case fileName.endsWith(".sh"): return "/img/bash_24.png";
+                                    default: return "jstree-file";
+                                }
+                            };
+                            const ico = getIconForFile(fileName);
                             jstreeData.push({
                                 id: `ws_file_${currentIdCounter++}`,
                                 parent: parentId,
                                 text: fileName,
                                 icon: ico,
-                                li_attr: { 
+                                li_attr: {
                                     'data-url': `/api/file/${nodeUrlPath}`,
                                     'data-input': '{}', // Default input for workspace files  
                                     'data-file-name': fileName,
@@ -195,7 +210,8 @@ class NinoWorkspace extends HTMLElement {
         */
     renderFileTree(jstreeData) {
         const jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
-        $(jstreeDiv)
+        const $jstreeElement = $(jstreeDiv); // Get the jQuery object for the div
+        $jstreeElement // Initialize jstree on the jQuery element
             .jstree({
                 core: {
                     data: jstreeData,
@@ -221,12 +237,15 @@ class NinoWorkspace extends HTMLElement {
 
                         const showInputDialog = (action, label, defaultValue, callback) => {
                             if (!this._contextMenuEvent) return;
-                            let dialog = document.querySelector('nino-dialog');
-                            if (!dialog) {
-                                dialog = document.createElement('nino-dialog');
-                                document.body.appendChild(dialog);
-                            }
-                            dialog.open(this._contextMenuEvent.clientX, this._contextMenuEvent.clientY, label, defaultValue, callback);
+                            let dialog = this.shadowRoot.querySelector('nino-dialog');
+
+                            dialog.open(
+                                this._contextMenuEvent.clientX,
+                                this._contextMenuEvent.clientY,
+                                label,
+                                defaultValue,
+                                callback
+                            );
                         };
 
                         return {
@@ -242,7 +261,11 @@ class NinoWorkspace extends HTMLElement {
                                 "separator_after": true,
                                 "icon": 'iDataconnector',
                                 "label": "Create DataConnector",
-                                "action": (obj) => showInputDialog('CreateDataConnector', 'DataConnector Path:', directory, (path) => Nĭnŏ.createDataconnector(path)),
+                                "action": (obj) => showInputDialog(
+                                    'CreateDataConnector',
+                                    'DataConnector Path:', directory ? `${directory}/dataconnector.yaml` : 'dataconnector.yaml',
+                                    (path) => Nĭnŏ.createDataconnector(path)
+                                ),
                                 "_class": "class"
                             },
                             createMasking: {
@@ -250,31 +273,55 @@ class NinoWorkspace extends HTMLElement {
                                 "separator_after": true,
                                 "icon": 'iMask',
                                 "label": "Create Masking File",
-                                "action": (obj) => showInputDialog('CreateMasking', 'Table Name for Mask:', filename ? filename.split('.')[0] : 'table', (tableName) => Nĭnŏ.createMasking(directory, tableName))
+                                "action": (obj) => showInputDialog(
+                                    'CreateMasking',
+                                    'Table Name for Mask:',
+                                    directory ? `${directory}/xxx-masking.yaml` : 'xxx-masking.yaml',
+                                    (path) => Nĭnŏ.createMasking(path)
+                                )
                             },
                             createPlaybook: {
                                 "separator_before": false,
                                 "separator_after": true,
                                 "icon": 'iAnsible',
                                 "label": "Create Playbook",
-                                "action": (obj) => showInputDialog('CreatePlaybook', 'Playbook Path:', directory, (path) => Nĭnŏ.createPlaybook(path))
+                                "action": (obj) => showInputDialog(
+                                    'CreatePlaybook',
+                                    'Playbook Path:',
+                                    directory ? `${directory}/playbook.yaml` : 'playbook.yaml',
+                                    (path) => Nĭnŏ.createPlaybook(path)
+                                )
                             },
                             createScript: {
                                 "separator_before": false,
                                 "separator_after": true,
                                 "icon": 'iBash',
                                 "label": "Create bash script",
-                                "action": (obj) => showInputDialog('CreateBash', 'Bash Script Path:', directory, (path) => Nĭnŏ.createBash(path))
+                                "action": (obj) => showInputDialog(
+                                    'CreateBash',
+                                    'Bash Script Path:',
+                                    directory ? `${directory}/aScript.sh` : 'aScript.sh',
+                                    (path) => Nĭnŏ.createBash(path)
+                                )
                             },
+                            deleteFile: {
+                                "separator_before": true,
+                                "separator_after": false,
+                                "icon": 'iDelete',
+                                "label": "Delete",
+                                "action": (obj) => showInputDialog(
+                                    'DeleteFile',
+                                    'Delete File Path:',
+                                    directory ? `${directory}/${filename}` : `${filename}`,
+                                    (path) => Nĭnŏ.deleteFile(path)
+                                )
+                            }
                         };
                     }
                 },
             })
-            .on('select_node.jstree', (e, data) => {
-                // if (data.node.type === 'file') {
-                //     this.dispatchEvent(new CustomEvent('select-file', { detail: { node: data.node } }));
-                // }
-            })
+        // Bind events to the jQuery object directly after initialization
+        $jstreeElement
             .on('dblclick.jstree', (e) => {
                 const instance = $.jstree.reference(e.target);
                 const node = instance.get_node(e.target);

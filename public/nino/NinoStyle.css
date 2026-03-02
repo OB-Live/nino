@@ -77,7 +77,7 @@ body {
 a {
 	color: var(--link-color);
 	text-decoration: none;
-	background-color: var(--link-background-color);
+	background-color: var(--sidebar-content-background-color);
 	border-radius: 3px;
 	padding-right: 6px
 }
@@ -263,19 +263,7 @@ nino-execution {
 .vakata-context li>a {
 	text-shadow: none
 }
-
-.play-icon {
-	width: 0;
-	height: 0;
-	border-style: solid;
-	border-width: 6px 0 6px 10px;
-	border-color: transparent transparent transparent var(--button-border-color);
-	cursor: pointer
-}
-
-.play-icon:hover {
-	opacity: .8
-}
+ 
 
 .close-tab {
 	font-size: 1.2rem;
@@ -420,6 +408,12 @@ nino-graphviz {
 .vakata-context .iBash {
 	background-image: url(/img/bash.jpg);
 	background-size: contain
+}
+
+.iDelete,
+.vakata-context .iDelete {
+	background-image: url(/img/delete.png);
+	background-size: contain;
 }
 
 .iPlay,

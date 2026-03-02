@@ -41,23 +41,25 @@ func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths 
 	r.Get("/api/schema/{folder}.{format:(dot|svg|png)}", serveSchema(&projectData))
 	r.Get("/api/plot/{folder}/{tableName}", servePlot(projectData))
 	r.Get("/api/playbook/{folder}", servePlaybook(&projectData))
-	r.Get("/api/new/mask/{folderName}/{tableName}", createMaskFile(&projectData, inputPaths, fileMap))
+	r.Get("/api/new/mask/*", createMaskFile(&projectData, inputPaths, fileMap))
 
 	// New API routes for folder and file creation
 	r.Get("/api/folder/*", createFolderHandler())
 	// r.Post("/api/new/mask/*", createFileHandler("mask", &projectData, inputPaths))
 	r.Get("/api/new/playbook/*", createFileHandler("playbook", &projectData, inputPaths))
-	r.Get("/api/new/dataconnectors/*", createFileHandler("dataconnectors", &projectData, inputPaths))
+	r.Get("/api/new/dataconnector/*", createFileHandler("dataconnectors", &projectData, inputPaths))
 	r.Get("/api/new/bash/*", createFileHandler("bash", &projectData, inputPaths))
 
 	// API routes for file handling
 	r.Get("/api/files", listFilesHandler(inputPaths))
 	r.Get("/api/file/*", getFileHandler(inputPaths))
 	r.Post("/api/file/*", updateFileHandler(inputPaths, &projectData))
+	r.Delete("/api/file/*", deleteFileHandler(inputPaths, &projectData))
 
 	// API routes that executes Command lines actions
 	r.Post("/api/exec/pimo", pimoExecHandler())
 	r.Post("/api/exec/playbook/{folder}/{filename}", execCommandHandler())
+	r.Post("/api/exec/script", execCommandHandler())
 	r.Get("/api/exec/lino/fetch/{folder}/{filename}", fetchLinoExampleHandler(inputPaths, fileMap))
 	r.Post("/api/exec/pull/{folder}/{filename}", execCommandHandler())
 
@@ -89,13 +91,13 @@ func customFileServer(fs fs.FS) http.Handler {
 // createMaskFile handles the creation of a boilerplate masking file.
 func createMaskFile(projectData *ProjectData, inputPaths []string, fileMap map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		folderName := chi.URLParam(r, "folderName")
+		folderName := chi.URLParam(r, "*")
 		tableName := chi.URLParam(r, "tableName")
 		currentProjectData := *projectData
 		// Find the table to get its columns
 		tableFolder, table, err := findTableLocation(currentProjectData, tableName, folderName)
 		if err != nil {
-			log.Printf("Creating mask.yaml for '%s'.'%s': %v", folderName, tableName, err)
+			log.Printf("Creating masking for '%s'.'%s': %v", folderName, tableName, err)
 			http.Error(w, err.Error(), http.StatusNotFound)
 			return
 		}
@@ -275,10 +277,6 @@ func createFileHandler(fileType string, projectData *ProjectData, inputPaths []s
 			if !strings.HasSuffix(path, SUFFIX_MASKING) {
 				path += SUFFIX_MASKING
 			}
-		case "playbook":
-			path += "/playbook.yaml"
-		case "dataconnectors":
-			path += "/dataconnector.yaml"
 
 		case "bash":
 			if !strings.HasSuffix(path, SUFFIX_SH) {
@@ -398,7 +396,7 @@ func reloadSchemas(projectData *ProjectData, inputPaths []string) {
 }
 
 // buildFileTree recursively builds a tree of files and folders for a given path.
-// It skips hidden files/folders and the "public" directory.
+// It skips hidden files/folders and the "public" and "tests" directory.
 func buildFileTree(path string) ([]interface{}, error) {
 	entries, err := os.ReadDir(path)
 	if err != nil {
@@ -409,7 +407,7 @@ func buildFileTree(path string) ([]interface{}, error) {
 	for _, entry := range entries {
 		name := entry.Name()
 		// Skip hidden files and folders, and the 'public' folder
-		if strings.HasPrefix(name, ".") || name == "public" {
+		if strings.HasPrefix(name, ".") || name == "public" || name == "tests" {
 			continue
 		}
 
@@ -420,10 +418,8 @@ func buildFileTree(path string) ([]interface{}, error) {
 			if err != nil {
 				return nil, err
 			}
-			if len(subfolderContent) > 0 {
-				content = append(content, map[string][]interface{}{name: subfolderContent})
-			}
-		} else if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") {
+			content = append(content, map[string][]interface{}{name: subfolderContent})
+		} else if strings.HasSuffix(name, ".yaml") || strings.HasSuffix(name, ".yml") || strings.HasSuffix(name, SUFFIX_SH) {
 			content = append(content, name)
 		}
 	}
@@ -455,14 +451,12 @@ func listFilesHandler(inputPaths []string) http.HandlerFunc {
 					http.Error(w, fmt.Sprintf("Failed to build file tree for %s: %v", basePath, err), http.StatusInternalServerError)
 					return
 				}
-				if len(folderContent) > 0 {
-					folderName := filepath.Base(basePath)
-					if folderName == "." {
-						// If the folder is '.', flatten its content into the workspace
-						workspaceItems = append(workspaceItems, folderContent...)
-					} else {
-						workspaceItems = append(workspaceItems, map[string][]interface{}{folderName: folderContent})
-					}
+				folderName := filepath.Base(basePath)
+				if folderName == "." {
+					// If the folder is '.', flatten its content into the workspace
+					workspaceItems = append(workspaceItems, folderContent...)
+				} else {
+					workspaceItems = append(workspaceItems, map[string][]interface{}{folderName: folderContent})
 				}
 			} else {
 				// If basePath is a file, add it directly to "Workspace"
@@ -534,6 +528,36 @@ func updateFileHandler(inputPaths []string, projectData *ProjectData) http.Handl
 
 		w.WriteHeader(http.StatusOK)
 		fmt.Fprintf(w, "File %s updated successfully", filepathParam)
+	}
+}
+
+// deleteFileHandler removes a file from the filesystem.
+func deleteFileHandler(inputPaths []string, projectData *ProjectData) http.HandlerFunc {
+	return func(w http.ResponseWriter, r *http.Request) {
+		filepathParam := strings.TrimPrefix(chi.URLParam(r, "*"), "/")
+		log.Printf("deleteFileHandler: Received request to delete filepath: %s", filepathParam)
+
+		fullPath, err := findSecureFilePath(inputPaths, filepathParam)
+		if err != nil {
+			log.Printf("deleteFileHandler: Error finding secure file path for %s: %v", filepathParam, err)
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+
+		err = os.Remove(fullPath)
+		if err != nil {
+			log.Printf("deleteFileHandler: Error deleting file '%s': %v", fullPath, err)
+			http.Error(w, fmt.Sprintf("Failed to delete file: %v", err), http.StatusInternalServerError)
+			return
+		}
+
+		log.Printf("deleteFileHandler: File '%s' deleted successfully", fullPath)
+
+		// After deleting the file, reload all schemas
+		reloadSchemas(projectData, inputPaths)
+
+		w.WriteHeader(http.StatusOK)
+		fmt.Fprintf(w, "File %s deleted successfully", filepathParam)
 	}
 }
 

@@ -10,7 +10,7 @@ class NinoEditor extends HTMLElement {
     this.attachShadow({ mode: 'open' });
     this.jsyaml = null;
     this.editorInstances = {};
-    this.activeTab = 'example';
+    this.activeTab = 'graph';
     this.yamlEditorFileType = 'yaml'; // Default file type for YAML editor // Default file type for YAML editor
 
     this._ninoExecution = null; // Reference to NinoExecution component
@@ -20,9 +20,11 @@ class NinoEditor extends HTMLElement {
       <div id="editor-panel" class="panel">
         <div class="tab-header">
           <button class="tab-button" data-tab="graph">
-          <span id="download-graph-btn" class="download-btn">⤓</span>Transformation Plan 
+            <span id="download-transformation-btn" class="download-btn">⤓</span>Transformation Plan 
           </button>
-          <button class="tab-button" data-tab="execution">Execution Plan</button>
+          <button class="tab-button" data-tab="execution">
+            <span id="download-execution-btn" class="download-btn">⤓</span>Execution Plan
+          </button>
           <button class="tab-button" data-tab="stats">Analyse</button>
           <button class="tab-button active" data-tab="example">Examples</button>
         </div> 
@@ -62,10 +64,17 @@ class NinoEditor extends HTMLElement {
     this.graphTransformation = this.shadowRoot.getElementById('graph-view-container');
     this.graphExecution = this.shadowRoot.getElementById('execution-view-container');
     this.statsViewContainer = this.shadowRoot.getElementById('stats-view-container');
-    this.downloadGraphBtn = this.shadowRoot.getElementById('download-graph-btn');
+    this.downloadGraphBtn = this.shadowRoot.getElementById('download-transformation-btn');
+    this.downloadExecBtn = this.shadowRoot.getElementById('download-execution-btn');
     this.tabHeader.addEventListener('click', this.handleTabClick.bind(this));
-    this.downloadGraphBtn.addEventListener('click', this.handleDownloadGraph.bind(this));
-
+    this.downloadGraphBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.open(NĭnŏAPI.getSchema('dot', 'petstore'), '_blank');
+    });
+    this.downloadExecBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      window.open(NĭnŏAPI.getPlaybook('petstore'), '_blank');
+    });
 
     this.editorInstances = {
       example: this.exampleEditor,
@@ -189,32 +198,7 @@ class NinoEditor extends HTMLElement {
     }
 
   }
-
-  handleDownloadGraph(event) {
-    event.stopPropagation(); // Prevent tab activation
-    // this.openSvgInNewTab();
-    window.open(NĭnŏAPI.getSchema('dot', 'petstore'), '_blank');
-  }
-
-  openSvgInNewTab() {
-    const activeGraphTab = this.shadowRoot.querySelector('#graph-view-container transformation-plan, #execution-view-container nino-transformation > playbook-plan');
-    if (!activeGraphTab) {
-      console.warn('No active graph to open.');
-      return;
-    }
-
-    const svgContent = activeGraphTab.getSvgContent();
-    if (svgContent) {
-      const blob = new Blob([svgContent], { type: 'image/svg+xml' });
-      const url = URL.createObjectURL(blob);
-      window.open(url, '_blank');
-      // The URL should be revoked when it's no longer needed, but doing it immediately
-      // might prevent the new tab from loading. Browsers handle this differently.
-      // A timeout can be a workaround.
-      setTimeout(() => URL.revokeObjectURL(url), 100);
-    }
-  }
-
+ 
   async openFile(event) {
     const example = event.detail.node.li_attr;
     const fileName = example["data-file-name"];
@@ -253,9 +237,7 @@ class NinoEditor extends HTMLElement {
     tabButton.dataset.url = url;
 
     let tabHTML = `<span class="save-icon">&#x1f4be;</span>`; // Floppy disk emoji for save
-    if (fileName.includes('dataconnector.yaml') || fileName.includes('playbook.yaml')) {
-      tabHTML += `<span class="play-icon"></span>`;
-    }
+
     tabHTML += `<span>${fileName}</span><span class="close-tab">&times;</span>`;
     tabButton.innerHTML = tabHTML;
 
@@ -271,10 +253,6 @@ class NinoEditor extends HTMLElement {
       this.closeTab(tabId);
     });
 
-    tabButton.querySelector('.play-icon')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      this.dispatchEvent(new CustomEvent('file-action', { detail: { action: 'play', example: { name: fileName, description: folderName } }, bubbles: true, composed: true }));
-    });
 
     return tabButton;
   }
