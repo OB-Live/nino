@@ -1,6 +1,6 @@
 // No longer importing makeResizable from NinoApp.js
-import { NĭnŏAPI } from './NinoConstants.js'; 
-import { Nĭnŏ } from './NinoApp.js'; 
+import { NĭnŏAPI } from './NinoConstants.js';
+import { Nĭnŏ } from './NinoApp.js';
 class NinoExecution extends HTMLElement {
     constructor() {
         super();
@@ -43,8 +43,8 @@ class NinoExecution extends HTMLElement {
                 </div>
                 <nino-monaco-editor
                     id="input-editor"
-                    language="javascript"
-                    value="console.log('Hello, isolated world!');">
+                    language="json"
+                    value="{}">
                 </nino-monaco-editor>  
 
                 <div class="editor-header">
@@ -56,8 +56,8 @@ class NinoExecution extends HTMLElement {
                 </div>
                 <nino-monaco-editor
                     id="output-editor"
-                    language="javascript"
-                    value="console.log('Hello, isolated world!');">
+                    language="json"
+                    value="{}">
                 </nino-monaco-editor>
                 
             </div>
@@ -71,9 +71,14 @@ class NinoExecution extends HTMLElement {
         this.fetchRowBtn = this.shadowRoot.getElementById('fetch-row-btn');
 
         this.executeBtn.addEventListener('click', () => {
-            const yamlValue = Nĭnŏ.getCurrentTabContent();
-            const jsonValue = this.inputEditor.getValue();
-            this.handlePimoExecution(yamlValue, jsonValue);
+            const lang = this.inputEditor.getAttribute("language")
+            if (lang == "shell") {
+                this.handleShellExecution()
+            } else {
+                const yamlValue = Nĭnŏ.getCurrentTabContent();
+                const jsonValue = this.inputEditor.getValue();
+                this.handlePimoExecution(yamlValue, jsonValue);
+            }
         });
 
         this.fetchRowBtn.addEventListener('click', this.handleFetchRow.bind(this));
@@ -93,6 +98,25 @@ class NinoExecution extends HTMLElement {
         this.updateFetchRowButton();
     }
 
+    async handleShellExecution() {
+
+        let url = NĭnŏAPI.execScript(example.description, example.name);
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'text/plain' },
+                body: this.inputEditor.getValue()
+            });
+            const text = await response.text();
+            this.setOutputEditorValue(text);
+            this.setOutputEditorLanguage("shell");
+        } catch (error) {
+            this.setOutputEditorLanguage("shell");
+            this.setOutputEditorValue(`Error: ${error.message}`);
+        }
+    }
+
     /**
      * Handles the click event for the execute button.
      * It sends the YAML and JSON content from the editors to the backend for execution
@@ -102,7 +126,7 @@ class NinoExecution extends HTMLElement {
         this._setButtonState(this.executeBtn, true, "Executing...");
 
         this.outputEditor.setValue("");
-    
+
         try {
             const response = await fetch(NĭnŏAPI.execPimo(), {
                 method: "POST",
@@ -112,7 +136,7 @@ class NinoExecution extends HTMLElement {
                     json: JSON.stringify(JSON.parse(jsonValue)),
                 }),
             });
-    
+
             if (!response.ok) {
                 const errorText = await response.text();
                 this.setOutputEditorLanguage('shell');
@@ -144,9 +168,9 @@ class NinoExecution extends HTMLElement {
     }
 
 
-    connectedCallback() { 
+    connectedCallback() {
         this.layoutEditors();
-     }
+    }
 
     layoutEditors() {
         if (this.inputEditor) {
@@ -160,7 +184,7 @@ class NinoExecution extends HTMLElement {
         if (this.inputEditor) {
             this.inputEditor.setAttribute('language', language);
         }
-    }    
+    }
     setOutputEditorLanguage(language) {
         if (this.outputEditor) {
             this.outputEditor.setAttribute('language', language);
@@ -176,9 +200,9 @@ class NinoExecution extends HTMLElement {
     }
     setOutputEditorValue(value) {
         if (this.outputEditor) {
-            this.outputEditor.setAttribute('value',value);
+            this.outputEditor.setAttribute('value', value);
         }
-    } 
+    }
 
     /**
      * Handles the click event for the 'fetch 1 row' button.
@@ -201,7 +225,7 @@ class NinoExecution extends HTMLElement {
             if (!response.ok) {
                 const errorText = await response.text();
                 this.setOutputEditorValue(`Error fetching example row: ${errorText}`);
-                
+
             } else {
                 const result = await response.text();
                 this.setInputEditorValue(result);

@@ -19,6 +19,16 @@ async function _createFileOrFolder(apiCall, ...args) {
     console.log(result);
 }
 
+async function _executeBackendApi(apiCall, ...args) {
+    ninoExecution.setOutputEditorValue("Executing...");
+    try {
+        const response = await fetch(apiCall(...args), { method: 'GET' });
+        const text = await response.text();
+        ninoExecution.setOutputEditorValue(text);
+    } catch (error) {
+        ninoExecution.setOutputEditorValue(`Error: ${error.message}`);
+    }
+}
 /**
  * @typedef {Object} Nĭnŏ
  * @property {function(string, string): Promise<void>} createMasking - Creates a masking file.
@@ -26,6 +36,8 @@ async function _createFileOrFolder(apiCall, ...args) {
  * @property {function(string, string): Promise<void>} createBash - Creates a bash script.
  * @property {function(string, string): Promise<void>} createDataconnector - Creates a dataconnector file.
  * @property {function(string): Promise<void>} createFolder - Creates a folder.
+ * @property {function(string, string): Promise<void>} restartAnalysis - Restarts analysis for a given folder and table.
+ * @property {function(): Promise<void>} kanalyze - Calls the kanalyze backend API.
  * @property {function(): Object} editors - Returns all editor instances.
  * @property {function(): HTMLElement} inputEditor - Returns the input editor instance.
  * @property {function(): HTMLElement} outputEditor - Returns the output editor instance.
@@ -42,11 +54,14 @@ export const Nĭnŏ = {
     createBash: (folderName) => _createFileOrFolder(NĭnŏAPI.createBash, folderName),
     createDataconnector: (folderName) => _createFileOrFolder(NĭnŏAPI.createDataConnector, folderName),
     createFolder: (folderName) => _createFileOrFolder(NĭnŏAPI.postFolder, folderName),
+    restartAnalysis: (folderName, tableName) => _executeBackendApi(NĭnŏAPI.execLinoAnalyse, folderName, tableName),
+    kanalyze: () => _executeBackendApi(NĭnŏAPI.execKanalyze),
 
     // UI elements
     editors: () => ninoEditor.editorInstances,
     inputEditor: () => ninoExecution.inputEditor,
-    outputEditor: () => ninoExecution.outputEditor,
+    outputEditor: () => ninoExecution.outputEditor, 
+    getCurrentTab: () => ninoEditor.editorInstances[ninoEditor.activeTab],
     getCurrentTabContent: () => ninoEditor.editorInstances[ninoEditor.activeTab].getValue(),
     getCurrentInputContent: () => ninoExecution.inputEditor.getValue(),
     setOutputContent: (value) => ninoExecution.outputEditor.setValue(value),
@@ -193,25 +208,7 @@ function toggleSidebar() {
 async function handleFileAction(event) {
     const { action, example } = event.detail;
     if (action === 'play') {
-        let url;
-        if (example.name.includes('playbook')) {
-            url = NĭnŏAPI.execPlaybook(example.description, example.name);
-        } else if (example.name.includes('dataconnector')) {
-            url = NĭnŏAPI.execPull(example.description, example.name);
-        }
-        if (!url) return;
-
-        try {
-            const response = await fetch(url, {
-                method: 'POST',
-                headers: { 'Content-Type': 'text/plain' },
-                body: ninoExecution.getInputEditorValue()
-            });
-            const text = await response.text();
-            ninoExecution.setOutputEditorValue(text);
-        } catch (error) {
-            ninoExecution.setOutputEditorValue(`Error: ${error.message}`);
-        }
+        
     }
 
     if (action == 'save') {

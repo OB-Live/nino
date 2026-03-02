@@ -35,6 +35,10 @@ RUN wget -O- -nv --no-check-certificate https://github.com/CGI-FR/PIMO/releases/
     | tar -xz -C /usr/bin/ \
     && chmod +x /usr/bin/pimo
 
+RUN wget -O- -nv --no-check-certificate https://github.com/CGI-FR/kanalyze/releases/download/v0.1.0/kanalyze_0.1.0_linux_amd64.tar.gz \
+    | tar -xz -C /usr/bin/ \
+    && chmod +x /usr/bin/kanalyze    
+
 # Copy example
 COPY petstore /workspace/petstore
 COPY nino /usr/bin/nino

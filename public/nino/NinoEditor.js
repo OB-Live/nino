@@ -227,6 +227,7 @@ class NinoEditor extends HTMLElement {
 
     const tabId = `file-tab-${example.id}`;
     let tabButton = this.shadowRoot.querySelector(`.tab-button[data-tab="${tabId}"]`);
+    Nĭnŏ.getActiveTab = () => tabButton;
     let url = example["data-url"];
 
     if (!tabButton) {

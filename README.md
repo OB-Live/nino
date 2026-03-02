@@ -35,7 +35,11 @@ docker run -p 2442:2442 0blive/nino
 
 developement mode
 ```sh
+# as daemon
 go run . -d . 
+
+# or single execution   
+go run . . 
 #✅ Fichier schema.dot généré avec succès.
 ```
 

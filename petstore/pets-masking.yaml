@@ -20,4 +20,4 @@ masking:
   - selector:
       jsonpath: "owner_id"
     mask:
-      #
+      # regex: ""

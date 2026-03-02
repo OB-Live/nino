@@ -465,3 +465,7 @@ nino-graphviz {
 	line-height: 1;
 	display: inline-flex
 }
+
+.contain{
+ background-size: contain;
+}

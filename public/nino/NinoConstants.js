@@ -317,6 +317,12 @@ export const NĭnŏAPI = {
         `/api/exec/playbook/${folder}/${filename}`,
     execPull: (folder, filename) =>
         `/api/exec/pull/${folder}/${filename}`,
+    execScript: (folder, filename) =>
+        `/api/exec/script/${folder}/${filename}`,
+    execLinoAnalyse: (folder, table) =>
+        `/api/exec/lino/analyse/${folder}/${table}`,
+    execKanalyze: () =>
+        '/api/exec/kanalyze',
     execLinoFetch: (folder, filename) =>
         `/api/exec/lino/fetch/${folder}/${filename}`,
 

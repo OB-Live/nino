@@ -1,54 +1,101 @@
 // Create a class for the element
-class PopupInfo extends HTMLElement {
+class NinoDialog extends HTMLElement {
   constructor() {
     // Always call super first in constructor
     super();
   }
 
   connectedCallback() {
-    // Create a shadow root
     const shadow = this.attachShadow({ mode: "open" });
 
-    // Create spans
-    const wrapper = document.createElement("span");
-    wrapper.setAttribute("class", "wrapper");
+    const template = document.createElement("template");
+    template.innerHTML = `
+      <link rel="stylesheet" href="NinoStyle.css">
+      <style>
+        :host {
+          position: absolute;
+          z-index: 1000;
+          border: 1px solid #ccc;
+          background-color: #252526;
+          padding: 10px;
+          box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .dialog-container {
+          display: flex;
+          flex-direction: column;
+        }
+        .dialog-container > * {
+            margin-bottom: 5px;
+        }
+        .dialog-container > *:last-child {
+            margin-bottom: 0;
+        }
+        .buttons {
+            display: flex;
+            justify-content: flex-end;
+        }
+        .buttons button {
+            margin-left: 5px;
+        }
+        input {
+            background-color: #3c3c3c;
+            color: #ccc;
+            border: 1px solid #555;
+        }
+      </style>
+      <div class="dialog-container">
+        <label id="label"></label>
+        <input type="text" id="pathname"/>
+        <div class="buttons">
+          <button id="cancel-btn">Cancel</button>
+          <button id="ok-btn">OK</button>
+        </div>
+      </div>
+    `;
 
-    const icon = document.createElement("span");
-    icon.setAttribute("class", "icon");
-    icon.setAttribute("tabindex", 0);
+    shadow.appendChild(template.content.cloneNode(true));
 
-    const info = document.createElement("span");
-    info.setAttribute("class", "info");
+    this.shadowRoot.getElementById('ok-btn').addEventListener('click', this._onOk.bind(this));
+    this.shadowRoot.getElementById('cancel-btn').addEventListener('click', this._onCancel.bind(this));
+    this.shadowRoot.getElementById('pathname').addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        this._onOk();
+      } else if (e.key === 'Escape') {
+        this._onCancel();
+      }
+    });
+  }
 
-    // Take attribute content and put it inside the info span
-    const text = this.getAttribute("data-text");
-    info.textContent = text;
+  open(x, y, label, defaultValue, onOk) {
+    this.style.left = `${x}px`;
+    this.style.top = `${y}px`;
+    this.shadowRoot.getElementById('label').textContent = label;
+    const input = this.shadowRoot.getElementById('pathname');
+    input.value = defaultValue;
+    this._onOkCallback = onOk;
+    document.body.appendChild(this);
+    input.focus();
+    input.select();
+  }
 
-    // Insert icon
-    let imgUrl;
-    if (this.hasAttribute("img")) {
-      imgUrl = this.getAttribute("img");
-    } else {
-      imgUrl = "img/default.png";
+  _onOk() {
+    if (this._onOkCallback) {
+      const value = this.shadowRoot.getElementById('pathname').value;
+      this._onOkCallback(value);
     }
+    this.close();
+  }
 
-    const img = document.createElement("img");
-    img.src = imgUrl;
-    icon.appendChild(img);
+  _onCancel() {
+    this.close();
+  }
 
-    // Apply external styles to the shadow dom
-    const linkElem = document.createElement("link");
-    linkElem.setAttribute("rel", "stylesheet");
-    linkElem.setAttribute("href", "style.css");
-
-    // Attach the created elements to the shadow dom
-    shadow.appendChild(linkElem);
-    shadow.appendChild(wrapper);
-    wrapper.appendChild(icon);
-    wrapper.appendChild(info);
+  close() {
+    if (this.parentNode) {
+      this.parentNode.removeChild(this);
+    }
   }
 }
 
 // Define the new element
-customElements.define("popup-info", PopupInfo);
-
+customElements.define("nino-dialog", NinoDialog);

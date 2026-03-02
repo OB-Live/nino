@@ -1,5 +1,6 @@
 import { pimoExamples, NĭnŏAPI } from './NinoConstants.js';
 import { Nĭnŏ } from './NinoApp.js';
+import './NinoDialog.js';
 import * as  jstree from 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js';
 
 class NinoWorkspace extends HTMLElement {
@@ -35,6 +36,7 @@ class NinoWorkspace extends HTMLElement {
     connectedCallback() {
         this.renderExamplesMenu();
         this.loadWorkspace();
+        this._contextMenuEvent = null;
     }
 
     getWorkspaceData() {
@@ -129,12 +131,23 @@ class NinoWorkspace extends HTMLElement {
                             const fileName = item;
                             const nodeTreePath = `${currentTreePath}/${fileName}`;
                             const nodeUrlPath = currentUrlPath ? `${currentUrlPath}/${fileName}` : fileName;
+                            const ico = fileName.includes("masking")?"/img/masks_24.png"
+                                :fileName.includes("dataconnector")?"/img/db_icon_24.png"
+                                :fileName.includes("playbook")?"/img/ansible_24.png"
+                                :fileName.includes("docker-compose")?"/img/docker_24.png"
+                                :fileName.includes("tables")?"/img/tables_24.png"
+                                :fileName.includes("analyze")?"/img/analyze_24.png"
+                                :fileName.includes("swagger")?"/img/swagger_24.png"
+                                :fileName.includes("descriptor")?"/img/description_24.png"
+                                :fileName.includes("relations")?"/img/relations_24.png"
+                                :fileName.endsWith(".sh")?"/img/bash_24.png"
+                                :"jstree-file";
                             jstreeData.push({
                                 id: `ws_file_${currentIdCounter++}`,
                                 parent: parentId,
                                 text: fileName,
-                                icon: 'jstree-file',
-                                li_attr: {
+                                icon: ico,
+                                li_attr: { 
                                     'data-url': `/api/file/${nodeUrlPath}`,
                                     'data-input': '{}', // Default input for workspace files  
                                     'data-file-name': fileName,
@@ -202,46 +215,56 @@ class NinoWorkspace extends HTMLElement {
                     analyse: { icon: '🔍' },
                 },
                 "contextmenu": {
-                    "items": function ($node) {
+                    "items": ($node) => {
                         const directory = $node.li_attr['data-folder-name']
                         const filename = $node.li_attr['data-file-name']
+
+                        const showInputDialog = (action, label, defaultValue, callback) => {
+                            if (!this._contextMenuEvent) return;
+                            let dialog = document.querySelector('nino-dialog');
+                            if (!dialog) {
+                                dialog = document.createElement('nino-dialog');
+                                document.body.appendChild(dialog);
+                            }
+                            dialog.open(this._contextMenuEvent.clientX, this._contextMenuEvent.clientY, label, defaultValue, callback);
+                        };
+
                         return {
                             createFolder: {
                                 "separator_before": false,
                                 "separator_after": true,
                                 "icon": 'iFolder',
                                 "label": "Create Folder",
-                                "action": function (obj) { Nĭnŏ.createFolder(directory); }
+                                "action": (obj) => showInputDialog('CreateFolder', 'Folder Name:', directory ? `${directory}/new-folder` : 'new-folder', (path) => Nĭnŏ.createFolder(path))
                             },
                             createDB: {
                                 "separator_before": false,
                                 "separator_after": true,
                                 "icon": 'iDataconnector',
                                 "label": "Create DataConnector",
-                                "action": function (obj) { Nĭnŏ.createDataconnector(directory) },
+                                "action": (obj) => showInputDialog('CreateDataConnector', 'DataConnector Path:', directory, (path) => Nĭnŏ.createDataconnector(path)),
                                 "_class": "class"
                             },
                             createMasking: {
                                 "separator_before": false,
                                 "separator_after": true,
                                 "icon": 'iMask',
-                                "class": "folder",
                                 "label": "Create Masking File",
-                                "action": function (obj) { Nĭnŏ.createMasking(directory, filename) },
+                                "action": (obj) => showInputDialog('CreateMasking', 'Table Name for Mask:', filename ? filename.split('.')[0] : 'table', (tableName) => Nĭnŏ.createMasking(directory, tableName))
                             },
                             createPlaybook: {
                                 "separator_before": false,
                                 "separator_after": true,
                                 "icon": 'iAnsible',
                                 "label": "Create Playbook",
-                                "action": function (obj) { Nĭnŏ.createPlaybook(directory) }
+                                "action": (obj) => showInputDialog('CreatePlaybook', 'Playbook Path:', directory, (path) => Nĭnŏ.createPlaybook(path))
                             },
                             createScript: {
                                 "separator_before": false,
                                 "separator_after": true,
                                 "icon": 'iBash',
                                 "label": "Create bash script",
-                                "action": function (obj) { Nĭnŏ.createBash(directory, filename) }
+                                "action": (obj) => showInputDialog('CreateBash', 'Bash Script Path:', directory, (path) => Nĭnŏ.createBash(path))
                             },
                         };
                     }
@@ -258,6 +281,10 @@ class NinoWorkspace extends HTMLElement {
                 if (node && node.type === 'file') {
                     this.dispatchEvent(new CustomEvent('open-file', { detail: { node } }));
                 }
+            })
+            .on('contextmenu.jstree', (e) => {
+                e.preventDefault();
+                this._contextMenuEvent = e;
             });
     }
 }

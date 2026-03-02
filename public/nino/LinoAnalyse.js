@@ -7,11 +7,9 @@ class LinoAnalyse extends HTMLElement {
             <link rel="stylesheet" href="NinoStyle.css">
 
             <p><span class="action-buttons"> 
-
-                <button class="btn"> 📈 (Re)Start Analysis</button> 
-                 
-                <button class="btn"><i class="iMask mediumIcon"></i> Create a mask</button> 
-                 
+                <button id="create-mask-btn" class="btn"><i class="iMask mediumIcon"></i> Create a mask</button>                  
+                <button id="restart-analysis-btn" class="btn"> 📈 (Re)Start Analysis</button> 
+                <button id="kanalyze-btn" class="btn">🔍 Kanalyze</button> 
             </span></p>
             <div id="stats-container"></div>
         `;
@@ -19,6 +17,33 @@ class LinoAnalyse extends HTMLElement {
 
     connectedCallback() {
         this.render();
+        this.shadowRoot.getElementById('create-mask-btn').addEventListener('click', this._onCreateMaskClick.bind(this));
+        this.shadowRoot.getElementById('restart-analysis-btn').addEventListener('click', this._onRestartAnalysisClick.bind(this));
+        this.shadowRoot.getElementById('kanalyze-btn').addEventListener('click', this._onKanalyzeClick.bind(this));
+    }
+
+    _onCreateMaskClick() {
+        const folderName = this.getAttribute('folder-name');
+        const tableName = this.getAttribute('table-name');
+        if (folderName && tableName) {
+            Nĭnŏ.createMasking(folderName, tableName);
+        } else {
+            alert('Please select a table to create a masking file.');
+        }
+    }
+
+    _onRestartAnalysisClick() {
+        const folderName = this.getAttribute('folder-name');
+        const tableName = this.getAttribute('table-name');
+        if (folderName && tableName) {
+            Nĭnŏ.restartAnalysis(folderName, tableName);
+        } else {
+            alert('Please select a table to restart analysis.');
+        }
+    }
+
+    _onKanalyzeClick() {
+        Nĭnŏ.kanalyze();
     }
 
     attributeChangedCallback(name, oldValue, newValue) {
