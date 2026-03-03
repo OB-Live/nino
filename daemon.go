@@ -405,6 +405,11 @@ func buildFileTree(path string) ([]interface{}, error) {
 
 	content := make([]interface{}, 0, len(entries))
 	for _, entry := range entries {
+		// Ignore symbolic links
+		if entry.Type()&fs.ModeSymlink != 0 {
+			continue
+		}
+
 		name := entry.Name()
 		// Skip hidden files and folders, and the 'public' folder
 		if strings.HasPrefix(name, ".") || name == "public" || name == "tests" {

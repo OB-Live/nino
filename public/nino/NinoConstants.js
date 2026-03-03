@@ -352,6 +352,10 @@ mkdir -p "./target";
 ln -sf "../dataconnector.yaml" "source/dataconnector.yaml"
 ln -sf "../dataconnector.yaml" "target/dataconnector.yaml"
 
+# test connections
+lino dc ping source
+lino dc ping target
+
 # extract metadata from source and target
 cd source
 lino table extract source
@@ -365,6 +369,7 @@ lino relation extract target
 lino analyse target > analyze.yaml
 
 # examples
+cd ../source
 cat tables.yaml | yq .tables.[].name
 ` },
   descriptor: {
