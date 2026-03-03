@@ -461,7 +461,7 @@ func listFilesHandler(inputPaths []string) http.HandlerFunc {
 			} else {
 				// If basePath is a file, add it directly to "Workspace"
 				fileName := filepath.Base(basePath)
-				if strings.HasSuffix(fileName, ".yaml") || strings.HasSuffix(fileName, ".yml") {
+				if strings.HasSuffix(fileName, ".yaml") || strings.HasSuffix(fileName, ".yml") || strings.HasSuffix(fileName, ".sh") {
 					workspaceItems = append(workspaceItems, fileName)
 				}
 			}

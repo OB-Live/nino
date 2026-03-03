@@ -19,27 +19,27 @@ class NinoEditor extends HTMLElement {
       <link rel="stylesheet" href="NinoStyle.css">
       <div id="editor-panel" class="panel">
         <div class="tab-header">
-          <button class="tab-button" data-tab="graph">
+          <button class="tab-button active" data-tab="graph">
             <span id="download-transformation-btn" class="download-btn">⤓</span>Transformation Plan 
           </button>
           <button class="tab-button" data-tab="execution">
             <span id="download-execution-btn" class="download-btn">⤓</span>Execution Plan
           </button>
           <button class="tab-button" data-tab="stats">Analyse</button>
-          <button class="tab-button active" data-tab="example">Examples</button>
+          <button class="tab-button" data-tab="example">Examples</button>
         </div> 
 
         <nino-monaco-editor 
           language="yaml"
           id="example-editor-container"
           value="${pimoExamples[0].examples[0].yaml}"  
-          class="tab-content editor-wrapper"
+          class="tab-content editor-wrapper" 
         ></nino-monaco-editor> 
 
         <nino-graphviz 
           id="graph-view-container" 
           url="${NĭnŏAPI.getSchema('dot')}" 
-          class="tab-content editor-wrapper"
+          class="tab-content editor-wrapper active"
         ></nino-graphviz> 
         
         <nino-graphviz 

@@ -38,13 +38,6 @@ class NinoWorkspace extends HTMLElement {
         return this.classList.contains('collapsed');
     }
 
-    collapse() {
-        this.classList.add('collapsed');
-    }
-
-    expand() {
-        this.classList.remove('collapsed');
-    }
 
     connectedCallback() {
         this.renderExamplesMenu();

@@ -339,7 +339,11 @@ export const NĭnŏAPI = {
 /** @type {FileType} */
 export const fileTypes = {
   connector: {
-    language: "yaml", suffix: ["yaml", "yml"], dialect: "connector", regex: "dataconnector",
+    language: "yaml", 
+    helper_language: "shell",
+    suffix: ["yaml", "yml"], 
+    dialect: "connector", 
+    regex: "dataconnector",
     template: (folderName) => `set -x
 cd ${folderName}
 # boiler plate project setup
