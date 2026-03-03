@@ -339,10 +339,10 @@ export const NĭnŏAPI = {
 /** @type {FileType} */
 export const fileTypes = {
   connector: {
-    language: "yaml", 
+    language: "yaml",
     helper_language: "shell",
-    suffix: ["yaml", "yml"], 
-    dialect: "connector", 
+    suffix: ["yaml", "yml"],
+    dialect: "connector",
     regex: "dataconnector",
     template: (folderName) => `set -x
 cd ${folderName}
@@ -367,10 +367,8 @@ cd ../target
 lino table extract target
 lino relation extract target
 lino analyse target > analyze.yaml
+ 
 
-# examples
-cd ../source
-cat tables.yaml | yq .tables.[].name
 ` },
   descriptor: {
     language: "yaml",
@@ -378,63 +376,107 @@ cat tables.yaml | yq .tables.[].name
     suffix: ["yaml", "yml"],
     dialect: "descriptor",
     regex: "descriptor",
-    template: (folderName, tableName) => `set -x
+    template: (folderName, filename) => `set -x
 cd ${folderName}
-# lino pull -l 1 --table ${tableName} source
-lino pull -l 1 -i ${tableName} source
+# pull a line as jsonl
+lino pull -l 1 -i ${filename} source
+
+lino id create $( echo ${filename} | cut -d'-' -f1 )
+
 ` },
   masking: {
-    language: "yaml", 
-    helper_language: "json", 
-    suffix: ["yaml", "yml"], 
-    dialect: "masking", 
+    language: "yaml",
+    helper_language: "json",
+    suffix: ["yaml", "yml"],
+    dialect: "masking",
     regex: "masking",
-    template: (folderName, tableName) => `{}` },
+    template: (folderName, tableName) => `{}`
+  },
   playbook: {
-    language: "yaml", 
-    helper_language: "shell", 
-    suffix: ["yaml", "yml"], 
-    dialect: "playbook", 
+    language: "yaml",
+    helper_language: "shell",
+    suffix: ["yaml", "yml"],
+    dialect: "playbook",
     regex: "playbook",
     template: (folderName, tableName) => `set -x
 cd ${folderName} 
 # Test the ansible playbook
 ansible-playbook playbook.yaml
 ` },
-  table: { 
-    language: "yaml", 
-    helper_language: "shell", 
-    suffix: ["yaml", "yml"], 
-    dialect: "table", 
-    regex: "table" 
-  }, 
-  relation: { 
+  table: {
     language: "yaml",
-    helper_language: "shell", 
-    suffix: ["yaml", "yml"], 
-    dialect: "relation", 
-    regex: "relation" 
-  },  
-  analyse: { 
-    language: "yaml", 
-    helper_language: "shell", 
-    suffix: ["yaml", "yml"], 
-    dialect: "analyse", 
-    regex: "analyze" }, // No specific template
+    helper_language: "shell",
+    suffix: ["yaml", "yml"],
+    dialect: "table",
+    regex: "table",
+    template: (folderName, tableName) => `set -x
+cd ${folderName}/source
+cat tables.yaml | yq .tables.[].name
+`
+  },
+  relation: {
+    language: "yaml",
+    helper_language: "shell",
+    suffix: ["yaml", "yml"],
+    dialect: "relation",
+    regex: "relation",
+    template: (folderName, tableName) => `set -x
+cd ${folderName}
+
+`
+  },
+  analyse: {
+    language: "yaml",
+    helper_language: "shell",
+    suffix: ["yaml", "yml"],
+    dialect: "analyse",
+    regex: "analyze",
+    template: (folderName, tableName) => `set -x 
+echo "huhu haha huhu hoho hihi" | tr -s ' ' | kanalyze
+# 1 [         3] => 3 words appears once 
+# 2 [         1] => 1 word appears twice
+`  },
   docker: {
-    language: "yaml", 
-    helper_language: "shell", 
-    suffix: ["yaml", "yml"], 
-    dialect: "docker", 
+    language: "yaml",
+    helper_language: "shell",
+    suffix: ["yaml", "yml"],
+    dialect: "docker",
     regex: "docker-compose",
     template: (folderName, tableName) => `cd ${folderName}
 # Test the docker-compose
 docker compose up  
 ` },
-  yaml: { language: "yaml", helper_language:"shell", suffix: ["yaml", "yml"], dialect: "yaml", regex: ".yml" }, // Generic yaml
-  shell: { language: "shell", helper_language:"plaintext", suffix: ["sh", "bash", "zsh"], dialect: "shell", regex: "sh" }, // Shell scripts
-  json: { language: "json", helper_language:"shell", suffix: ["json"], dialect: "json", regex: "json" }, // JSON files
-  md: { language: "md", helper_language:"plaintext", suffix: ["md"], dialect: "md", regex: "md" }, // Markdown files
+  yaml: {
+    language: "yaml",
+    helper_language: "shell",
+    suffix: ["yaml", "yml"],
+    dialect: "yaml",
+    regex: ".yml"
+  },
+
+  shell: {
+    language: "shell",
+    helper_language: "plaintext",
+    suffix: ["sh", "bash", "zsh"],
+    dialect: "shell",
+    regex: "sh"
+  },
+  json: {
+    language: "json",
+    helper_language: "shell",
+    suffix: ["json"],
+    dialect: "json",
+    regex: "json"
+  },
+
+  md: {
+    language: "md",
+    helper_language: "plaintext",
+    suffix: ["md"],
+    dialect: "md",
+    regex: "md"
+  },
+
 };
 
 
