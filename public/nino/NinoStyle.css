@@ -464,3 +464,32 @@ nino-graphviz {
 .contain {
 	background-size: contain;
 }
+
+#nino-dialog {
+  position: absolute;
+  z-index: 1000;
+  background: var(--sidebar-background);
+  color: black;
+}
+
+#nino-dialog[hidden] {
+	display: none;
+}
+
+.dialog-container {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding: 6px 6px;
+  border: 2px solid var(--sidebar-border-color);
+}
+
+.dialog-container .buttons {
+	display: flex;
+	justify-content: flex-end;
+	gap: 5px;
+}
+
+.dialog-container input {
+	border: 1px solid #555;
+}

@@ -387,7 +387,8 @@ lino pull -l 1 -i ${tableName} source
     suffix: ["yaml", "yml"], 
     dialect: "playbook", 
     regex: "playbook",
-    template: (folderName, tableName) => `cd ${folderName} 
+    template: (folderName, tableName) => `set -x
+cd ${folderName} 
 # Test the ansible playbook
 ansible-playbook playbook.yaml
 ` },

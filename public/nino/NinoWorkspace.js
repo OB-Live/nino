@@ -1,6 +1,5 @@
 import { pimoExamples, NĭnŏAPI } from './NinoConstants.js';
 import { Nĭnŏ } from './NinoApp.js';
-import './NinoDialog.js';
 import * as  jstree from 'https://cdnjs.cloudflare.com/ajax/libs/jstree/3.3.12/jstree.min.js';
 
 class NinoWorkspace extends HTMLElement {
@@ -17,11 +16,21 @@ class NinoWorkspace extends HTMLElement {
                 <div id="examples-container" class="scroll-area"></div>
                 <div id="jstree-workspace" class="jstree-default-dark"></div>
             </div>
-            <nino-dialog></nino-dialog>
+            <div id="nino-dialog" hidden>
+              <div class="dialog-container">
+                <label id="dialog-label"></label>
+                <input type="text" id="dialog-pathname"/>
+                <div class="buttons">
+                  <button id="dialog-cancel-btn">Cancel</button>
+                  <button id="dialog-ok-btn">OK</button>
+                </div>
+              </div>
+            </div>
         `;
 
         this.jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
-        this.$jstree = $(this.jstreeDiv); // Get the jQuery object for the div
+        this.$jstree = $(this.jstreeDiv); 
+        this.dialog = this.shadowRoot.querySelector('#nino-dialog');
     }
 
     toggleCollapse() {
@@ -41,6 +50,40 @@ class NinoWorkspace extends HTMLElement {
         this.renderExamplesMenu();
         this.loadWorkspace();
         this._contextMenuEvent = null;
+
+        this.shadowRoot.getElementById('dialog-ok-btn').addEventListener('click', this._onDialogOk.bind(this));
+        this.shadowRoot.getElementById('dialog-cancel-btn').addEventListener('click', this._onDialogCancel.bind(this));
+        this.shadowRoot.getElementById('dialog-pathname').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                this._onDialogOk();
+            } else if (e.key === 'Escape') {
+                this._onDialogCancel();
+            }
+        });
+    }
+
+    _openDialog(x, y, label, defaultValue, onOk) {
+        this.dialog.hidden = false;
+        this.dialog.style.left = `${x}px`;
+        this.dialog.style.top = `${y}px`;
+        this.shadowRoot.getElementById('dialog-label').textContent = label;
+        const input = this.shadowRoot.getElementById('dialog-pathname');
+        input.value = defaultValue;
+        this._onOkCallback = onOk;
+        input.focus();
+        input.select();
+    }
+
+    async _onDialogOk() {
+        if (this._onOkCallback) {
+            const value = this.shadowRoot.getElementById('dialog-pathname').value;
+            await this._onOkCallback(value);
+        }
+        this._closeDialog();
+    }
+
+    _onDialogCancel() {
+        this._closeDialog();
     }
 
     /**
@@ -238,9 +281,8 @@ class NinoWorkspace extends HTMLElement {
 
                     const showInputDialog = (action, label, defaultValue, callback) => {
                         if (!this._contextMenuEvent) return;
-                        let dialog = this.shadowRoot.querySelector('nino-dialog');
 
-                        dialog.open(
+                        this._openDialog(
                             this._contextMenuEvent.clientX,
                             this._contextMenuEvent.clientY,
                             label,
@@ -332,6 +374,10 @@ class NinoWorkspace extends HTMLElement {
             e.preventDefault();
             this._contextMenuEvent = e;
         });
+    }
+
+    _closeDialog() {
+        this.dialog.hidden = true;
     }
 }
 

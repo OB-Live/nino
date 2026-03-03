@@ -15,15 +15,15 @@ $(sidebarToggle).on("click", toggleSidebar);
 
 async function _deleteFileOrFolder(apiCall, ...args) {
     const response = await fetch(apiCall(...args), { method: 'DELETE' });
-    const result = await response.json();
-    console.log(result);
+    const result = await response.text(); 
+    ninoExecution.setOutputEditorValue(result);
     ninoWorkspace.refresh(); 
 }
 
 async function _createFileOrFolder(apiCall, ...args) {
     const response = await fetch(apiCall(...args), { method: 'GET' });
-    const result = await response.json();
-    console.log(result);
+    const result = await response.text(); 
+    ninoExecution.setOutputEditorValue(result);
     ninoWorkspace.refresh();  
 }
 
