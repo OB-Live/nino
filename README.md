@@ -31,6 +31,11 @@ using docker
 ```sh
 docker pull 0blive/nino
 docker run -p 2442:2442 0blive/nino
+
+# to rebuild 
+# go build . && docker build -t 0blive/nino .
+# docker login -u 0blive 
+# docker push 0blive/nino
 ```
 
 developement mode

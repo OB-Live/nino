@@ -18,26 +18,41 @@
 FROM ubuntu:26.04
 
 RUN apt-get update \
-    && apt-get install -y ansible-core wget tar jq
+    && apt-get install -y ansible-core wget tar jq curl ca-certificates
+
+ADD .assets/cgi_zscaler_ca_root.crt /usr/local/share/ca-certificates/cgi_ca_root.crt
+ADD .assets/docker.sources /etc/apt/sources.list.d/docker.sources
+RUN chmod 644 /usr/local/share/ca-certificates/cgi_ca_root.crt && update-ca-certificates
+
 
 # RUN ansible-galaxy role install OB-Live.nino -c
 # RUN ansible-galaxy install -r ~/.ansible/roles/OB-Live.nino/requirements.yml -c 
 # RUN ansible-playbook ~/.ansible/roles/OB-Live.nino/installation.yml
 
-RUN wget --no-check-certificate https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq && \
+RUN wget https://github.com/mikefarah/yq/releases/latest/download/yq_linux_amd64 -O /usr/local/bin/yq && \
     chmod +x /usr/local/bin/yq
 
-RUN wget -O- -nv --no-check-certificate https://github.com/CGI-FR/LINO/releases/download/v3.6.2/LINO_3.6.2_linux_amd64.tar.gz \
+RUN wget -O- -nv https://github.com/CGI-FR/LINO/releases/download/v3.6.2/LINO_3.6.2_linux_amd64.tar.gz \
     | tar -xz -C /usr/bin/ \
     && chmod +x /usr/bin/lino
 
-RUN wget -O- -nv --no-check-certificate https://github.com/CGI-FR/PIMO/releases/download/v1.31.3/PIMO_1.31.3_linux_amd64.tar.gz \
+RUN wget -O- -nv https://github.com/CGI-FR/PIMO/releases/download/v1.31.3/PIMO_1.31.3_linux_amd64.tar.gz \
     | tar -xz -C /usr/bin/ \
     && chmod +x /usr/bin/pimo
 
-RUN wget -O- -nv --no-check-certificate https://github.com/CGI-FR/kanalyze/releases/download/v0.1.0/kanalyze_0.1.0_linux_amd64.tar.gz \
+RUN wget -O- -nv https://github.com/CGI-FR/kanalyze/releases/download/v0.1.0/kanalyze_0.1.0_linux_amd64.tar.gz \
     | tar -xz -C /usr/bin/ \
-    && chmod +x /usr/bin/kanalyze    
+    && chmod +x /usr/bin/kanalyze 
+
+
+RUN apt-get --reinstall install iptables -y \
+    && wget https://download.docker.com/linux/ubuntu/dists/oracular/pool/stable/amd64/containerd.io_1.7.27-1_amd64.deb \
+    && wget https://download.docker.com/linux/ubuntu/dists/oracular/pool/stable/amd64/docker-ce-cli_28.4.0-1~ubuntu.24.10~oracular_amd64.deb \
+    && wget https://download.docker.com/linux/ubuntu/dists/oracular/pool/stable/amd64/docker-buildx-plugin_0.27.0-1~ubuntu.24.10~oracular_amd64.deb \
+    && wget https://download.docker.com/linux/ubuntu/dists/oracular/pool/stable/amd64/docker-ce_28.4.0-1~ubuntu.24.10~oracular_amd64.deb \
+    && wget https://download.docker.com/linux/ubuntu/dists/oracular/pool/stable/amd64/docker-compose-plugin_2.39.2-1~ubuntu.24.10~oracular_amd64.deb \
+    && wget https://download.docker.com/linux/ubuntu/dists/oracular/pool/stable/amd64/docker-model-plugin_0.1.39-1~ubuntu.24.10~oracular_amd64.deb \
+    && dpkg -i ./containerd.io_*.deb ./docker-ce_*.deb ./docker-ce-cli_*.deb ./docker-buildx-plugin_*.deb ./docker-compose-plugin_*.deb
 
 # Copy example
 COPY petstore /workspace/petstore
