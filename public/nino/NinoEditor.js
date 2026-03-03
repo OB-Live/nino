@@ -166,7 +166,7 @@ class NinoEditor extends HTMLElement {
         // This is handled by openFile or initial setup, so no specific action here unless needed.
         break;
       default:
-        console.warn(`Unknown tabId: ${tabId}`);
+        console.debug(`Unknown tabId: ${tabId}`);
     }
 
     this.layoutEditors();
@@ -207,7 +207,7 @@ class NinoEditor extends HTMLElement {
     const language = type.language || 'plaintext'; // Default to plaintext if type is not recognized
 
 
-    console.log('NinoEditor: openFile called with example:', fileName, folderName, example);
+    console.debug('NinoEditor: openFile called with example:', fileName, folderName, example);
 
     const tabId = `file-tab-${example.id}`;
     let tabButton = this.shadowRoot.querySelector(`.tab-button[data-tab="${tabId}"]`);

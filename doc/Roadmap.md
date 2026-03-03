@@ -6,6 +6,7 @@
 - check all execution 
 - analyse/analyze.yaml behaviour 
 - refresh workspace (!important for tests)
+- close popup
 
 
 # Add features 

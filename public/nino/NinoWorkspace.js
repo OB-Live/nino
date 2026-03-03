@@ -19,6 +19,9 @@ class NinoWorkspace extends HTMLElement {
             </div>
             <nino-dialog></nino-dialog>
         `;
+
+        this.jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
+        this.$jstree = $(this.jstreeDiv); // Get the jQuery object for the div
     }
 
     toggleCollapse() {
@@ -40,12 +43,13 @@ class NinoWorkspace extends HTMLElement {
         this._contextMenuEvent = null;
     }
 
-    refresh() {
-        
-        console.log("refresh")
-        const jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
-        jstreeDiv.clear()
-        this.loadWorkspace();
+    /**
+     * reload and refresh the file tree
+     */
+    async refresh() {
+        const jstreeData = await this.fetchWorkspaceFiles();
+        this.$jstree.jstree(true).settings.core.data = jstreeData;
+        this.$jstree.jstree(true).refresh();
     }
 
     getWorkspaceData() {
@@ -209,130 +213,125 @@ class NinoWorkspace extends HTMLElement {
         * documentation there : https://github.com/vakata/jstree/blob/master/src/jstree.contextmenu.js
         */
     renderFileTree(jstreeData) {
-        const jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
-        const $jstreeElement = $(jstreeDiv); // Get the jQuery object for the div
-        $jstreeElement // Initialize jstree on the jQuery element
-            .jstree({
-                core: {
-                    data: jstreeData,
-                    dots: true,
-                    check_callback: true,
-                },
-                plugins: ["state", "types", "sort", "search", "contextmenu"],
+        this.$jstree.jstree({
+            core: {
+                data: jstreeData,
+                dots: true,
+                check_callback: true,
+            },
+            plugins: ["state", "types", "sort", "search", "contextmenu"],
 
-                types: {
-                    default: { icon: 'jstree-file' },
-                    folder: { icon: 'jstree-folder' },
-                    file: { icon: 'iMask' },
-                    dataconnector: { icon: 'iDataconnector' },
-                    masking: { icon: 'iMask' },
-                    playbook: { icon: '▶️' },
-                    table: { icon: '📊' },
-                    analyse: { icon: '🔍' },
-                },
-                "contextmenu": {
-                    "items": ($node) => {
-                        const directory = $node.li_attr['data-folder-name']
-                        const filename = $node.li_attr['data-file-name']
+            types: {
+                default: { icon: 'jstree-file' },
+                folder: { icon: 'jstree-folder' },
+                file: { icon: 'iMask' },
+                dataconnector: { icon: 'iDataconnector' },
+                masking: { icon: 'iMask' },
+                playbook: { icon: '▶️' },
+                table: { icon: '📊' },
+                analyse: { icon: '🔍' },
+            },
+            "contextmenu": {
+                "items": ($node) => {
+                    const directory = $node.li_attr['data-folder-name']
+                    const filename = $node.li_attr['data-file-name']
 
-                        const showInputDialog = (action, label, defaultValue, callback) => {
-                            if (!this._contextMenuEvent) return;
-                            let dialog = this.shadowRoot.querySelector('nino-dialog');
+                    const showInputDialog = (action, label, defaultValue, callback) => {
+                        if (!this._contextMenuEvent) return;
+                        let dialog = this.shadowRoot.querySelector('nino-dialog');
 
-                            dialog.open(
-                                this._contextMenuEvent.clientX,
-                                this._contextMenuEvent.clientY,
-                                label,
-                                defaultValue,
-                                callback
-                            );
-                        };
+                        dialog.open(
+                            this._contextMenuEvent.clientX,
+                            this._contextMenuEvent.clientY,
+                            label,
+                            defaultValue,
+                            callback
+                        );
+                    };
 
-                        return {
-                            createFolder: {
-                                "separator_before": false,
-                                "separator_after": true,
-                                "icon": 'iFolder',
-                                "label": "Create Folder",
-                                "action": (obj) => showInputDialog('CreateFolder', 'Folder Name:', directory ? `${directory}/new-folder` : 'new-folder', (path) => Nĭnŏ.createFolder(path))
-                            },
-                            createDB: {
-                                "separator_before": false,
-                                "separator_after": true,
-                                "icon": 'iDataconnector',
-                                "label": "Create DataConnector",
-                                "action": (obj) => showInputDialog(
-                                    'CreateDataConnector',
-                                    'DataConnector Path:', directory ? `${directory}/dataconnector.yaml` : 'dataconnector.yaml',
-                                    (path) => Nĭnŏ.createDataconnector(path)
-                                ),
-                                "_class": "class"
-                            },
-                            createMasking: {
-                                "separator_before": false,
-                                "separator_after": true,
-                                "icon": 'iMask',
-                                "label": "Create Masking File",
-                                "action": (obj) => showInputDialog(
-                                    'CreateMasking',
-                                    'Table Name for Mask:',
-                                    directory ? `${directory}/xxx-masking.yaml` : 'xxx-masking.yaml',
-                                    (path) => Nĭnŏ.createMasking(path)
-                                )
-                            },
-                            createPlaybook: {
-                                "separator_before": false,
-                                "separator_after": true,
-                                "icon": 'iAnsible',
-                                "label": "Create Playbook",
-                                "action": (obj) => showInputDialog(
-                                    'CreatePlaybook',
-                                    'Playbook Path:',
-                                    directory ? `${directory}/playbook.yaml` : 'playbook.yaml',
-                                    (path) => Nĭnŏ.createPlaybook(path)
-                                )
-                            },
-                            createScript: {
-                                "separator_before": false,
-                                "separator_after": true,
-                                "icon": 'iBash',
-                                "label": "Create bash script",
-                                "action": (obj) => showInputDialog(
-                                    'CreateBash',
-                                    'Bash Script Path:',
-                                    directory ? `${directory}/aScript.sh` : 'aScript.sh',
-                                    (path) => Nĭnŏ.createBash(path)
-                                )
-                            },
-                            deleteFile: {
-                                "separator_before": true,
-                                "separator_after": false,
-                                "icon": 'iDelete',
-                                "label": "Delete",
-                                "action": (obj) => showInputDialog(
-                                    'DeleteFile',
-                                    'Delete File Path:',
-                                    directory ? `${directory}/${filename}` : `${filename}`,
-                                    (path) => Nĭnŏ.deleteFile(path)
-                                )
-                            }
-                        };
-                    }
-                },
-            })
-        // Bind events to the jQuery object directly after initialization
-        $jstreeElement
-            .on('dblclick.jstree', (e) => {
-                const instance = $.jstree.reference(e.target);
-                const node = instance.get_node(e.target);
-                if (node && node.type === 'file') {
-                    this.dispatchEvent(new CustomEvent('open-file', { detail: { node } }));
+                    return {
+                        createFolder: {
+                            "separator_before": false,
+                            "separator_after": true,
+                            "icon": 'iFolder',
+                            "label": "Create Folder",
+                            "action": (obj) => showInputDialog('CreateFolder', 'Folder Name:', directory ? `${directory}/new-folder` : 'new-folder', (path) => Nĭnŏ.createFolder(path))
+                        },
+                        createDB: {
+                            "separator_before": false,
+                            "separator_after": true,
+                            "icon": 'iDataconnector',
+                            "label": "Create DataConnector",
+                            "action": (obj) => showInputDialog(
+                                'CreateDataConnector',
+                                'DataConnector Path:', directory ? `${directory}/dataconnector.yaml` : 'dataconnector.yaml',
+                                (path) => Nĭnŏ.createDataconnector(path)
+                            ),
+                            "_class": "class"
+                        },
+                        createMasking: {
+                            "separator_before": false,
+                            "separator_after": true,
+                            "icon": 'iMask',
+                            "label": "Create Masking File",
+                            "action": (obj) => showInputDialog(
+                                'CreateMasking',
+                                'Table Name for Mask:',
+                                directory ? `${directory}/xxx-masking.yaml` : 'xxx-masking.yaml',
+                                (path) => Nĭnŏ.createMasking(path)
+                            )
+                        },
+                        createPlaybook: {
+                            "separator_before": false,
+                            "separator_after": true,
+                            "icon": 'iAnsible',
+                            "label": "Create Playbook",
+                            "action": (obj) => showInputDialog(
+                                'CreatePlaybook',
+                                'Playbook Path:',
+                                directory ? `${directory}/playbook.yaml` : 'playbook.yaml',
+                                (path) => Nĭnŏ.createPlaybook(path)
+                            )
+                        },
+                        createScript: {
+                            "separator_before": false,
+                            "separator_after": true,
+                            "icon": 'iBash',
+                            "label": "Create bash script",
+                            "action": (obj) => showInputDialog(
+                                'CreateBash',
+                                'Bash Script Path:',
+                                directory ? `${directory}/aScript.sh` : 'aScript.sh',
+                                (path) => Nĭnŏ.createBash(path)
+                            )
+                        },
+                        deleteFile: {
+                            "separator_before": true,
+                            "separator_after": false,
+                            "icon": 'iDelete',
+                            "label": "Delete",
+                            "action": (obj) => showInputDialog(
+                                'DeleteFile',
+                                'Delete File Path:',
+                                directory ? `${directory}/${filename}` : `${filename}`,
+                                (path) => Nĭnŏ.deleteFile(path)
+                            )
+                        }
+                    };
                 }
-            })
-            .on('contextmenu.jstree', (e) => {
-                e.preventDefault();
-                this._contextMenuEvent = e;
-            });
+            },
+        })
+        this.$jstree.on('dblclick.jstree', (e) => {
+            const instance = $.jstree.reference(e.target);
+            const node = instance.get_node(e.target);
+            if (node && node.type === 'file') {
+                this.dispatchEvent(new CustomEvent('open-file', { detail: { node } }));
+            }
+        });
+        this.$jstree.on('contextmenu.jstree', (e) => {
+            e.preventDefault();
+            this._contextMenuEvent = e;
+        });
     }
 }
 

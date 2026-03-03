@@ -340,7 +340,7 @@ export const NĭnŏAPI = {
 export const fileTypes = {
   connector: {
     language: "yaml", suffix: ["yaml", "yml"], dialect: "connector", regex: "dataconnector",
-    template: (folderName) => `
+    template: (folderName) => `set -x
 cd ${folderName}
 # boiler plate project setup
 mkdir -p "./source";
@@ -369,7 +369,8 @@ cat tables.yaml | yq .tables.[].name
     suffix: ["yaml", "yml"],
     dialect: "descriptor",
     regex: "descriptor",
-    template: (folderName, tableName) => `cd ${folderName}
+    template: (folderName, tableName) => `set -x
+cd ${folderName}
 # lino pull -l 1 --table ${tableName} source
 lino pull -l 1 -i ${tableName} source
 ` },

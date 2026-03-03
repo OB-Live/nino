@@ -245,12 +245,13 @@ nino-workspace {
 #editor-panel,
 nino-editor,
 nino-execution {
-	min-width: 20vw !important
+	min-width: 20vw !important;
+	width: stretch;
 }
 
 #editor-panel {
 	height: 100%;
-    display: block
+	display: block
 }
 
 #execution-panel {
@@ -263,7 +264,7 @@ nino-execution {
 .vakata-context li>a {
 	text-shadow: none
 }
- 
+
 
 .close-tab {
 	font-size: 1.2rem;
@@ -460,6 +461,6 @@ nino-graphviz {
 	display: inline-flex
 }
 
-.contain{
- background-size: contain;
+.contain {
+	background-size: contain;
 }
