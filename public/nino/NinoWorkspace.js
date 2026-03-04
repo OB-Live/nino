@@ -29,7 +29,7 @@ class NinoWorkspace extends HTMLElement {
         `;
 
         this.jstreeDiv = this.shadowRoot.querySelector("#jstree-workspace");
-        this.$jstree = $(this.jstreeDiv); 
+        this.$jstree = $(this.jstreeDiv);
         this.dialog = this.shadowRoot.querySelector('#nino-dialog');
     }
 
@@ -224,7 +224,7 @@ class NinoWorkspace extends HTMLElement {
                             parent: parentId,
                             text: folderName,
                             icon: 'jstree-folder',
-                            state: { opened: true },
+                            // state: { opened: true },// The 'state' property should be managed by the 'state' plugin
                             type: 'folder',
                             children: processNode(folderContent, newFolderId, newCurrentTreePath, newCurrentUrlPath) // Recursively call for children
                         });
