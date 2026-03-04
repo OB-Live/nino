@@ -9,17 +9,37 @@ NINO parses YAML configuration files from specified project directories and gene
 
 The interactive web interface allows users to explore the data schema, view data distribution plots for specific table columns, and visualize the execution plan of associated Ansible playbooks. Furthermore, it exposes a set of API endpoints for programmatic access, enabling integration with external tools for file management and automation. This makes it a powerful utility for both documenting and managing complex data transformation processes.
 
-# Routes
+# API Routes
 
-*   `GET /api/schema`: Returns the DOT graph for the entire project schema.
-*   `GET /api/schema/{folder}`: Returns the DOT graph for a specific folder.
+## Schema Visualization
+*   `GET /api/schema.{format:(dot|svg|png)}`: Returns the project schema in the specified format (DOT, SVG, or PNG).
+*   `GET /api/schema/{folder}.{format:(dot|svg|png)}`: Returns the schema for a specific folder in the specified format.
 *   `GET /api/plot/{folder}/{tableName}`: Returns a PNG image plotting the data distribution for a table's columns.
 *   `GET /api/playbook/{folder}`: Returns the DOT graph for an Ansible playbook execution plan.
-*   `GET /api/new/mask/{folderName}/{tableName}`: Creates a new boilerplate masking masking file for a table.
+
+## File Management
+
 *   `GET /api/files`: Returns a JSON object listing all files within the project directories.
-*   `GET /api/file/{folder}/{filename}`: Retrieves the raw content of a specific file.
+*   `GET /api/file/*`: Retrieves the raw content of a specific file. The `*` captures the full path to the file relative to the project root.
+*   `POST /api/file/*`: Updates the content of a specific file with the request body. The `*` captures the full path to the file.
+*   `DELETE /api/file/*`: Deletes a specific file. The `*` captures the full path to the file.
+
+## Creation Endpoints
+*   `GET /api/folder/*`: Creates a new folder recursively. The `*` captures the full path of the folder to create.
+*   `GET /api/new/mask/{folderName}/{tableName}`: Creates a new boilerplate masking file for a table.
+*   `GET /api/new/playbook/*`: Creates a new boilerplate playbook file. The `*` captures the full path to the playbook file.
+*   `GET /api/new/dataconnector/*`: Creates a new boilerplate dataconnector file. The `*` captures the full path to the dataconnector file.
+*   `GET /api/new/bash/*`: Creates a new boilerplate bash script file. The `*` captures the full path to the bash script file.
+
+## Execution Endpoints
+*   `POST /api/exec/pimo`: Executes the PIMO CLI tool. Expects a JSON body with `yaml` and `json` fields.
+*   `POST /api/exec/playbook/{folder}/{filename}`: Executes a specific Ansible playbook.
+*   `POST /api/exec/script`: Executes a given script. Expects the script content in the request body.
 *   `GET /api/exec/lino/fetch/{folder}/{filename}`: Fetches a single row of data as an example for a masking file.
-*   `POST /api/file/{folder}/{filename}`: Updates the content of a specific file with the request body.
+*   `POST /api/exec/pull/{folder}/{filename}`: Executes a pull command.
+
+## Other
+*   `POST /api/reload`: Reloads all schemas.
 
 # Start 
 using CLI:
@@ -57,6 +77,10 @@ npx run cypress
 ## edit / reframe for a demo video 
 ffmpeg -i tests/cypress/videos/ui_spec.cy.js.mp4 -vf "crop=620:480:460:70" -c:a copy demo.mp4 -y
 ```
+
+<video width="640" height="480" controls>
+  <source src="pimo.mp4" type="video/mp4">
+</video>
 
 # Features
 

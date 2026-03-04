@@ -41,7 +41,7 @@ func startDaemon(projectData ProjectData, fileMap map[string]string, inputPaths 
 	r.Get("/api/schema/{folder}.{format:(dot|svg|png)}", serveSchema(&projectData))
 	r.Get("/api/plot/{folder}/{tableName}", servePlot(projectData))
 	r.Get("/api/playbook/{folder}", servePlaybook(&projectData))
-	r.Get("/api/new/mask/*", createMaskFile(&projectData, inputPaths, fileMap))
+	r.Get("/api/new/mask/*", createMaskFileHandler(&projectData, inputPaths, fileMap))
 
 	// New API routes for folder and file creation
 	r.Get("/api/folder/*", createFolderHandler())
@@ -88,14 +88,24 @@ func customFileServer(fs fs.FS) http.Handler {
 	})
 }
 
-// createMaskFile handles the creation of a boilerplate masking file.
-func createMaskFile(projectData *ProjectData, inputPaths []string, fileMap map[string]string) http.HandlerFunc {
+// createMaskFileHandler handles the creation of a boilerplate masking file.
+func createMaskFileHandler(projectData *ProjectData, inputPaths []string, fileMap map[string]string) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
-		folderName := chi.URLParam(r, "*")
-		tableName := chi.URLParam(r, "tableName")
+		// The '*' parameter captures the full path, e.g., "folder/to/xxx-masking.yaml"
+		fullPathParam := strings.TrimPrefix(chi.URLParam(r, "*"), "/")
+		if fullPathParam == "" {
+			http.Error(w, "File path is required", http.StatusBadRequest)
+			return
+		}
+
+		// Extract folderName and tableName from the fullPathParam
+		folderName := filepath.Dir(fullPathParam)
+		fileName := filepath.Base(fullPathParam)
+		tableName := strings.TrimSuffix(fileName, SUFFIX_MASKING)
+
 		currentProjectData := *projectData
 		// Find the table to get its columns
-		tableFolder, table, err := findTableLocation(currentProjectData, tableName, folderName)
+		_, table, err := findTableLocation(currentProjectData, tableName, folderName)
 		if err != nil {
 			log.Printf("Creating masking for '%s'.'%s': %v", folderName, tableName, err)
 			http.Error(w, err.Error(), http.StatusNotFound)
@@ -104,16 +114,15 @@ func createMaskFile(projectData *ProjectData, inputPaths []string, fileMap map[s
 
 		// Find the base path for the folder to construct the file path.
 		// This logic finds the base path from the original input paths.
-		basePath, ok := findBasePathForFolder(inputPaths, tableFolder, fileMap)
+		basePath, ok := findBasePathForFolder(inputPaths, folderName, fileMap)
 		if !ok {
-			http.Error(w, fmt.Sprintf("Could not determine file path for folder '%s'", tableFolder), http.StatusInternalServerError)
+			http.Error(w, fmt.Sprintf("Could not determine file path for folder '%s'", folderName), http.StatusInternalServerError)
 			return
 		}
 		if info, err := os.Stat(basePath); err == nil && info.IsDir() {
-			basePath = filepath.Join(basePath, tableFolder)
+			basePath = filepath.Join(basePath, folderName)
 		}
-
-		filePath := filepath.Join(basePath, fmt.Sprintf("%s"+SUFFIX_MASKING, tableName))
+		filePath := filepath.Join(basePath, fileName)
 
 		var sb strings.Builder
 		sb.WriteString("version: \"1\"\n")
@@ -121,6 +130,7 @@ func createMaskFile(projectData *ProjectData, inputPaths []string, fileMap map[s
 		sb.WriteString("masking:\n")
 		for _, col := range table.Columns {
 			sb.WriteString(fmt.Sprintf("  - selector:\n      jsonpath: \"%s\"\n    mask:\n      # regex: \"\"\n", col.Name))
+			sb.WriteString("      randomChoiceInUri: \"pimo://nameFR\"\n")
 		}
 
 		if err := os.WriteFile(filePath, []byte(sb.String()), 0644); err != nil {
@@ -802,12 +812,12 @@ masking:
 	"dataconnectors": `version: v1
 dataconnectors:
   - name: source
-    url: postgresql://jhpetclinic@bdd_prod:5432/jhpetclinic?sslmode=disable
+    url: postgresql://jhpetclinic@localhost:5432/jhpetclinic?sslmode=disable
     readonly: true
     password:
       valueFromEnv: ADMIN
   - name: target
-    url: postgresql://jhpetclinic@bdd_qualif:5433/jhpetclinic?sslmode=disable
+    url: postgresql://jhpetclinic@localhost:5433/jhpetclinic?sslmode=disable
     readonly: false
     password:
       valueFromEnv: ADMIN

@@ -378,10 +378,7 @@ lino analyse target > analyze.yaml
     regex: "descriptor",
     template: (folderName, filename) => `set -x
 cd ${folderName}
-# pull a line as jsonl
-lino pull -l 1 -i ${filename} source
-
-lino id create $( echo ${filename} | cut -d'-' -f1 )
+lino id display-plan -i ${filename}
 
 ` },
   masking: {
@@ -412,6 +409,7 @@ ansible-playbook playbook.yaml
     template: (folderName, tableName) => `set -x
 cd ${folderName}/source
 cat tables.yaml | yq .tables.[].name
+lino id create XXXX -i ../XXXX-descriptor.yaml
 `
   },
   relation: {

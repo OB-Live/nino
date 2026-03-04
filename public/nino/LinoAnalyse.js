@@ -26,7 +26,7 @@ class LinoAnalyse extends HTMLElement {
         const folderName = this.getAttribute('folder-name');
         const tableName = this.getAttribute('table-name');
         if (folderName && tableName) {
-            Nĭnŏ.createMasking(folderName, tableName);
+            Nĭnŏ.createMasking(folderName+"/"+tableName+"-masking.yaml");
         } else {
             alert('Please select a table to create a masking file.');
         }

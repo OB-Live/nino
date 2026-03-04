@@ -17,3 +17,4 @@ cypress/screenshots
 tests/cypress/screenshots
 tests/cypress/videos/ui_spec.cy.js-compressed.mp4
 tests/cypress/videos/ui_spec.cy.js.mp4
+test/
