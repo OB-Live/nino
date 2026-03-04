@@ -299,7 +299,8 @@ class NinoWorkspace extends HTMLElement {
                             "label": "Create DataConnector",
                             "action": (obj) => showInputDialog(
                                 'CreateDataConnector',
-                                'DataConnector Path:', directory ? `${directory}/dataconnector.yaml` : 'dataconnector.yaml',
+                                'DataConnector Path:',
+                                directory ? `${directory}/dataconnector.yaml` : 'dataconnector.yaml',
                                 (path) => Nĭnŏ.createDataconnector(path)
                             ),
                             "_class": "class"
